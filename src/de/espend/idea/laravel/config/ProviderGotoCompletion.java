@@ -84,12 +84,19 @@ public class ProviderGotoCompletion implements GotoCompletionRegistrar {
 
         @NotNull
         @Override
-        public Collection<PhpClass> getPsiTargets(StringLiteralExpression element) {
+        public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
+
             String contents = element.getContents();
             if(StringUtils.isBlank(contents)) {
                 return Collections.EMPTY_LIST;
             }
-            return PhpElementsUtil.getClassesOrInterfaces(element.getProject(), contents);
+
+            Collection<PsiElement> psiElements = new ArrayList<PsiElement>();
+            for(PhpClass phpClass: PhpElementsUtil.getClassesOrInterfaces(element.getProject(), contents)) {
+                psiElements.add(phpClass);
+            }
+
+            return psiElements;
         }
     }
 }

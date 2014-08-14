@@ -14,6 +14,6 @@ public interface GotoCompletionProviderInterface {
     public Collection<LookupElement> getLookupElements();
 
     @NotNull
-    public Collection<PhpClass> getPsiTargets(StringLiteralExpression element);
+    public Collection<PsiElement> getPsiTargets(StringLiteralExpression element);
 
 }
