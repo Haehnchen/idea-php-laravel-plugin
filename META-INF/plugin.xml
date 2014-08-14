@@ -1,0 +1,58 @@
+<idea-plugin version="2">
+  <id>de.espend.idea.laravel</id>
+  <name>Laravel Plugin</name>
+  <version>0.1</version>
+  <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
+
+    <description><![CDATA[
+      <h1>Laravel Plugin</h1><br>
+      <br>
+
+      <h2>Features</h2>
+      <ul>
+        <li>Foo</li>
+      </ul>
+
+    ]]></description>
+
+  <change-notes><![CDATA[
+    <h2>0.1</h2>
+    <ul>
+        <li>Foo</li>
+    </ul>
+    ]]>
+  </change-notes>
+
+  <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
+  <idea-version since-build="130.1"/>
+
+  <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <extensions defaultExtensionNs="com.intellij">
+
+      <projectConfigurable instance="de.espend.idea.laravel.ui.LaravelProjectSettingsForm" id="Laravel.SettingsForm" displayName="Laravel Plugin"/>
+      <projectService serviceImplementation="de.espend.idea.laravel.LaravelSettings"/>
+
+      <completion.contributor language="PHP" implementationClass="fr.adrienbrault.idea.symfony2plugin.codeInsight.completion.CompletionContributor"/>
+      <gotoDeclarationHandler implementation="fr.adrienbrault.idea.symfony2plugin.codeInsight.navigation.GotoHandler"/>
+  </extensions>
+
+  <application-components>
+    <!-- Add your application components here -->
+  </application-components>
+
+  <project-components>
+      <component>
+        <implementation-class>de.espend.idea.laravel.LaravelProjectComponent</implementation-class>
+      </component>
+  </project-components>
+
+  <actions>
+    <!-- Add your actions here -->
+  </actions>
+
+</idea-plugin>
