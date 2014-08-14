@@ -7,10 +7,9 @@ import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiReference;
 import com.jetbrains.php.PhpIcons;
-import com.jetbrains.php.lang.psi.elements.PhpClass;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
+import de.espend.idea.laravel.LaravelProjectComponent;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
 import org.apache.commons.lang.StringUtils;
@@ -41,8 +40,17 @@ public class ViewReferences implements GotoCompletionRegistrar {
             @Override
             public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
 
-                if (MethodMatcher.getMatchedSignatureWithDepth(psiElement, VIEWS) == null) {
-                    return new ControllerRoute(psiElement);
+                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                    return null;
+                }
+
+                PsiElement parent = psiElement.getParent();
+                if(parent == null) {
+                    return null;
+                }
+
+                if (MethodMatcher.getMatchedSignatureWithDepth(parent, VIEWS) != null) {
+                    return new ViewProvider(parent);
                 }
 
                 return null;
@@ -50,9 +58,9 @@ public class ViewReferences implements GotoCompletionRegistrar {
         });
     }
 
-    private class ControllerRoute extends GotoCompletionProvider {
+    private class ViewProvider extends GotoCompletionProvider {
 
-        public ControllerRoute(PsiElement element) {
+        public ViewProvider(PsiElement element) {
             super(element);
         }
 

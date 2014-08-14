@@ -2,15 +2,11 @@ package de.espend.idea.laravel.controller;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
-import com.jetbrains.php.PhpIcons;
 import com.jetbrains.php.lang.psi.elements.Method;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
-import de.espend.idea.laravel.view.ViewCollector;
+import de.espend.idea.laravel.LaravelProjectComponent;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
 import org.apache.commons.lang.StringUtils;
@@ -24,7 +20,13 @@ import java.util.Collections;
 public class ControllerReferences implements GotoCompletionRegistrar {
 
     private static MethodMatcher.CallToSignature[] ROUTE = new MethodMatcher.CallToSignature[] {
-        new MethodMatcher.CallToSignature("\\Illuminate\\Support\\Facades\\Route", "get"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "get"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "post"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "put"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "patch"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "delete"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "options"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "any"),
     };
 
     @Override
@@ -34,8 +36,17 @@ public class ControllerReferences implements GotoCompletionRegistrar {
             @Override
             public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
 
-                if (MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE, 1) == null) {
-                    return new ControllerRoute(psiElement);
+                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                    return null;
+                }
+
+                PsiElement parent = psiElement.getParent();
+                if(parent == null) {
+                    return null;
+                }
+
+                if (MethodMatcher.getMatchedSignatureWithDepth(parent, ROUTE, 1) != null) {
+                    return new ControllerRoute(parent);
                 }
 
                 return null;
