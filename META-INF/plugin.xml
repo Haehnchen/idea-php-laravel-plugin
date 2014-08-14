@@ -41,6 +41,9 @@
       <gotoDeclarationHandler implementation="fr.adrienbrault.idea.symfony2plugin.codeInsight.navigation.GotoHandler"/>
   </extensions>
 
+  <depends>com.jetbrains.php</depends>
+  <depends>com.intellij.modules.platform</depends>
+
   <application-components>
     <!-- Add your application components here -->
   </application-components>

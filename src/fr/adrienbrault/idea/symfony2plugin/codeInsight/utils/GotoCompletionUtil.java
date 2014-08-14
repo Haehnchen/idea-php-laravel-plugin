@@ -2,6 +2,7 @@ package fr.adrienbrault.idea.symfony2plugin.codeInsight.utils;
 
 import com.intellij.patterns.ElementPattern;
 import com.intellij.psi.PsiElement;
+import de.espend.idea.laravel.config.ProviderGotoCompletion;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
@@ -13,7 +14,7 @@ import java.util.Collection;
 public class GotoCompletionUtil {
 
     private static GotoCompletionRegistrar[] CONTRIBUTORS = new GotoCompletionRegistrar[] {
-        //new FormOptionGotoCompletionRegistrar()
+        new ProviderGotoCompletion()
     };
 
     public static Collection<GotoCompletionContributor> getContributors(final PsiElement psiElement) {
