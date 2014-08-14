@@ -29,6 +29,10 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "any"),
     };
 
+    private static MethodMatcher.CallToSignature[] REDIRECT = new MethodMatcher.CallToSignature[] {
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Redirector", "action"),
+    };
+
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
         registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
@@ -46,6 +50,10 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 }
 
                 if (MethodMatcher.getMatchedSignatureWithDepth(parent, ROUTE, 1) != null) {
+                    return new ControllerRoute(parent);
+                }
+
+                if (MethodMatcher.getMatchedSignatureWithDepth(parent, REDIRECT) != null) {
                     return new ControllerRoute(parent);
                 }
 
