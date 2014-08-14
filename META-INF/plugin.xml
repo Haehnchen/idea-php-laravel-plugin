@@ -7,10 +7,18 @@
     <description><![CDATA[
       <h1>Laravel Plugin</h1><br>
       <br>
+      <h2>Install</h2>
+      <ul>
+        <li>Install plugin and active it per Project under "Settings > Lavarel Plugin"</li>
+        <li>Use "Laravel IDE Helper Generator" to generate ide classes</li>
+      </ul>
+      <br>
 
       <h2>Features</h2>
       <ul>
-        <li>Foo</li>
+        <li>PHP/Route: Controller completion and goto</li>
+        <li>PHP/View: completion and goto for view templates</li>
+        <li>PHP/Config: "providers" class array completion</li>
       </ul>
 
     ]]></description>
@@ -18,7 +26,7 @@
   <change-notes><![CDATA[
     <h2>0.1</h2>
     <ul>
-        <li>Foo</li>
+        <li>initial release</li>
     </ul>
     ]]>
   </change-notes>
