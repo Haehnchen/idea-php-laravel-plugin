@@ -4,8 +4,11 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
+import com.jetbrains.php.PhpIndex;
 import com.jetbrains.php.lang.psi.elements.Method;
+import com.jetbrains.php.lang.psi.elements.PhpClass;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
+import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
@@ -33,8 +36,31 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Redirector", "action"),
     };
 
+    private static MethodMatcher.CallToSignature[] ROUTE_RESOURCE = new MethodMatcher.CallToSignature[] {
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "resource"),
+    };
+
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
+        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
+            @Nullable
+            @Override
+            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
+
+                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                    return null;
+                }
+
+                PsiElement parent = psiElement.getParent();
+                if(parent != null && MethodMatcher.getMatchedSignatureWithDepth(parent, ROUTE_RESOURCE, 1) != null) {
+                    return new ControllerResource(parent);
+                }
+
+                return null;
+
+            }
+        });
+
         registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
             @Nullable
             @Override
@@ -104,6 +130,49 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
                 }
             });
+
+            return targets;
+
+        }
+    }
+
+    private class ControllerResource extends GotoCompletionProvider {
+
+        public ControllerResource(PsiElement element) {
+            super(element);
+        }
+
+        @NotNull
+        @Override
+        public Collection<LookupElement> getLookupElements() {
+            final Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
+
+            for(PhpClass phpClass: PhpIndex.getInstance(getProject()).getAllSubclasses("\\Illuminate\\Routing\\Controller")) {
+                if(!phpClass.isAbstract()) {
+                    // TODO: how they handle namespaces?
+                    String className = phpClass.getPresentableFQN();
+                    if(className != null) {
+                        lookupElements.add(LookupElementBuilder.create(className).withIcon(LaravelIcons.LARAVEL));
+                    }
+                }
+            }
+
+            return lookupElements;
+        }
+
+        @NotNull
+        @Override
+        public Collection<PsiElement> getPsiTargets(final StringLiteralExpression element) {
+
+            final String content = element.getContents();
+            if(StringUtils.isBlank(content)) {
+                return Collections.emptyList();
+            }
+
+            Collection<PsiElement> targets = new ArrayList<PsiElement>();
+            for(PhpClass phpClass: PhpIndex.getInstance(getProject()).getAnyByFQN(content)) {
+                targets.add(phpClass);
+            }
 
             return targets;
 
