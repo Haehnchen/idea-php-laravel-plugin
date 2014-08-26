@@ -2,6 +2,7 @@ package fr.adrienbrault.idea.symfony2plugin.codeInsight.utils;
 
 import com.intellij.patterns.ElementPattern;
 import com.intellij.psi.PsiElement;
+import de.espend.idea.laravel.config.AppConfigReferences;
 import de.espend.idea.laravel.config.ProviderGotoCompletion;
 import de.espend.idea.laravel.controller.ControllerReferences;
 import de.espend.idea.laravel.view.ViewReferences;
@@ -19,6 +20,7 @@ public class GotoCompletionUtil {
         new ProviderGotoCompletion(),
         new ViewReferences(),
         new ControllerReferences(),
+        new AppConfigReferences(),
     };
 
     public static Collection<GotoCompletionContributor> getContributors(final PsiElement psiElement) {
