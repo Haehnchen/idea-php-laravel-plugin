@@ -33,6 +33,9 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
 
     private static MethodMatcher.CallToSignature[] CONFIG = new MethodMatcher.CallToSignature[] {
         new MethodMatcher.CallToSignature("\\Illuminate\\Config\\Repository", "get"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Config\\Repository", "has"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Config\\Repository", "set"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Config\\Repository", "setParsedKey"),
     };
 
     @Override
@@ -126,8 +129,8 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
         }
     }
 
-    public static void collectConfigKeys(ArrayCreationExpression creationExpression, ConfigVisitor configVisitor) {
-        collectConfigKeys(creationExpression, configVisitor, new ArrayList<String>());
+    public static void collectConfigKeys(ArrayCreationExpression creationExpression, ConfigVisitor configVisitor, String configName) {
+        collectConfigKeys(creationExpression, configVisitor, Arrays.asList(configName));
     }
 
     public static void collectConfigKeys(ArrayCreationExpression creationExpression, ConfigVisitor configVisitor, List<String> context) {
@@ -173,7 +176,7 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
         public boolean visitFile(@NotNull VirtualFile virtualFile) {
 
             if(virtualFile.getFileType() == PhpFileType.INSTANCE) {
-                PsiFile psiFile = psiManager.findFile(virtualFile);
+                final PsiFile psiFile = psiManager.findFile(virtualFile);
                 if(psiFile != null) {
                     psiFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
                         @Override
@@ -189,7 +192,7 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
                         public void visitPhpReturn(PhpReturn phpReturn) {
                             PsiElement arrayCreation = phpReturn.getFirstPsiChild();
                             if(arrayCreation instanceof ArrayCreationExpression) {
-                                collectConfigKeys((ArrayCreationExpression) arrayCreation, configVisitor);
+                                collectConfigKeys((ArrayCreationExpression) arrayCreation, configVisitor, psiFile.getVirtualFile().getNameWithoutExtension());
                             }
                         }
 
