@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.1</version>
+  <version>0.2</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -17,13 +17,30 @@
       <h2>Features</h2>
       <ul>
         <li>PHP/Route: Controller completion and goto</li>
+        <li>PHP/Route: Router::resource references</li>
         <li>PHP/View: completion and goto for view templates</li>
         <li>PHP/Config: "providers" class array completion</li>
+        <li>PHP/Config: Config key completion and goto</li>
+      </ul>
+
+      <h2>Todo</h2>
+      <ul>
+        <li>Improve Blade support, after PhpStorm8</li>
+        <li>Try to remove "IDE Helper Generator" deps</li>
+        <li>Migrate auto completion popup focus from Symfony2 Plugin</li>
+        <li>...</li>
       </ul>
 
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.2</h2>
+    <ul>
+        <li>Add app config references</li>
+        <li>Add Router::resource references</li>
+    </ul>
+
     <h2>0.1</h2>
     <ul>
         <li>initial release</li>
