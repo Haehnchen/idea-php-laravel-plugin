@@ -64,10 +64,18 @@
 
       <completion.contributor language="PHP" implementationClass="fr.adrienbrault.idea.symfony2plugin.codeInsight.completion.CompletionContributor"/>
       <gotoDeclarationHandler implementation="fr.adrienbrault.idea.symfony2plugin.codeInsight.navigation.GotoHandler"/>
+
+      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeSectionStubIndex"/>
+      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeExtendsStubIndex"/>
+      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeIncludeStubIndex"/>
+
+      <codeInsight.lineMarkerProvider language="Blade" implementationClass="de.espend.idea.laravel.blade.TemplateLineMarker"/>
+
   </extensions>
 
   <depends>com.jetbrains.php</depends>
   <depends>com.intellij.modules.platform</depends>
+  <depends>com.jetbrains.php.blade</depends>
 
   <application-components>
     <!-- Add your application components here -->
