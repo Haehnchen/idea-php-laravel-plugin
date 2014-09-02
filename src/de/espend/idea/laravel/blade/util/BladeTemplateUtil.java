@@ -8,6 +8,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.jetbrains.php.blade.psi.BladeDirectiveParameterPsiImpl;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
+import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.util.PsiElementUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +19,7 @@ public class BladeTemplateUtil {
     @Nullable
     public static VirtualFile resolveTemplateName(Project project, String templateName) {
 
-        VirtualFile viewsDir = VfsUtil.findRelativeFile(project.getBaseDir(), "app", "views");
+        VirtualFile viewsDir = VfsUtil.findRelativeFile(project.getBaseDir(), LaravelSettings.getInstance(project).getRelativeViewsDirectory().split("/"));
         if(viewsDir == null) {
             return null;
         }

@@ -4,13 +4,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
+import de.espend.idea.laravel.LaravelSettings;
 import org.jetbrains.annotations.NotNull;
 
 public class ViewCollector {
 
     public static void visitFile(@NotNull Project project, @NotNull final ViewVisitor visitor) {
 
-        final VirtualFile templateDir = VfsUtil.findRelativeFile("app/views", project.getBaseDir());
+        final VirtualFile templateDir = VfsUtil.findRelativeFile(LaravelSettings.getInstance(project).getRelativeViewsDirectory(), project.getBaseDir());
         if(templateDir == null) {
             return;
         }

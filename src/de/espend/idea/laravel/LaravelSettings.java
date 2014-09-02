@@ -3,6 +3,7 @@ package de.espend.idea.laravel;
 import com.intellij.openapi.components.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 @State(
@@ -14,13 +15,25 @@ import org.jetbrains.annotations.Nullable;
 )
 public class LaravelSettings implements PersistentStateComponent<LaravelSettings> {
 
+    public static String DEFAULT_VIEWS_DIRECTORY = "app/views";
+
     public boolean pluginEnabled = false;
+    public String viewsDirectory = DEFAULT_VIEWS_DIRECTORY;
+
     protected Project project;
 
     public static LaravelSettings getInstance(Project project) {
         LaravelSettings settings = ServiceManager.getService(project, LaravelSettings.class);
         settings.project = project;
         return settings;
+    }
+
+    public String getRelativeViewsDirectory() {
+        if(StringUtils.isBlank(viewsDirectory)) {
+            return DEFAULT_VIEWS_DIRECTORY;
+        }
+
+        return viewsDirectory;
     }
 
     @Nullable
