@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.2</version>
+  <version>0.3</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -21,6 +21,8 @@
         <li>PHP/View: completion and goto for view templates</li>
         <li>PHP/Config: "providers" class array completion</li>
         <li>PHP/Config: Config key completion and goto</li>
+        <li>Blade: extends and include linemarker</li>
+        <li>Blade: section overwrite linemarker</li>
       </ul>
 
       <h2>Todo</h2>
@@ -34,6 +36,15 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.3</h2>
+    <ul>
+        <li>Add stub indexes for blade section, include and extends tags</li>
+        <li>Add blade overwritten linemarker for sections</li>
+        <li>Add file context include and extends linemarker</li>
+        <li>Add textfield to configure default view namespace</li>
+        <li>Only allow PhpStorm8 builds, for Blade support</li>
+    </ul>
 
     <h2>0.2</h2>
     <ul>
