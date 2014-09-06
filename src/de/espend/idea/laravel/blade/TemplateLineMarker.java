@@ -4,7 +4,6 @@ import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
 import com.intellij.navigation.GotoRelatedItem;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -64,6 +63,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
                     String sectionName = BladePsiUtil.getSection(nextSibling);
                     if(sectionName != null) {
                         collectOverwrittenSection(nextSibling, collection, sectionName);
+                        collectImplementsSection(nextSibling, collection, sectionName);
                     }
                 }
             }
@@ -109,29 +109,15 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
     private void collectTemplateFileRelatedFiles(final PsiFile psiFile, @NotNull Collection<LineMarkerInfo> collection) {
 
-        String relativeFile = VfsUtil.getRelativePath(psiFile.getVirtualFile(), psiFile.getProject().getBaseDir());
-        if(relativeFile == null) {
+        String templateName = BladeTemplateUtil.getFileTemplateName(psiFile.getProject(), psiFile.getVirtualFile());
+        if(templateName == null) {
             return;
         }
-
-        if(!relativeFile.startsWith("app/views/")) {
-            return;
-        }
-
-        String filename = relativeFile.substring("app/views/".length());
-        if(filename.endsWith(".php")) {
-            filename = filename.substring(0, filename.length() - 4);
-        }
-        if(filename.endsWith(".blade")) {
-            filename = filename.substring(0, filename.length() - 6);
-        }
-
-        filename = filename.replace("/", ".");
 
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
 
         for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY)) {
-            FileBasedIndexImpl.getInstance().getFilesWithKey(key, new HashSet<String>(Arrays.asList(filename)), new Processor<VirtualFile>() {
+            FileBasedIndexImpl.getInstance().getFilesWithKey(key, new HashSet<String>(Arrays.asList(templateName)), new Processor<VirtualFile>() {
                 @Override
                 public boolean process(VirtualFile virtualFile) {
                     PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
@@ -200,6 +186,47 @@ public class TemplateLineMarker implements LineMarkerProvider {
             }
         });
 
+    }
+
+
+    /**
+     * Find all sub implementations of a section that are overwritten by an extends tag
+     * Possible targets are: @section('sidebar')
+     */
+    private void collectImplementsSection(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
+
+        final String templateName = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
+        if(templateName == null) {
+            return;
+        }
+
+        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
+
+        Set<VirtualFile> virtualFiles = BladeTemplateUtil.getExtendsImplementations(psiElement.getProject(), templateName);
+        if(virtualFiles.size() == 0) {
+            return;
+        }
+
+        for(VirtualFile virtualFile: virtualFiles) {
+            PsiFile psiFile = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
+            if(psiFile != null) {
+                BladeTemplateUtil.visitSection(psiFile, new BladeTemplateUtil.SectionVisitor() {
+                    @Override
+                    public void visit(@NotNull PsiElement psiElement, @NotNull String templateName) {
+                        if (sectionName.equalsIgnoreCase(templateName)) {
+                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiElement).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
+                        }
+                    }
+                });
+            }
+
+        }
+
+        if(gotoRelatedItems.size() == 0) {
+            return;
+        }
+
+        collection.add(getRelatedPopover("Template", "Blade File", psiElement, gotoRelatedItems, PhpIcons.IMPLEMENTED));
     }
 
 }
