@@ -115,7 +115,7 @@ public class BladeTemplateUtil {
     }
 
     public static interface SectionVisitor {
-        public void visit(@NotNull PsiElement psiElement, @NotNull String templateName);
+        public void visit(@NotNull PsiElement psiElement, @NotNull String sectionName);
     }
 
     public static String getFileTemplateName(Project project, VirtualFile virtualFile) {
@@ -167,5 +167,29 @@ public class BladeTemplateUtil {
                 return true;
             }
         }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(project), BladeFileType.INSTANCE));
+    }
+
+    public static void visitUpPathSections(final PsiFile psiFile, int depth, final SectionVisitor visitor) {
+
+        // simple secure recursive calls
+        if(depth-- <= 0) {
+            return;
+        }
+
+        final int finalDepth = depth;
+        BladeTemplateUtil.visitExtends(psiFile, new BladeTemplateUtil.ExtendsVisitor() {
+            @Override
+            public void visit(@NotNull PsiElement psiElement, @NotNull String content) {
+                VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), content);
+                if (virtualFile != null) {
+                    PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
+                    if (templatePsiFile != null) {
+                        BladeTemplateUtil.visitSection(templatePsiFile, visitor);
+                        visitUpPathSections(templatePsiFile, finalDepth, visitor);
+                    }
+                }
+            }
+        });
+
     }
 }
