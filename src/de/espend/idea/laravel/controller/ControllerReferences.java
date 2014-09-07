@@ -10,7 +10,11 @@ import com.jetbrains.php.lang.psi.elements.PhpClass;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
-import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -32,8 +36,9 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "any"),
     };
 
-    private static MethodMatcher.CallToSignature[] REDIRECT = new MethodMatcher.CallToSignature[] {
+    private static MethodMatcher.CallToSignature[] ACTIONS = new MethodMatcher.CallToSignature[] {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Redirector", "action"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Html\\HtmlBuilder", "linkAction"),
     };
 
     private static MethodMatcher.CallToSignature[] ROUTE_RESOURCE = new MethodMatcher.CallToSignature[] {
@@ -79,7 +84,10 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                     return new ControllerRoute(parent);
                 }
 
-                if (MethodMatcher.getMatchedSignatureWithDepth(parent, REDIRECT) != null) {
+                if (MethodMatcher.getMatchedSignatureWithDepth(parent, ACTIONS) != null ||
+                    PhpElementsUtil.isFunctionReference(psiElement.getParent(), 0, "link_to_action", "action")
+                    ) {
+
                     return new ControllerRoute(parent);
                 }
 

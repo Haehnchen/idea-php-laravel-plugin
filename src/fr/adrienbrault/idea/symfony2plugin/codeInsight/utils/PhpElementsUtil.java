@@ -2,21 +2,17 @@ package fr.adrienbrault.idea.symfony2plugin.codeInsight.utils;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiElementFilter;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.CommonProcessors;
 import com.jetbrains.php.PhpIndex;
-import com.jetbrains.php.lang.psi.PhpPsiUtil;
 import com.jetbrains.php.lang.psi.elements.*;
 import fr.adrienbrault.idea.symfony2plugin.dic.MethodReferenceBag;
 import fr.adrienbrault.idea.symfony2plugin.util.ParameterBag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 public class PhpElementsUtil {
 
@@ -101,6 +97,35 @@ public class PhpElementsUtil {
         }
 
         return new MethodReferenceBag(parameterList, methodReference, currentIndex);
+
+    }
+
+    public static boolean isFunctionReference(PsiElement psiElement, int wantIndex, String... funcName) {
+
+        PsiElement variableContext = psiElement.getContext();
+        if(!(variableContext instanceof ParameterList)) {
+            return false;
+        }
+
+        ParameterList parameterList = (ParameterList) variableContext;
+        PsiElement context = parameterList.getContext();
+        if (!(context instanceof FunctionReference)) {
+            return false;
+        }
+
+        FunctionReference methodReference = (FunctionReference) context;
+        String name = methodReference.getName();
+
+        if(name == null || Arrays.asList(funcName).contains(funcName)) {
+            return false;
+        }
+
+        ParameterBag currentIndex = getCurrentParameterIndex(psiElement);
+        if(currentIndex == null) {
+            return false;
+        }
+
+        return !(wantIndex >= 0 && currentIndex.getIndex() != wantIndex);
 
     }
 
