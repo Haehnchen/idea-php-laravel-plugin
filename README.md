@@ -15,7 +15,8 @@ Laravel Plugin for PHPStorm
  * PHP/Config: "providers" class array completion
  * PHP/Config: Config key completion and goto
  * Blade: extends and include linemarker
- * Blade: section overwrite linemarker
+ * Blade: section overwrite and implements linemarker
+ * Blade: Improvements in blade template name completion
 
 ![alt text](http://plugins.jetbrains.com/files/7532/screenshot_14670.png)
 
