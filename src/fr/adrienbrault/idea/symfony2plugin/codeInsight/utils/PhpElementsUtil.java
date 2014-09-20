@@ -5,6 +5,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiElementFilter;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.php.PhpIndex;
+import com.jetbrains.php.lang.parser.PhpElementTypes;
+import com.jetbrains.php.lang.patterns.PhpPatterns;
 import com.jetbrains.php.lang.psi.elements.*;
 import fr.adrienbrault.idea.symfony2plugin.dic.MethodReferenceBag;
 import fr.adrienbrault.idea.symfony2plugin.util.ParameterBag;
@@ -173,5 +175,40 @@ public class PhpElementsUtil {
             }
         });
 
+    }
+
+    @Nullable
+    public static ArrayCreationExpression getCompletableArrayCreationElement(PsiElement psiElement) {
+
+        // array('<test>' => '')
+        if(PhpPatterns.psiElement(PhpElementTypes.ARRAY_KEY).accepts(psiElement.getContext())) {
+            PsiElement arrayKey = psiElement.getContext();
+            if(arrayKey != null) {
+                PsiElement arrayHashElement = arrayKey.getContext();
+                if(arrayHashElement instanceof ArrayHashElement) {
+                    PsiElement arrayCreationExpression = arrayHashElement.getContext();
+                    if(arrayCreationExpression instanceof ArrayCreationExpression) {
+                        return (ArrayCreationExpression) arrayCreationExpression;
+                    }
+                }
+            }
+
+        }
+
+        // on array creation key dont have value, so provide completion here also
+        // array('foo' => 'bar', '<test>')
+        if(PhpPatterns.psiElement(PhpElementTypes.ARRAY_VALUE).accepts(psiElement.getContext())) {
+            PsiElement arrayKey = psiElement.getContext();
+            if(arrayKey != null) {
+                PsiElement arrayCreationExpression = arrayKey.getContext();
+                if(arrayCreationExpression instanceof ArrayCreationExpression) {
+                    return (ArrayCreationExpression) arrayCreationExpression;
+                }
+
+            }
+
+        }
+
+        return null;
     }
 }

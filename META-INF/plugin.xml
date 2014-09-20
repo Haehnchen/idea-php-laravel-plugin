@@ -92,6 +92,9 @@
 
       <codeInsight.lineMarkerProvider language="Blade" implementationClass="de.espend.idea.laravel.blade.TemplateLineMarker"/>
 
+      <completion.confidence language="PHP" implementationClass="de.espend.idea.laravel.completion.PhpParameterStringCompletionConfidence"
+                             id="asTrue" order="first"/>
+
   </extensions>
 
   <depends>com.jetbrains.php</depends>

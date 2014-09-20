@@ -18,6 +18,7 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
     public static String DEFAULT_VIEWS_DIRECTORY = "app/views";
 
     public boolean pluginEnabled = false;
+    public boolean useAutoPopup = false;
     public String viewsDirectory = DEFAULT_VIEWS_DIRECTORY;
 
     protected Project project;
