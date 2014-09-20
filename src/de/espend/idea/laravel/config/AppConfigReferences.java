@@ -18,6 +18,7 @@ import com.jetbrains.php.lang.psi.elements.PhpReturn;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.LaravelSettings;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
@@ -120,7 +121,7 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
 
         private void visitConfigs(ConfigVisitor configVisitor) {
 
-            VirtualFile appConfig = VfsUtil.findRelativeFile(getProject().getBaseDir(), "app", "config");
+            VirtualFile appConfig = VfsUtil.findRelativeFile(getProject().getBaseDir(), LaravelSettings.getInstance(getProject()).configDirectory.split("/"));
             if(appConfig == null) {
                 return;
             }
