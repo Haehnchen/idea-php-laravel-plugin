@@ -53,9 +53,7 @@ public class TranslationKeyStubIndex extends FileBasedIndexExtension<String, Voi
                     psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(fileContent.getFile().getNameWithoutExtension(), new ArrayKeyVisitor() {
                         @Override
                         public void visit(String key, PsiElement psiKey, boolean isRootElement) {
-                            if (!isRootElement) {
-                                map.put(key, null);
-                            }
+                            map.put(key, null);
                         }
                     }));
                 }
