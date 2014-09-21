@@ -79,7 +79,7 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
             CollectProjectUniqueKeys ymlProjectProcessor = new CollectProjectUniqueKeys(getProject(), ConfigKeyStubIndex.KEY);
             FileBasedIndexImpl.getInstance().processAllKeys(ConfigKeyStubIndex.KEY, ymlProjectProcessor, getProject());
             for(String key: ymlProjectProcessor.getResult()) {
-                lookupElements.add(LookupElementBuilder.create(key).withIcon(LaravelIcons.LARAVEL));
+                lookupElements.add(LookupElementBuilder.create(key).withIcon(LaravelIcons.CONFIG));
             }
 
             return lookupElements;

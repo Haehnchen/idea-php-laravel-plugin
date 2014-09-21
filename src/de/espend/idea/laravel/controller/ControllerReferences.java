@@ -111,7 +111,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
             ControllerCollector.visitController(getProject(), new ControllerCollector.ControllerVisitor() {
                 @Override
                 public void visit(@NotNull Method method, String name) {
-                    lookupElements.add(LookupElementBuilder.create(name).withIcon(method.getIcon()));
+                    lookupElements.add(LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE));
                 }
             });
 
@@ -160,7 +160,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                     // TODO: how they handle namespaces?
                     String className = phpClass.getPresentableFQN();
                     if(className != null) {
-                        lookupElements.add(LookupElementBuilder.create(className).withIcon(LaravelIcons.LARAVEL));
+                        lookupElements.add(LookupElementBuilder.create(className).withIcon(LaravelIcons.ROUTE));
                     }
                 }
             }
