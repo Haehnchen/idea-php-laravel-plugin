@@ -2,9 +2,7 @@ package de.espend.idea.laravel.translation;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -12,15 +10,13 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.Processor;
 import com.intellij.util.indexing.FileBasedIndexImpl;
-import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
-import de.espend.idea.laravel.LaravelSettings;
-import de.espend.idea.laravel.blade.RelatedPopupGotoLineMarker;
 import de.espend.idea.laravel.config.AppConfigReferences;
 import de.espend.idea.laravel.stub.TranslationKeyStubIndex;
+import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
 import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
 import de.espend.idea.laravel.util.ArrayReturnPsiRecursiveVisitor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
@@ -108,9 +104,9 @@ public class TranslationReferences implements GotoCompletionRegistrar {
                         return true;
                     }
 
-                    psiFileTarget.acceptChildren(new ArrayReturnPsiRecursiveVisitor(virtualFile.getNameWithoutExtension(), new AppConfigReferences.ConfigVisitor() {
+                    psiFileTarget.acceptChildren(new ArrayReturnPsiRecursiveVisitor(virtualFile.getNameWithoutExtension(), new ArrayKeyVisitor() {
                         @Override
-                        public void visitConfig(String key, PsiElement psiKey, boolean isRootElement) {
+                        public void visit(String key, PsiElement psiKey, boolean isRootElement) {
                             if(!isRootElement && key.equals(contents)) {
                                 targets.add(psiKey);
                             }

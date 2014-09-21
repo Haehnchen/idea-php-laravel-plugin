@@ -1,7 +1,6 @@
 package de.espend.idea.laravel.util;
 
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.php.lang.psi.elements.ArrayCreationExpression;
@@ -9,6 +8,7 @@ import com.jetbrains.php.lang.psi.elements.ArrayHashElement;
 import com.jetbrains.php.lang.psi.elements.PhpReturn;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.config.AppConfigReferences;
+import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -18,11 +18,11 @@ import java.util.List;
 public class ArrayReturnPsiRecursiveVisitor extends PsiRecursiveElementWalkingVisitor {
 
     private final String fileNameWithoutExtension;
-    private final AppConfigReferences.ConfigVisitor configVisitor;
+    private final ArrayKeyVisitor arrayKeyVisitor;
 
-    public ArrayReturnPsiRecursiveVisitor(String fileNameWithoutExtension, AppConfigReferences.ConfigVisitor configVisitor) {
+    public ArrayReturnPsiRecursiveVisitor(String fileNameWithoutExtension, ArrayKeyVisitor arrayKeyVisitor) {
         this.fileNameWithoutExtension = fileNameWithoutExtension;
-        this.configVisitor = configVisitor;
+        this.arrayKeyVisitor = arrayKeyVisitor;
     }
 
     @Override
@@ -38,16 +38,16 @@ public class ArrayReturnPsiRecursiveVisitor extends PsiRecursiveElementWalkingVi
     public void visitPhpReturn(PhpReturn phpReturn) {
         PsiElement arrayCreation = phpReturn.getFirstPsiChild();
         if(arrayCreation instanceof ArrayCreationExpression) {
-            collectConfigKeys((ArrayCreationExpression) arrayCreation, this.configVisitor, fileNameWithoutExtension);
+            collectConfigKeys((ArrayCreationExpression) arrayCreation, this.arrayKeyVisitor, fileNameWithoutExtension);
         }
     }
 
 
-    public static void collectConfigKeys(ArrayCreationExpression creationExpression, AppConfigReferences.ConfigVisitor configVisitor, String configName) {
-        collectConfigKeys(creationExpression, configVisitor, Arrays.asList(configName));
+    public static void collectConfigKeys(ArrayCreationExpression creationExpression, ArrayKeyVisitor arrayKeyVisitor, String configName) {
+        collectConfigKeys(creationExpression, arrayKeyVisitor, Arrays.asList(configName));
     }
 
-    public static void collectConfigKeys(ArrayCreationExpression creationExpression, AppConfigReferences.ConfigVisitor configVisitor, List<String> context) {
+    public static void collectConfigKeys(ArrayCreationExpression creationExpression, ArrayKeyVisitor arrayKeyVisitor, List<String> context) {
 
         for(ArrayHashElement hashElement: PsiTreeUtil.getChildrenOfTypeAsList(creationExpression, ArrayHashElement.class)) {
 
@@ -61,10 +61,10 @@ public class ArrayReturnPsiRecursiveVisitor extends PsiRecursiveElementWalkingVi
                 String keyName = StringUtils.join(myContext, ".");
 
                 if(arrayValue instanceof ArrayCreationExpression) {
-                    configVisitor.visitConfig(keyName, arrayKey, true);
-                    collectConfigKeys((ArrayCreationExpression) arrayValue, configVisitor, myContext);
+                    arrayKeyVisitor.visit(keyName, arrayKey, true);
+                    collectConfigKeys((ArrayCreationExpression) arrayValue, arrayKeyVisitor, myContext);
                 } else {
-                    configVisitor.visitConfig(keyName, arrayKey, false);
+                    arrayKeyVisitor.visit(keyName, arrayKey, false);
                 }
 
             }

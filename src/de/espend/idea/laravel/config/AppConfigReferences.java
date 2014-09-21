@@ -2,18 +2,21 @@ package de.espend.idea.laravel.config;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.Processor;
+import com.intellij.util.indexing.FileBasedIndexImpl;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
-import de.espend.idea.laravel.LaravelSettings;
+import de.espend.idea.laravel.stub.ConfigKeyStubIndex;
+import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
+import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
 import de.espend.idea.laravel.util.ArrayReturnPsiRecursiveVisitor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
@@ -50,7 +53,7 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
 
                 PsiElement parent = psiElement.getParent();
                 if(parent != null && MethodMatcher.getMatchedSignatureWithDepth(parent, CONFIG) != null) {
-                    return new ControllerRoute(parent);
+                    return new ConfigKeyProvider(parent);
                 }
 
                 return null;
@@ -61,9 +64,9 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
 
     }
 
-    private static class ControllerRoute extends GotoCompletionProvider {
+    private static class ConfigKeyProvider extends GotoCompletionProvider {
 
-        public ControllerRoute(PsiElement element) {
+        public ConfigKeyProvider(PsiElement element) {
             super(element);
         }
 
@@ -73,21 +76,11 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
 
             final Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
 
-            visitConfigs(new ConfigVisitor() {
-                @Override
-                public void visitConfig(String key, PsiElement psiKey, boolean isRootElement) {
-
-                    LookupElementBuilder lookup = LookupElementBuilder.create(key)
-                        .withTypeText(psiKey.getContainingFile().getName(), true)
-                        .withIcon(LaravelIcons.LARAVEL);
-
-                    if (isRootElement) {
-                        lookup.withTypeText("(root)", true);
-                    }
-
-                    lookupElements.add(lookup);
-                }
-            });
+            CollectProjectUniqueKeys ymlProjectProcessor = new CollectProjectUniqueKeys(getProject(), ConfigKeyStubIndex.KEY);
+            FileBasedIndexImpl.getInstance().processAllKeys(ConfigKeyStubIndex.KEY, ymlProjectProcessor, getProject());
+            for(String key: ymlProjectProcessor.getResult()) {
+                lookupElements.add(LookupElementBuilder.create(key).withIcon(LaravelIcons.LARAVEL));
+            }
 
             return lookupElements;
         }
@@ -96,62 +89,38 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
         @Override
         public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
 
-            final String text = element.getContents();
-            if(StringUtils.isBlank(text)) {
-                return Collections.emptyList();
-            }
-
             final Set<PsiElement> targets = new HashSet<PsiElement>();
 
-            visitConfigs(new ConfigVisitor() {
+            final String contents = element.getContents();
+            if(StringUtils.isBlank(contents)) {
+                return targets;
+            }
+
+            FileBasedIndexImpl.getInstance().getFilesWithKey(ConfigKeyStubIndex.KEY, new HashSet<String>(Arrays.asList(contents)), new Processor<VirtualFile>() {
                 @Override
-                public void visitConfig(String key, PsiElement psiKey, boolean isRootElement) {
-                    if(text.equalsIgnoreCase(key)) {
-                        targets.add(psiKey);
+                public boolean process(VirtualFile virtualFile) {
+                    PsiFile psiFileTarget = PsiManager.getInstance(getProject()).findFile(virtualFile);
+                    if(psiFileTarget == null) {
+                        return true;
                     }
+
+                    psiFileTarget.acceptChildren(new ArrayReturnPsiRecursiveVisitor(virtualFile.getNameWithoutExtension(), new ArrayKeyVisitor() {
+                        @Override
+                        public void visit(String key, PsiElement psiKey, boolean isRootElement) {
+                            if(!isRootElement && key.equals(contents)) {
+                                targets.add(psiKey);
+                            }
+                        }
+                    }));
+
+                    return true;
                 }
-            });
+            }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(getProject()), PhpFileType.INSTANCE));
 
             return targets;
         }
 
-        private void visitConfigs(ConfigVisitor configVisitor) {
-
-            VirtualFile appConfig = VfsUtil.findRelativeFile(getProject().getBaseDir(), LaravelSettings.getInstance(getProject()).configDirectory.split("/"));
-            if(appConfig == null) {
-                return;
-            }
-
-            VfsUtil.visitChildrenRecursively(appConfig, new MyVirtualFileVisitor(PsiManager.getInstance(getProject()), configVisitor));
-        }
     }
 
-    public interface ConfigVisitor {
-        public void visitConfig(String key, PsiElement psiKey, boolean isRootElement);
-    }
 
-    private static class MyVirtualFileVisitor extends VirtualFileVisitor {
-
-        private final PsiManager psiManager;
-        private final ConfigVisitor configVisitor;
-
-        public MyVirtualFileVisitor(PsiManager psiManager, ConfigVisitor configVisitor) {
-            this.psiManager = psiManager;
-            this.configVisitor = configVisitor;
-        }
-
-        @Override
-        public boolean visitFile(@NotNull VirtualFile virtualFile) {
-
-            if(virtualFile.getFileType() == PhpFileType.INSTANCE) {
-                final PsiFile psiFile = psiManager.findFile(virtualFile);
-                if(psiFile != null) {
-                    psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(psiFile.getVirtualFile().getNameWithoutExtension(), configVisitor));
-                }
-            }
-
-            return super.visitFile(virtualFile);
-        }
-
-    }
 }

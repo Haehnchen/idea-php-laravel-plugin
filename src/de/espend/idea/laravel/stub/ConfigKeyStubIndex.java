@@ -17,9 +17,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public class TranslationKeyStubIndex extends FileBasedIndexExtension<String, Void> {
+public class ConfigKeyStubIndex extends FileBasedIndexExtension<String, Void> {
 
-    public static final ID<String, Void> KEY = ID.create("de.espend.idea.laravel.translation_keys");
+    public static final ID<String, Void> KEY = ID.create("de.espend.idea.laravel.config_keys");
     private final KeyDescriptor<String> myKeyDescriptor = new EnumeratorStringDescriptor();
 
     @NotNull
@@ -45,11 +45,9 @@ public class TranslationKeyStubIndex extends FileBasedIndexExtension<String, Voi
 
                 String path = fileContent.getFile().getPath();
 
-                // app/lang/fr_FR/messages.php
-                // app/lang/fr/messages.php
-                // app/lang/packages/en/hearthfire/messages.php
-                // app/lang/packages/fr_FR/hearthfire/messages.php
-                if(path.matches(".*/lang/(\\w{2}|\\w{2}_\\w{2})/\\w+.php$") || path.matches(".*/lang/packages/(\\w{2}|\\w{2}_\\w{2})/\\w+/\\w+.php$")) {
+                // config/app.php
+                // config/testing/app.php
+                if(path.matches(".*/config/\\w+.php$") || path.matches(".*/config/\\w+/\\w+.php$")) {
                     psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(fileContent.getFile().getNameWithoutExtension(), new ArrayKeyVisitor() {
                         @Override
                         public void visit(String key, PsiElement psiKey, boolean isRootElement) {
