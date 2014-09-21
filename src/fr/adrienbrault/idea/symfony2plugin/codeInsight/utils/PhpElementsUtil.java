@@ -118,7 +118,7 @@ public class PhpElementsUtil {
         FunctionReference methodReference = (FunctionReference) context;
         String name = methodReference.getName();
 
-        if(name == null || Arrays.asList(funcName).contains(funcName)) {
+        if(name == null || !Arrays.asList(funcName).contains(name)) {
             return false;
         }
 
