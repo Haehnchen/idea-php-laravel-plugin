@@ -55,7 +55,12 @@ public class TranslationKeyStubIndex extends FileBasedIndexExtension<String, Voi
                 }
 
                 String path = fileContent.getFile().getPath();
-                if(path.matches(".*/lang/\\w{2}/\\w+.php$")) {
+
+                // app/lang/fr_FR/messages.php
+                // app/lang/fr/messages.php
+                // app/lang/packages/en/hearthfire/messages.php
+                // app/lang/packages/fr_FR/hearthfire/messages.php
+                if(path.matches(".*/lang/(\\w{2}|\\w{2}_\\w{2})/\\w+.php$") || path.matches(".*/lang/packages/(\\w{2}|\\w{2}_\\w{2})/\\w+/\\w+.php$")) {
                     psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(fileContent.getFile().getNameWithoutExtension(), new AppConfigReferences.ConfigVisitor() {
                         @Override
                         public void visitConfig(String key, PsiElement psiKey, boolean isRootElement) {
