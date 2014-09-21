@@ -32,8 +32,6 @@ public class LaravelProjectSettingsForm implements Configurable {
     private TextFieldWithBrowseButton textViewsPath;
     private JButton buttonViewsPathReset;
     private JCheckBox useAutoPopopForCompletionCheckBox;
-    private JButton buttonConfigPathReset;
-    private TextFieldWithBrowseButton textConfigPath;
 
     @Nls
     @Override
@@ -54,9 +52,6 @@ public class LaravelProjectSettingsForm implements Configurable {
         textViewsPath.getButton().addMouseListener(createPathButtonMouseListener(textViewsPath.getTextField(), FileChooserDescriptorFactory.createSingleFolderDescriptor()));
         buttonViewsPathReset.addMouseListener(createResetPathButtonMouseListener(textViewsPath.getTextField(), LaravelSettings.DEFAULT_VIEWS_DIRECTORY));
 
-        textConfigPath.getButton().addMouseListener(createPathButtonMouseListener(textConfigPath.getTextField(), FileChooserDescriptorFactory.createSingleFolderDescriptor()));
-        buttonConfigPathReset.addMouseListener(createResetPathButtonMouseListener(textConfigPath.getTextField(), LaravelSettings.DEFAULT_CONFIG_DIRECTORY));
-
         return (JComponent) panel1;
     }
 
@@ -64,7 +59,6 @@ public class LaravelProjectSettingsForm implements Configurable {
     public boolean isModified() {
         return !enabled.isSelected() == getSettings().pluginEnabled
             || !textViewsPath.getText().equals(getSettings().viewsDirectory)
-            || !textConfigPath.getText().equals(getSettings().configDirectory)
             || !useAutoPopopForCompletionCheckBox.isSelected() == getSettings().useAutoPopup
             ;
     }
@@ -73,7 +67,6 @@ public class LaravelProjectSettingsForm implements Configurable {
     public void apply() throws ConfigurationException {
         getSettings().pluginEnabled = enabled.isSelected();
         getSettings().viewsDirectory = textViewsPath.getText();
-        getSettings().configDirectory = textConfigPath.getText();
         getSettings().useAutoPopup = useAutoPopopForCompletionCheckBox.isSelected();
     }
 
@@ -85,7 +78,6 @@ public class LaravelProjectSettingsForm implements Configurable {
     private void updateUIFromSettings() {
         enabled.setSelected(getSettings().pluginEnabled);
         textViewsPath.setText(getSettings().viewsDirectory);
-        textConfigPath.setText(getSettings().configDirectory);
         useAutoPopopForCompletionCheckBox.setSelected(getSettings().useAutoPopup);
     }
 
