@@ -1,17 +1,21 @@
 <idea-plugin version="2">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.4</version>
+  <version>0.5</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
       <h1>Laravel Plugin</h1><br>
-      <br>
+    <br/>
+    <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues">Issues</a>
+    <br/>
+
       <h2>Install</h2>
       <ul>
         <li>Install plugin and active it per Project under "Settings > Lavarel Plugin"</li>
         <li>Use "Laravel IDE Helper Generator" to generate ide classes</li>
         <li>Configure root Views directory, if not using default file structure</li>
+        <li>(Enable autopopup for completion in plugin setting)</li>
       </ul>
       <br>
 
@@ -21,7 +25,8 @@
         <li>PHP/Route: Router::resource references</li>
         <li>PHP/View: completion and goto for view templates</li>
         <li>PHP/Config: "providers" class array completion</li>
-        <li>PHP/Config: Config key completion and goto</li>
+        <li>PHP/Config: Config key indexer, completion and goto</li>
+        <li>PHP/Translation: Translation key indexer, completion and goto</li>
         <li>Blade: extends and include linemarker</li>
         <li>Blade: section overwrite and implements linemarker</li>
         <li>Blade: Improvements in blade template name completion</li>
@@ -29,15 +34,24 @@
 
       <h2>Todo</h2>
       <ul>
-        <li>Improve Blade support, after PhpStorm8</li>
         <li>Try to remove "IDE Helper Generator" deps</li>
-        <li>Migrate auto completion popup focus from Symfony2 Plugin</li>
-        <li>...</li>
+        <li>Require Symfony2 Plugin, to reduce duplicate code</li>
+        <li>Support multiple view namespaces</li>
+        <li>Support trans/transChoice translation syntax</li>
+        <li>Support yield directive in blade</li>
       </ul>
 
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.5</h2>
+    <ul>
+        <li>Add translation indexer and provider references "Lang" class alias</li>
+        <li>Add config indexer and migrate references</li>
+        <li>Porting completion autopopup Confidence from symfony2 plugin</li>
+        <li>Fix route completion fired on every function</li>
+   </ul>
 
     <h2>0.4</h2>
     <ul>
