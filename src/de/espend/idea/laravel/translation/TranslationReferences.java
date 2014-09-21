@@ -23,6 +23,7 @@ import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +53,9 @@ public class TranslationReferences implements GotoCompletionRegistrar {
                 }
 
                 PsiElement parent = psiElement.getParent();
-                if(parent != null && MethodMatcher.getMatchedSignatureWithDepth(parent, TRANSLATION_KEY) != null) {
+                if(parent != null && (
+                    MethodMatcher.getMatchedSignatureWithDepth(parent, TRANSLATION_KEY) != null || PhpElementsUtil.isFunctionReference(parent, 0, "trans")
+                )) {
                     return new TranslationKey(parent);
                 }
 
