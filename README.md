@@ -6,9 +6,9 @@ Laravel Plugin for PHPStorm
 
 ## Installation
 
-To install,  go to Settings > Plugins and search for "Laravel Plugin".
+To install,  go to `Settings > Plugins` and search for "Laravel Plugin".
 
-Once installed, you must activate per-project by going to Settings > Laravel Plugin and clicking "Enable for this project".
+Once installed, you must activate per-project by going to `Settings > Laravel Plugin` and clicking "Enable for this project".
 
 *Note* Currently, you must install and use the [Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) in order for PHPStorm to know how to find the Laravel classes.
 
@@ -21,6 +21,8 @@ Once installed, you must activate per-project by going to Settings > Laravel Plu
  * Blade: extends and include linemarker
  * Blade: section overwrite and implements linemarker
  * Blade: Improvements in blade template name completion
+
+## Screenshots
 
 ![alt text](http://plugins.jetbrains.com/files/7532/screenshot_14670.png)
 
