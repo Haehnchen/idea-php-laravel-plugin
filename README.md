@@ -22,6 +22,13 @@ Once installed, you must activate per-project by going to `Settings > Laravel Pl
  * Blade: section overwrite and implements linemarker
  * Blade: Improvements in blade template name completion
 
+## TODO
+ * Try to remove "IDE Helper Generator" deps
+ * Require Symfony2 Plugin, to reduce duplicate code
+ * Support multiple view namespaces
+ * Support trans/transChoice translation syntax
+ * Support yield directive in blade
+
 ## Screenshots
 
 ![alt text](http://plugins.jetbrains.com/files/7532/screenshot_14670.png)
