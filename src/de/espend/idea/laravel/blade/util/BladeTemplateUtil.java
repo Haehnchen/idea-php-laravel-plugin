@@ -8,6 +8,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.util.Processor;
 import com.intellij.util.indexing.FileBasedIndexImpl;
 import com.jetbrains.php.blade.BladeFileType;
@@ -72,6 +73,10 @@ public class BladeTemplateUtil {
 
     public static void visitYield(@NotNull final PsiFile psiFile, DirectiveParameterVisitor visitor) {
         psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(BladeTokenTypes.YIELD_DIRECTIVE, visitor));
+    }
+
+    public static void visitSectionOrYield(@NotNull final PsiFile psiFile, final DirectiveParameterVisitor visitor) {
+        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, BladeTokenTypes.SECTION_DIRECTIVE, BladeTokenTypes.YIELD_DIRECTIVE));
     }
 
     public static interface SectionVisitor extends DirectiveParameterVisitor {
@@ -144,7 +149,7 @@ public class BladeTemplateUtil {
                 if (virtualFile != null) {
                     PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
                     if (templatePsiFile != null) {
-                        BladeTemplateUtil.visitSection(templatePsiFile, visitor);
+                        BladeTemplateUtil.visitSectionOrYield(templatePsiFile, visitor);
                         visitUpPathSections(templatePsiFile, finalDepth, visitor);
                     }
                 }
@@ -156,11 +161,16 @@ public class BladeTemplateUtil {
 
     private static class DirectivePsiRecursiveElementWalkingVisitor extends PsiRecursiveElementWalkingVisitor {
 
-        private final BladeDirectiveElementType elementType;
+        private final BladeDirectiveElementType[] elementTypes;
         private final DirectiveParameterVisitor visitor;
 
         public DirectivePsiRecursiveElementWalkingVisitor(BladeDirectiveElementType elementType, DirectiveParameterVisitor visitor) {
-            this.elementType = elementType;
+            this.elementTypes = new BladeDirectiveElementType[] {elementType} ;
+            this.visitor = visitor;
+        }
+
+        public DirectivePsiRecursiveElementWalkingVisitor(DirectiveParameterVisitor visitor, BladeDirectiveElementType... elementTypes) {
+            this.elementTypes = elementTypes;
             this.visitor = visitor;
         }
 
@@ -168,7 +178,7 @@ public class BladeTemplateUtil {
         public void visitElement(PsiElement element) {
             if(element instanceof BladePsiDirectiveParameter) {
                 PsiElement sectionElement = element.getPrevSibling();
-                if(sectionElement.getNode().getElementType() == this.elementType) {
+                if(this.isValidElementType(sectionElement.getNode().getElementType())) {
                     for(PsiElement psiElement : PsiElementUtils.getChildrenFix(element)) {
                         if(psiElement.getNode().getElementType() == BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT) {
                             String content = PsiElementUtils.trimQuote(psiElement.getText());
@@ -180,6 +190,17 @@ public class BladeTemplateUtil {
                 }
             }
             super.visitElement(element);
+        }
+
+        private boolean isValidElementType(IElementType iElementType) {
+
+            for(BladeDirectiveElementType elementType: this.elementTypes) {
+                if(iElementType == elementType) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
     }
