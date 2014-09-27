@@ -13,6 +13,7 @@ import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.BladeLanguage;
 import com.jetbrains.php.blade.psi.BladeFileImpl;
 import com.jetbrains.php.blade.psi.BladePsiLanguageInjectionHost;
+import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import com.jetbrains.php.lang.psi.elements.MethodReference;
 import com.jetbrains.php.lang.psi.elements.ParameterList;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
@@ -186,6 +187,12 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
                         if (templateName != null) {
                             lookupElement = lookupElement.withTypeText(templateName, true);
+                        }
+
+                        if(parameter.getElementType() == BladeTokenTypes.SECTION_DIRECTIVE) {
+                            lookupElement = lookupElement.withTailText("(section)", true);
+                        } else if(parameter.getElementType() == BladeTokenTypes.YIELD_DIRECTIVE) {
+                            lookupElement = lookupElement.withTailText("(yield)", true);
                         }
 
                         lookupElementList.add(lookupElement);
