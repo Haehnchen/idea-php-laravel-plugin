@@ -15,9 +15,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public class BladeIncludeStubIndex extends FileBasedIndexExtension<String, Void> {
+public class BladeYieldStubIndex extends FileBasedIndexExtension<String, Void> {
 
-    public static final ID<String, Void> KEY = ID.create("de.espend.idea.laravel.blade.include");
+    public static final ID<String, Void> KEY = ID.create("de.espend.idea.laravel.blade.yield");
     private final KeyDescriptor<String> myKeyDescriptor = new EnumeratorStringDescriptor();
 
     @NotNull
@@ -34,7 +34,7 @@ public class BladeIncludeStubIndex extends FileBasedIndexExtension<String, Void>
             @Override
             public Map<String, Void> map(@NotNull FileContent fileContent) {
 
-                Map<String, Void> map = new THashMap<String, Void>();
+                final Map<String, Void> map = new THashMap<String, Void>();
 
                 PsiFile psiFile = fileContent.getPsiFile();
 
@@ -42,7 +42,7 @@ public class BladeIncludeStubIndex extends FileBasedIndexExtension<String, Void>
                     return map;
                 }
 
-                psiFile.acceptChildren(new BladeDirectivePsiElementWalkingVisitor(BladeTokenTypes.INCLUDE_DIRECTIVE, map));
+                psiFile.acceptChildren(new BladeDirectivePsiElementWalkingVisitor(BladeTokenTypes.YIELD_DIRECTIVE, map));
 
                 return map;
             }
@@ -81,4 +81,6 @@ public class BladeIncludeStubIndex extends FileBasedIndexExtension<String, Void>
     public int getVersion() {
         return 1;
     }
+
+
 }
