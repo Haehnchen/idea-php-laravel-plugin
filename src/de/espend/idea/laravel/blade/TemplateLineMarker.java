@@ -68,6 +68,16 @@ public class TemplateLineMarker implements LineMarkerProvider {
                 }
             }
 
+            if(psiElement.getNode().getElementType() == BladeTokenTypes.YIELD_DIRECTIVE) {
+                PsiElement nextSibling = psiElement.getNextSibling();
+                if(nextSibling instanceof BladePsiDirectiveParameter) {
+                    String sectionName = BladePsiUtil.getSection(nextSibling);
+                    if(sectionName != null) {
+                        collectImplementsSection(nextSibling, collection, sectionName);
+                    }
+                }
+            }
+
         }
 
     }
@@ -163,14 +173,17 @@ public class TemplateLineMarker implements LineMarkerProvider {
             return;
         }
 
-        BladeTemplateUtil.visitSection(psiFile, new BladeTemplateUtil.SectionVisitor() {
+        BladeTemplateUtil.DirectiveParameterVisitor visitor = new BladeTemplateUtil.DirectiveParameterVisitor() {
             @Override
             public void visit(@NotNull PsiElement psiElement, @NotNull String templateName) {
                 if (sectionName.equalsIgnoreCase(templateName)) {
                     gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiElement).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
                 }
             }
-        });
+        };
+
+        BladeTemplateUtil.visitSection(psiFile, visitor);
+        BladeTemplateUtil.visitYield(psiFile, visitor);
 
         final int finalDepth = depth;
         BladeTemplateUtil.visitExtends(psiFile, new BladeTemplateUtil.ExtendsVisitor() {
@@ -211,6 +224,42 @@ public class TemplateLineMarker implements LineMarkerProvider {
             PsiFile psiFile = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
             if(psiFile != null) {
                 BladeTemplateUtil.visitSection(psiFile, new BladeTemplateUtil.SectionVisitor() {
+                    @Override
+                    public void visit(@NotNull PsiElement psiElement, @NotNull String templateName) {
+                        if (sectionName.equalsIgnoreCase(templateName)) {
+                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiElement).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
+                        }
+                    }
+                });
+            }
+
+        }
+
+        if(gotoRelatedItems.size() == 0) {
+            return;
+        }
+
+        collection.add(getRelatedPopover("Template", "Blade File", psiElement, gotoRelatedItems, PhpIcons.IMPLEMENTED));
+    }
+
+    private void collectYieldImplementsSection(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
+
+        final String templateName = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
+        if(templateName == null) {
+            return;
+        }
+
+        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
+
+        Set<VirtualFile> virtualFiles = BladeTemplateUtil.getExtendsImplementations(psiElement.getProject(), templateName);
+        if(virtualFiles.size() == 0) {
+            return;
+        }
+
+        for(VirtualFile virtualFile: virtualFiles) {
+            PsiFile psiFile = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
+            if(psiFile != null) {
+                BladeTemplateUtil.visitYield(psiFile, new BladeTemplateUtil.DirectiveParameterVisitor() {
                     @Override
                     public void visit(@NotNull PsiElement psiElement, @NotNull String templateName) {
                         if (sectionName.equalsIgnoreCase(templateName)) {
