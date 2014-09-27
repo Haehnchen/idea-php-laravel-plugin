@@ -63,57 +63,11 @@ public class BladeTemplateUtil {
     }
 
     public static void visitSection(@NotNull final PsiFile psiFile, final DirectiveParameterVisitor visitor) {
-        psiFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
-            @Override
-            public void visitElement(PsiElement element) {
-                if(element instanceof BladeDirectiveParameterPsiImpl) {
-
-                    PsiElement sectionElement = element.getPrevSibling();
-                    if(sectionElement.getNode().getElementType() == BladeTokenTypes.SECTION_DIRECTIVE) {
-                        for(PsiElement psiElement : PsiElementUtils.getChildrenFix(element)) {
-                            if(psiElement.getNode().getElementType() == BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT) {
-                                String content = PsiElementUtils.trimQuote(psiElement.getText());
-                                if(content != null && StringUtils.isNotBlank(content)) {
-                                    visitor.visit(psiElement, content);
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-                super.visitElement(element);
-            }
-        });
+        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(BladeTokenTypes.SECTION_DIRECTIVE, visitor));
     }
 
-    public static interface ExtendsVisitor {
-        public void visit(@NotNull PsiElement psiElement, @NotNull String content);
-    }
-
-    public static void visitExtends(final @NotNull PsiFile psiFile, final ExtendsVisitor visitor) {
-        psiFile.acceptChildren(new PsiRecursiveElementWalkingVisitor() {
-            @Override
-            public void visitElement(PsiElement element) {
-                if(element instanceof BladeDirectiveParameterPsiImpl) {
-
-                    PsiElement sectionElement = element.getPrevSibling();
-                    if(sectionElement.getNode().getElementType() == BladeTokenTypes.EXTENDS_DIRECTIVE) {
-                        for(PsiElement psiElement : PsiElementUtils.getChildrenFix(element)) {
-                            if(psiElement.getNode().getElementType() == BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT) {
-                                String content = PsiElementUtils.trimQuote(psiElement.getText());
-                                if(content != null && StringUtils.isNotBlank(content)) {
-                                    visitor.visit(psiFile, content);
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-                super.visitElement(element);
-            }
-        });
+    public static void visitExtends(final @NotNull PsiFile psiFile, final DirectiveParameterVisitor visitor) {
+        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(BladeTokenTypes.EXTENDS_DIRECTIVE, visitor));
     }
 
     public static void visitYield(@NotNull final PsiFile psiFile, DirectiveParameterVisitor visitor) {
@@ -183,7 +137,7 @@ public class BladeTemplateUtil {
         }
 
         final int finalDepth = depth;
-        BladeTemplateUtil.visitExtends(psiFile, new BladeTemplateUtil.ExtendsVisitor() {
+        BladeTemplateUtil.visitExtends(psiFile, new DirectiveParameterVisitor() {
             @Override
             public void visit(@NotNull PsiElement psiElement, @NotNull String content) {
                 VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), content);

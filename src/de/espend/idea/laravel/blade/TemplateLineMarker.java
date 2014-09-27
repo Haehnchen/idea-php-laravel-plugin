@@ -186,7 +186,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
         BladeTemplateUtil.visitYield(psiFile, visitor);
 
         final int finalDepth = depth;
-        BladeTemplateUtil.visitExtends(psiFile, new BladeTemplateUtil.ExtendsVisitor() {
+        BladeTemplateUtil.visitExtends(psiFile, new BladeTemplateUtil.DirectiveParameterVisitor() {
             @Override
             public void visit(@NotNull PsiElement psiElement, @NotNull String content) {
                 VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), content);
