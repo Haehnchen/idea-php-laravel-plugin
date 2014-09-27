@@ -6,7 +6,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
-import com.intellij.sql.psi.SqlStringLiteralExpression;
 import com.intellij.util.ThreeState;
 import com.jetbrains.php.lang.psi.PhpFile;
 import com.jetbrains.php.lang.psi.elements.*;
@@ -31,7 +30,7 @@ public class PhpParameterStringCompletionConfidence extends CompletionConfidence
         }
 
         PsiElement context = contextElement.getContext();
-        if(!(context instanceof SqlStringLiteralExpression)) {
+        if(!(context instanceof StringLiteralExpression)) {
             return ThreeState.UNSURE;
         }
 
