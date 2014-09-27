@@ -19,6 +19,7 @@ import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.LaravelSettings;
+import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import de.espend.idea.laravel.view.ViewCollector;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
@@ -174,14 +175,14 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
             }
 
             final Set<String> uniqueSet = new HashSet<String>();
-            BladeTemplateUtil.visitUpPathSections(host.getContainingFile(), 10, new BladeTemplateUtil.SectionVisitor() {
+            BladeTemplateUtil.visitUpPathSections(host.getContainingFile(), 10, new BladeTemplateUtil.DirectiveParameterVisitor() {
                 @Override
-                public void visit(@NotNull PsiElement psiElement, @NotNull String sectionName) {
-                    if (!uniqueSet.contains(sectionName)) {
-                        uniqueSet.add(sectionName);
+                public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
+                    if (!uniqueSet.contains(parameter.getContent())) {
+                        uniqueSet.add(parameter.getContent());
 
-                        LookupElementBuilder lookupElement = LookupElementBuilder.create(sectionName).withIcon(LaravelIcons.LARAVEL);
-                        String templateName = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
+                        LookupElementBuilder lookupElement = LookupElementBuilder.create(parameter.getContent()).withIcon(LaravelIcons.LARAVEL);
+                        String templateName = BladeTemplateUtil.getFileTemplateName(parameter.getPsiElement().getProject(), parameter.getPsiElement().getContainingFile().getVirtualFile());
 
                         if (templateName != null) {
                             lookupElement = lookupElement.withTypeText(templateName, true);
@@ -210,11 +211,11 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
             }
 
             final Set<PsiElement> uniqueSet = new HashSet<PsiElement>();
-            BladeTemplateUtil.visitUpPathSections(host.getContainingFile(), 10, new BladeTemplateUtil.SectionVisitor() {
+            BladeTemplateUtil.visitUpPathSections(host.getContainingFile(), 10, new BladeTemplateUtil.DirectiveParameterVisitor() {
                 @Override
-                public void visit(@NotNull PsiElement psiElement, @NotNull String sectionName) {
-                    if(sectionNameSource.equalsIgnoreCase(sectionName)) {
-                        uniqueSet.add(psiElement);
+                public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
+                    if(sectionNameSource.equalsIgnoreCase(parameter.getContent())) {
+                        uniqueSet.add(parameter.getPsiElement());
                     }
                 }
             });

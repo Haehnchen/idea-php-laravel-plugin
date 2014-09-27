@@ -19,6 +19,7 @@ import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
@@ -175,9 +176,9 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
         BladeTemplateUtil.DirectiveParameterVisitor visitor = new BladeTemplateUtil.DirectiveParameterVisitor() {
             @Override
-            public void visit(@NotNull PsiElement psiElement, @NotNull String templateName) {
-                if (sectionName.equalsIgnoreCase(templateName)) {
-                    gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiElement).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
+            public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
+                if (sectionName.equalsIgnoreCase(parameter.getContent())) {
+                    gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
                 }
             }
         };
@@ -188,8 +189,8 @@ public class TemplateLineMarker implements LineMarkerProvider {
         final int finalDepth = depth;
         BladeTemplateUtil.visitExtends(psiFile, new BladeTemplateUtil.DirectiveParameterVisitor() {
             @Override
-            public void visit(@NotNull PsiElement psiElement, @NotNull String content) {
-                VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), content);
+            public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
+                VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), parameter.getContent());
                 if (virtualFile != null) {
                     PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
                     if (templatePsiFile != null) {
@@ -206,9 +207,9 @@ public class TemplateLineMarker implements LineMarkerProvider {
      * Find all sub implementations of a section that are overwritten by an extends tag
      * Possible targets are: @section('sidebar')
      */
-    private void collectImplementsSection(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
+    private void collectImplementsSection(PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
 
-        final String templateName = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
+        String templateName = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
         if(templateName == null) {
             return;
         }
@@ -223,11 +224,11 @@ public class TemplateLineMarker implements LineMarkerProvider {
         for(VirtualFile virtualFile: virtualFiles) {
             PsiFile psiFile = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
             if(psiFile != null) {
-                BladeTemplateUtil.visitSection(psiFile, new BladeTemplateUtil.SectionVisitor() {
+                BladeTemplateUtil.visitSection(psiFile, new BladeTemplateUtil.DirectiveParameterVisitor() {
                     @Override
-                    public void visit(@NotNull PsiElement psiElement, @NotNull String templateName) {
-                        if (sectionName.equalsIgnoreCase(templateName)) {
-                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiElement).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
+                    public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
+                        if (sectionName.equalsIgnoreCase(parameter.getContent())) {
+                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
                         }
                     }
                 });
@@ -244,7 +245,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
     private void collectYieldImplementsSection(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
 
-        final String templateName = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
+        String templateName = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
         if(templateName == null) {
             return;
         }
@@ -261,9 +262,9 @@ public class TemplateLineMarker implements LineMarkerProvider {
             if(psiFile != null) {
                 BladeTemplateUtil.visitYield(psiFile, new BladeTemplateUtil.DirectiveParameterVisitor() {
                     @Override
-                    public void visit(@NotNull PsiElement psiElement, @NotNull String templateName) {
-                        if (sectionName.equalsIgnoreCase(templateName)) {
-                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiElement).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
+                    public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
+                        if (sectionName.equalsIgnoreCase(parameter.getContent())) {
+                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
                         }
                     }
                 });

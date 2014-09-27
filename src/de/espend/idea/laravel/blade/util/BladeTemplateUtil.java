@@ -17,6 +17,7 @@ import com.jetbrains.php.blade.psi.BladeDirectiveParameterPsiImpl;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import de.espend.idea.laravel.LaravelSettings;
+import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
 import de.espend.idea.laravel.util.PsiElementUtils;
 import org.apache.commons.lang.StringUtils;
@@ -79,10 +80,6 @@ public class BladeTemplateUtil {
         psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, BladeTokenTypes.SECTION_DIRECTIVE, BladeTokenTypes.YIELD_DIRECTIVE));
     }
 
-    public static interface SectionVisitor extends DirectiveParameterVisitor {
-        public void visit(@NotNull PsiElement psiElement, @NotNull String sectionName);
-    }
-
     public static String getFileTemplateName(Project project, VirtualFile virtualFile) {
 
         String relativeFile = VfsUtil.getRelativePath(virtualFile, project.getBaseDir());
@@ -134,7 +131,7 @@ public class BladeTemplateUtil {
         }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(project), BladeFileType.INSTANCE));
     }
 
-    public static void visitUpPathSections(final PsiFile psiFile, int depth, final SectionVisitor visitor) {
+    public static void visitUpPathSections(final PsiFile psiFile, int depth, final DirectiveParameterVisitor visitor) {
 
         // simple secure recursive calls
         if(depth-- <= 0) {
@@ -144,8 +141,8 @@ public class BladeTemplateUtil {
         final int finalDepth = depth;
         BladeTemplateUtil.visitExtends(psiFile, new DirectiveParameterVisitor() {
             @Override
-            public void visit(@NotNull PsiElement psiElement, @NotNull String content) {
-                VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), content);
+            public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
+                VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), parameter.getContent());
                 if (virtualFile != null) {
                     PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
                     if (templatePsiFile != null) {
@@ -183,7 +180,7 @@ public class BladeTemplateUtil {
                         if(psiElement.getNode().getElementType() == BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT) {
                             String content = PsiElementUtils.trimQuote(psiElement.getText());
                             if(content != null && StringUtils.isNotBlank(content)) {
-                                visitor.visit(psiElement, content);
+                                visitor.visit(new DirectiveParameterVisitorParameter(psiElement, content, sectionElement.getNode().getElementType()));
                             }
                         }
                     }
@@ -206,7 +203,7 @@ public class BladeTemplateUtil {
     }
 
     public static interface DirectiveParameterVisitor {
-        public void visit(@NotNull PsiElement psiElement, @NotNull String content);
+        public void visit(@NotNull DirectiveParameterVisitorParameter parameter);
     }
 
 }
