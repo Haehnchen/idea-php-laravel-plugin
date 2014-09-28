@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.5</version>
+  <version>0.6</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -28,7 +28,7 @@
         <li>PHP/Config: Config key indexer, completion and goto</li>
         <li>PHP/Translation: Translation key indexer, completion and goto</li>
         <li>Blade: extends and include linemarker</li>
-        <li>Blade: section overwrite and implements linemarker</li>
+        <li>Blade: section, yield overwrite and implements linemarker</li>
         <li>Blade: Improvements in blade template name completion</li>
       </ul>
 
@@ -38,12 +38,18 @@
         <li>Require Symfony2 Plugin, to reduce duplicate code</li>
         <li>Support multiple view namespaces</li>
         <li>Support trans/transChoice translation syntax</li>
-        <li>Support yield directive in blade</li>
       </ul>
 
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.6</h2>
+    <ul>
+        <li>Fix "SqlStringLiteralExpression" import for popovers</li>
+        <li>Add blade yield index and refactoring all other index element walkers</li>
+        <li>Support blade yield directive in linemarker</li>
+   </ul>
 
     <h2>0.5</h2>
     <ul>

@@ -1,3 +1,8 @@
+## 0.6
+- Fix "SqlStringLiteralExpression" import for popovers
+- Add blade yield index and refactoring all other index element walkers
+- Support blade yield directive in linemarker
+
 ## 0.5
 - Add translation indexer and provider references "Lang" class alias
 - Add config indexer and migrate references
