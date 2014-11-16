@@ -101,6 +101,13 @@
   <extensions defaultExtensionNs="com.intellij">
 
       <projectConfigurable instance="de.espend.idea.laravel.ui.LaravelProjectSettingsForm" id="Laravel.SettingsForm" displayName="Laravel Plugin"/>
+
+      <projectConfigurable instance="de.espend.idea.laravel.ui.TemplateSettingsForm"
+                           displayName="Views / Template"
+                           parentId="Laravel.SettingsForm"
+              />
+
+
       <projectService serviceImplementation="de.espend.idea.laravel.LaravelSettings"/>
 
       <completion.contributor language="PHP" implementationClass="fr.adrienbrault.idea.symfony2plugin.codeInsight.completion.CompletionContributor"/>

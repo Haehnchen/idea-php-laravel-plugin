@@ -3,8 +3,12 @@ package de.espend.idea.laravel;
 import com.intellij.openapi.components.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
+import de.espend.idea.laravel.view.dict.TemplatePath;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @State(
     name = "LaravelPluginSettings",
@@ -22,6 +26,9 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
     public String viewsDirectory = DEFAULT_VIEWS_DIRECTORY;
 
     protected Project project;
+
+    @Nullable
+    public List<TemplatePath> templatePaths = new ArrayList<TemplatePath>();
 
     public static LaravelSettings getInstance(Project project) {
         LaravelSettings settings = ServiceManager.getService(project, LaravelSettings.class);
@@ -47,4 +54,5 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
     public void loadState(LaravelSettings settings) {
         XmlSerializerUtil.copyBean(settings, this);
     }
+
 }

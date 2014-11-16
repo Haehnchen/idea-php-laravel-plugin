@@ -12,19 +12,30 @@ import java.util.*;
 
 public class ViewCollector {
 
-    public static void visitFile(@NotNull Project project, @NotNull final ViewVisitor visitor) {
-
+    public static Collection<TemplatePath> getPaths(@NotNull Project project, boolean includeSettings) {
         String[] defaultDirs = new String[] {LaravelSettings.getInstance(project).getRelativeViewsDirectory(), "resources/views", "app/views"};
         Collection<TemplatePath> templatePaths = new ArrayList<TemplatePath>();
 
         for(String path: new HashSet<String>(Arrays.asList(defaultDirs))) {
-            templatePaths.add(new TemplatePath(path));
+            templatePaths.add(new TemplatePath(path, false));
         }
 
-        for(TemplatePath templatePath : templatePaths) {
+        if(includeSettings) {
+            List<TemplatePath> paths = LaravelSettings.getInstance(project).templatePaths;
+            if(paths != null) {
+                for(TemplatePath templatePath : paths) {
+                    templatePaths.add(templatePath.clone());
+                }
+            }
+        }
+
+        return templatePaths;
+    }
+
+    public static void visitFile(@NotNull Project project, @NotNull final ViewVisitor visitor) {
+        for(TemplatePath templatePath : getPaths(project, true)) {
             visitTemplatePath(project, templatePath, visitor);
         }
-
     }
 
     public static void visitTemplatePath(@NotNull Project project, final @NotNull TemplatePath templatePath, @NotNull final ViewVisitor visitor) {
