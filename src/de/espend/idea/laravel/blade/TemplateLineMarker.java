@@ -102,9 +102,8 @@ public class TemplateLineMarker implements LineMarkerProvider {
                 if(bladeParameter instanceof BladePsiDirectiveParameter) {
                     String extendTemplate = BladePsiUtil.getSection(bladeParameter);
                     if(extendTemplate != null) {
-                        VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiElement.getProject(), extendTemplate);
-                        if(virtualFile != null) {
-
+                        Set<VirtualFile> virtualFiles = BladeTemplateUtil.resolveTemplateName(psiElement.getProject(), extendTemplate);
+                        for(VirtualFile virtualFile: virtualFiles) {
                             PsiFile psiFile = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
                             if(psiFile != null) {
                                 visitOverwrittenTemplateFile(psiFile, gotoRelatedItems, sectionName);
@@ -225,8 +224,8 @@ public class TemplateLineMarker implements LineMarkerProvider {
         BladeTemplateUtil.visitExtends(psiFile, new BladeTemplateUtil.DirectiveParameterVisitor() {
             @Override
             public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
-                VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), parameter.getContent());
-                if (virtualFile != null) {
+                Set<VirtualFile> virtualFiles = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), parameter.getContent());
+                for (VirtualFile virtualFile : virtualFiles) {
                     PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
                     if (templatePsiFile != null) {
                         visitOverwrittenTemplateFile(templatePsiFile, gotoRelatedItems, sectionName, finalDepth);

@@ -21,6 +21,7 @@ import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
 import de.espend.idea.laravel.util.PsiElementUtils;
 import de.espend.idea.laravel.view.ViewCollector;
+import de.espend.idea.laravel.view.dict.TemplatePath;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,38 +33,74 @@ import java.util.Set;
 
 public class BladeTemplateUtil {
 
-    @Nullable
-    public static VirtualFile resolveTemplateName(Project project, String templateName) {
+    @NotNull
+    public static Set<VirtualFile> resolveTemplateName(Project project, String templateName) {
 
-        VirtualFile viewsDir = VfsUtil.findRelativeFile(project.getBaseDir(), LaravelSettings.getInstance(project).getRelativeViewsDirectory().split("/"));
-        if(viewsDir == null) {
-            return null;
+        Set<String> templateNames = new HashSet<String>();
+
+        int i = templateName.indexOf("::");
+        String ns = null;
+        if(i > 0) {
+            ns = templateName.substring(0, i);
+            templateName = templateName.substring(i + 2, templateName.length());
         }
 
-        String bladeFilename = templateName.replace(".", "/").concat(".blade.php");
+        templateNames.add(templateName.replace(".", "/"));
+        templateNames.add(templateName.replace(".", "/").concat(".blade.php"));
 
-        return VfsUtil.findRelativeFile(viewsDir, bladeFilename.split("/"));
+        Set<VirtualFile> templateFiles = new HashSet<VirtualFile>();
+        for(TemplatePath templatePath : ViewCollector.getPaths(project, true)) {
 
+            if(ns != null && !ns.equals(templatePath.getNamespace())) {
+                continue;
+            }
+
+            VirtualFile viewDir = templatePath.getRelativePath(project);
+            if(viewDir == null) {
+                continue;
+            }
+
+            for(String templateRelative: templateNames) {
+                VirtualFile viewsDir = VfsUtil.findRelativeFile(templateRelative, viewDir);
+                if(viewsDir != null) {
+                    templateFiles.add(viewsDir);
+                }
+            }
+
+        }
+
+        return templateFiles;
     }
 
-    @Nullable
-    public static String resolveTemplateName(Project project, VirtualFile virtualFile) {
 
-        VirtualFile viewsDir = VfsUtil.findRelativeFile(project.getBaseDir(), LaravelSettings.getInstance(project).getRelativeViewsDirectory().split("/"));
-        if(viewsDir == null) {
-            return null;
+    @NotNull
+    public static Set<String> resolveTemplateName(Project project, VirtualFile virtualFile) {
+
+        Set<String> templateNames = new HashSet<String>();
+        for(TemplatePath templatePath : ViewCollector.getPaths(project, true)) {
+
+            VirtualFile viewDir = templatePath.getRelativePath(project);
+            if(viewDir == null) {
+                continue;
+            }
+
+            String relativePath = VfsUtil.getRelativePath(virtualFile, viewDir);
+            if(relativePath != null) {
+                if(relativePath.endsWith(".blade.php")) {
+                    relativePath = relativePath.substring(0, relativePath.length() - ".blade.php".length());
+                }
+
+                if(templatePath.getNamespace() != null && StringUtils.isNotBlank(templatePath.getNamespace())) {
+                    templateNames.add(templatePath.getNamespace() + "::" + relativePath.replace("/", "."));
+                } else {
+                    templateNames.add(relativePath.replace("/", "."));
+                }
+
+            }
+
         }
 
-        String relativePath = VfsUtil.getRelativePath(virtualFile, viewsDir);
-        if(relativePath == null) {
-            return null;
-        }
-
-        if(relativePath.endsWith(".blade.php")) {
-            relativePath = relativePath.substring(0, relativePath.length() - ".blade.php".length());
-        }
-
-        return relativePath.replace("/", ".");
+        return templateNames;
     }
 
     public static void visitSection(@NotNull final PsiFile psiFile, final DirectiveParameterVisitor visitor) {
@@ -124,10 +161,10 @@ public class BladeTemplateUtil {
         FileBasedIndexImpl.getInstance().getFilesWithKey(BladeExtendsStubIndex.KEY, new HashSet<String>(Arrays.asList(templateName)), new Processor<VirtualFile>() {
             @Override
             public boolean process(VirtualFile virtualFile) {
-                if(!virtualFiles.contains(virtualFile)) {
+                if (!virtualFiles.contains(virtualFile)) {
                     virtualFiles.add(virtualFile);
-                    String nextTpl = BladeTemplateUtil.resolveTemplateName(project, virtualFile);
-                    if(nextTpl != null) {
+                    Set<String> nextTpls = BladeTemplateUtil.resolveTemplateName(project, virtualFile);
+                    for (String nextTpl : nextTpls) {
                         getExtendsImplementations(project, nextTpl, virtualFiles, finalDepth);
                     }
                 }
@@ -147,8 +184,8 @@ public class BladeTemplateUtil {
         BladeTemplateUtil.visitExtends(psiFile, new DirectiveParameterVisitor() {
             @Override
             public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
-                VirtualFile virtualFile = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), parameter.getContent());
-                if (virtualFile != null) {
+                Set<VirtualFile> virtualFiles = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), parameter.getContent());
+                for(VirtualFile virtualFile : virtualFiles) {
                     PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
                     if (templatePsiFile != null) {
                         BladeTemplateUtil.visitSectionOrYield(templatePsiFile, visitor);

@@ -13,7 +13,7 @@ import java.util.*;
 public class ViewCollector {
 
     public static Collection<TemplatePath> getPaths(@NotNull Project project, boolean includeSettings) {
-        String[] defaultDirs = new String[] {LaravelSettings.getInstance(project).getRelativeViewsDirectory(), "resources/views", "app/views"};
+        String[] defaultDirs = new String[] {"resources/views", "app/views"};
         Collection<TemplatePath> templatePaths = new ArrayList<TemplatePath>();
 
         for(String path: new HashSet<String>(Arrays.asList(defaultDirs))) {

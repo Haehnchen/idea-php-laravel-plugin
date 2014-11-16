@@ -90,8 +90,6 @@ public class PhpTemplateUsageStubIndex extends FileBasedIndexExtension<String, V
                             return;
                         }
 
-                        System.out.println(contents);
-
                         map.put(contents, null);
                     }
 

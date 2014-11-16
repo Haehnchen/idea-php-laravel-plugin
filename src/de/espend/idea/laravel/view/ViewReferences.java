@@ -10,6 +10,7 @@ import com.intellij.psi.PsiManager;
 import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
@@ -117,18 +118,12 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
             final Collection<PsiElement> targets = new ArrayList<PsiElement>();
 
-            ViewCollector.visitFile(getProject(), new ViewCollector.ViewVisitor() {
-                @Override
-                public void visit(@NotNull VirtualFile virtualFile, String name) {
-                    if(content.equalsIgnoreCase(name)) {
-                        PsiFile psiFile = PsiManager.getInstance(element.getProject()).findFile(virtualFile);
-                        if(psiFile != null) {
-                            targets.add(psiFile);
-                        }
-                    }
-
+            for(VirtualFile virtualFile: BladeTemplateUtil.resolveTemplateName(element.getProject(), content)) {
+                PsiFile psiFile = PsiManager.getInstance(element.getProject()).findFile(virtualFile);
+                if(psiFile != null) {
+                    targets.add(psiFile);
                 }
-            });
+            }
 
             return targets;
         }

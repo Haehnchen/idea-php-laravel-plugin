@@ -59,21 +59,11 @@ public class TemplatePath {
     }
 
     @Nullable
-    public String getRelativePath(Project project) {
-
-        if(this.isCustomPath()) {
-            return this.getPath();
-        }
-
-        VirtualFile virtualFile = this.getDirectory();
-        if(virtualFile == null) {
-            return null;
-        }
-
-        return VfsUtil.getRelativePath(virtualFile, project.getBaseDir(), '/');
+    public VirtualFile getRelativePath(Project project) {
+        return VfsUtil.findRelativeFile(project.getBaseDir(), this.getPath().split("/"));
     }
 
-    private VirtualFile getDirectory() {
+    public VirtualFile getDirectory() {
 
         File file = new File(this.getPath());
 

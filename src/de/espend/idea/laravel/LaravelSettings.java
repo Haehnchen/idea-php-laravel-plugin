@@ -19,11 +19,8 @@ import java.util.List;
 )
 public class LaravelSettings implements PersistentStateComponent<LaravelSettings> {
 
-    public static String DEFAULT_VIEWS_DIRECTORY = "app/views";
-
     public boolean pluginEnabled = false;
     public boolean useAutoPopup = false;
-    public String viewsDirectory = DEFAULT_VIEWS_DIRECTORY;
 
     protected Project project;
 
@@ -34,14 +31,6 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
         LaravelSettings settings = ServiceManager.getService(project, LaravelSettings.class);
         settings.project = project;
         return settings;
-    }
-
-    public String getRelativeViewsDirectory() {
-        if(StringUtils.isBlank(viewsDirectory)) {
-            return DEFAULT_VIEWS_DIRECTORY;
-        }
-
-        return viewsDirectory;
     }
 
     @Nullable
