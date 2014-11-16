@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 
-@Tag("template_path")
+@Tag("templatePath")
 public class TemplatePath {
 
     private String path;
@@ -22,12 +22,12 @@ public class TemplatePath {
     public TemplatePath() {
     }
 
-    public TemplatePath(String path, boolean customPath) {
+    public TemplatePath(@NotNull String path, boolean customPath) {
         this.path = path;
         this.customPath = customPath;
     }
 
-    public TemplatePath(String path, @Nullable String namespace, boolean customPath) {
+    public TemplatePath(@NotNull String path, @Nullable String namespace, boolean customPath) {
         this(path, customPath);
         this.namespace = namespace;
     }
@@ -83,4 +83,13 @@ public class TemplatePath {
 
         return VfsUtil.findFileByIoFile(file, true);
     }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
 }
