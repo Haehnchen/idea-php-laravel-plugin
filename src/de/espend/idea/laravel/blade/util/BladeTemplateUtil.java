@@ -20,11 +20,13 @@ import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
 import de.espend.idea.laravel.util.PsiElementUtils;
+import de.espend.idea.laravel.view.ViewCollector;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -80,32 +82,35 @@ public class BladeTemplateUtil {
         psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, BladeTokenTypes.SECTION_DIRECTIVE, BladeTokenTypes.YIELD_DIRECTIVE));
     }
 
-    public static String getFileTemplateName(Project project, VirtualFile virtualFile) {
+    public static Set<String> getFileTemplateName(Project project, final VirtualFile currentVirtualFile) {
 
-        String relativeFile = VfsUtil.getRelativePath(virtualFile, project.getBaseDir());
-        if(relativeFile == null) {
-            return null;
-        }
+        final Set<String> strings = new HashSet<String>();
 
-        if(!relativeFile.startsWith("app/views/")) {
-            return null;
-        }
+        ViewCollector.visitFile(project, new ViewCollector.ViewVisitor() {
+            @Override
+            public void visit(@NotNull VirtualFile virtualFile, String name) {
+                if(virtualFile.equals(currentVirtualFile)) {
+                    strings.add(name);
+                }
+            }
+        });
 
-        String filename = relativeFile.substring("app/views/".length());
-        if(filename.endsWith(".php")) {
-            filename = filename.substring(0, filename.length() - 4);
-        }
-        if(filename.endsWith(".blade")) {
-            filename = filename.substring(0, filename.length() - 6);
-        }
-
-        return filename.replace("/", ".");
+        return strings;
 
     }
 
     public static Set<VirtualFile> getExtendsImplementations(Project project, String templateName) {
         Set<VirtualFile> virtualFiles = new HashSet<VirtualFile>();
         getExtendsImplementations(project, templateName, virtualFiles, 10);
+        return virtualFiles;
+    }
+
+    public static Set<VirtualFile> getExtendsImplementations(Project project, Collection<String> templateNames) {
+        Set<VirtualFile> virtualFiles = new HashSet<VirtualFile>();
+        for(String templateName : templateNames) {
+            getExtendsImplementations(project, templateName, virtualFiles, 10);
+        }
+
         return virtualFiles;
     }
 

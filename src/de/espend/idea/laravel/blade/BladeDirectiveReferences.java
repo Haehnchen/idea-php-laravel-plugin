@@ -183,19 +183,21 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
                         uniqueSet.add(parameter.getContent());
 
                         LookupElementBuilder lookupElement = LookupElementBuilder.create(parameter.getContent()).withIcon(LaravelIcons.LARAVEL);
-                        String templateName = BladeTemplateUtil.getFileTemplateName(parameter.getPsiElement().getProject(), parameter.getPsiElement().getContainingFile().getVirtualFile());
+                        Set<String> templateNames = BladeTemplateUtil.getFileTemplateName(parameter.getPsiElement().getProject(), parameter.getPsiElement().getContainingFile().getVirtualFile());
 
-                        if (templateName != null) {
+                        for(String templateName: templateNames) {
+
                             lookupElement = lookupElement.withTypeText(templateName, true);
+
+                            if(parameter.getElementType() == BladeTokenTypes.SECTION_DIRECTIVE) {
+                                lookupElement = lookupElement.withTailText("(section)", true);
+                            } else if(parameter.getElementType() == BladeTokenTypes.YIELD_DIRECTIVE) {
+                                lookupElement = lookupElement.withTailText("(yield)", true);
+                            }
+
+                            lookupElementList.add(lookupElement);
                         }
 
-                        if(parameter.getElementType() == BladeTokenTypes.SECTION_DIRECTIVE) {
-                            lookupElement = lookupElement.withTailText("(section)", true);
-                        } else if(parameter.getElementType() == BladeTokenTypes.YIELD_DIRECTIVE) {
-                            lookupElement = lookupElement.withTailText("(yield)", true);
-                        }
-
-                        lookupElementList.add(lookupElement);
                     }
                 }
             });

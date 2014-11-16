@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.ConstantFunction;
 import com.intellij.util.Processor;
@@ -17,6 +18,9 @@ import com.jetbrains.php.PhpIcons;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
+import com.jetbrains.php.lang.PhpFileType;
+import com.jetbrains.php.lang.psi.elements.ParameterList;
+import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
@@ -25,6 +29,7 @@ import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
 import de.espend.idea.laravel.stub.BladeIncludeStubIndex;
 import de.espend.idea.laravel.stub.BladeSectionStubIndex;
+import de.espend.idea.laravel.stub.PhpTemplateUsageStubIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -120,26 +125,56 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
     private void collectTemplateFileRelatedFiles(final PsiFile psiFile, @NotNull Collection<LineMarkerInfo> collection) {
 
-        String templateName = BladeTemplateUtil.getFileTemplateName(psiFile.getProject(), psiFile.getVirtualFile());
-        if(templateName == null) {
+        Set<String> templateNames = BladeTemplateUtil.getFileTemplateName(psiFile.getProject(), psiFile.getVirtualFile());
+        if(templateNames.size() == 0) {
             return;
         }
 
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
 
         for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY)) {
-            FileBasedIndexImpl.getInstance().getFilesWithKey(key, new HashSet<String>(Arrays.asList(templateName)), new Processor<VirtualFile>() {
+            for(String templateName: templateNames) {
+                FileBasedIndexImpl.getInstance().getFilesWithKey(key, new HashSet<String>(Arrays.asList(templateName)), new Processor<VirtualFile>() {
+                    @Override
+                    public boolean process(VirtualFile virtualFile) {
+                        PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
+
+                        if(psiFileTarget != null) {
+                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiFileTarget).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
+                        }
+
+                        return true;
+                    }
+                }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(psiFile.getProject()), BladeFileType.INSTANCE, BladeFileType.INSTANCE));
+            }
+        }
+
+
+        for(final String templateName: templateNames) {
+            FileBasedIndexImpl.getInstance().getFilesWithKey(PhpTemplateUsageStubIndex.KEY, new HashSet<String>(Arrays.asList(templateName)), new Processor<VirtualFile>() {
                 @Override
                 public boolean process(VirtualFile virtualFile) {
-                    PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
 
-                    if(psiFileTarget != null) {
-                        gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiFileTarget).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
+                    PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
+                    if(psiFileTarget == null) {
+                        return true;
                     }
 
+                    psiFileTarget.accept(new PsiRecursiveElementWalkingVisitor() {
+                        @Override
+                        public void visitElement(PsiElement element) {
+
+                            if(element instanceof StringLiteralExpression && element.getParent() instanceof ParameterList && templateName.equals(((StringLiteralExpression) element).getContents())) {
+                                gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(element).withIcon(PhpIcons.IMPLEMENTED, PhpIcons.IMPLEMENTED));
+                            }
+
+                            super.visitElement(element);
+                        }
+                    });
                     return true;
                 }
-            }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(psiFile.getProject()), BladeFileType.INSTANCE));
+                
+            }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(psiFile.getProject()), PhpFileType.INSTANCE));
         }
 
         if(gotoRelatedItems.size() == 0) {
@@ -209,14 +244,14 @@ public class TemplateLineMarker implements LineMarkerProvider {
      */
     private void collectImplementsSection(PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
 
-        String templateName = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
-        if(templateName == null) {
+        Set<String> templateNames = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
+        if(templateNames.size() == 0) {
             return;
         }
 
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
 
-        Set<VirtualFile> virtualFiles = BladeTemplateUtil.getExtendsImplementations(psiElement.getProject(), templateName);
+        Set<VirtualFile> virtualFiles = BladeTemplateUtil.getExtendsImplementations(psiElement.getProject(), templateNames);
         if(virtualFiles.size() == 0) {
             return;
         }
@@ -245,14 +280,14 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
     private void collectYieldImplementsSection(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
 
-        String templateName = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
-        if(templateName == null) {
+        Set<String> templateNames = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
+        if(templateNames.size() == 0) {
             return;
         }
 
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
 
-        Set<VirtualFile> virtualFiles = BladeTemplateUtil.getExtendsImplementations(psiElement.getProject(), templateName);
+        Set<VirtualFile> virtualFiles = BladeTemplateUtil.getExtendsImplementations(psiElement.getProject(), templateNames);
         if(virtualFiles.size() == 0) {
             return;
         }
