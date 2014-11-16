@@ -18,6 +18,7 @@ import de.espend.idea.laravel.stub.ConfigKeyStubIndex;
 import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
 import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
 import de.espend.idea.laravel.util.ArrayReturnPsiRecursiveVisitor;
+import de.espend.idea.laravel.util.PsiElementUtils;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
@@ -52,7 +53,7 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
                 }
 
                 PsiElement parent = psiElement.getParent();
-                if(parent != null && MethodMatcher.getMatchedSignatureWithDepth(parent, CONFIG) != null) {
+                if(parent != null && (PsiElementUtils.isFunctionReference(parent, "config", 0) || MethodMatcher.getMatchedSignatureWithDepth(parent, CONFIG) != null)) {
                     return new ConfigKeyProvider(parent);
                 }
 
