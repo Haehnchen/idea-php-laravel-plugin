@@ -67,7 +67,7 @@ public class TemplateSettingsForm implements Configurable {
                 TemplateSettingsForm.this.resetList();
 
                 List<TemplatePath> sortableLookupItems = new ArrayList<TemplatePath>();
-                sortableLookupItems.addAll(ViewCollector.getPaths(TemplateSettingsForm.this.project, false));
+                sortableLookupItems.addAll(new ArrayList<TemplatePath>(ViewCollector.getPaths(TemplateSettingsForm.this.project, true)));
                 //Collections.sort(sortableLookupItems);
             }
         });
@@ -81,7 +81,7 @@ public class TemplateSettingsForm implements Configurable {
         }
         
         List<TemplatePath> sortableLookupItems = new ArrayList<TemplatePath>();
-        sortableLookupItems.addAll(ViewCollector.getPaths(this.project, includeSettings));
+        sortableLookupItems.addAll(new ArrayList<TemplatePath>(ViewCollector.getPaths(this.project, includeSettings)));
         //Collections.sort(sortableLookupItems);
 
         for (TemplatePath twigPath : sortableLookupItems) {
@@ -167,8 +167,7 @@ public class TemplateSettingsForm implements Configurable {
         List<TemplatePath> twigPaths = new ArrayList<TemplatePath>();
 
         for(TemplatePath twigPath :this.tableView.getListTableModel().getItems()) {
-            // only custom and disabled path need to save
-            if((twigPath.getRelativePath(this.project) != null) || twigPath.isCustomPath()) {
+            if(twigPath.isCustomPath()) {
                 twigPaths.add(twigPath.clone());
             }
         }
