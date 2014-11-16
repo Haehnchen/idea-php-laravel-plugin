@@ -60,7 +60,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
         // @extends('extends.bade')
         // @include('include.include')
-        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
+        registrar.register(PlatformPatterns.psiElement().inVirtualFile(PlatformPatterns.virtualFile().withName(PlatformPatterns.string().endsWith("blade.php"))), new GotoCompletionContributor() {
 
             @Nullable
             @Override
