@@ -7,10 +7,13 @@ import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.jetbrains.php.PhpIcons;
+import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelProjectComponent;
-import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +38,7 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
-        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
+        registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class).withLanguage(PhpLanguage.INSTANCE), new GotoCompletionContributor() {
             @Nullable
             @Override
             public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
@@ -56,6 +59,29 @@ public class ViewReferences implements GotoCompletionRegistrar {
                 return null;
             }
         });
+
+        registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class).withLanguage(PhpLanguage.INSTANCE), new GotoCompletionContributor() {
+            @Nullable
+            @Override
+            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
+
+                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                    return null;
+                }
+
+                PsiElement stringLiteral = psiElement.getParent();
+                if(!(stringLiteral instanceof StringLiteralExpression)) {
+                    return null;
+                }
+
+                if(!de.espend.idea.laravel.util.PsiElementUtils.isFunctionReference(stringLiteral, "view", 0)) {
+                    return null;
+                }
+
+                return new ViewProvider(stringLiteral);
+            }
+        });
+
     }
 
     private class ViewProvider extends GotoCompletionProvider {
@@ -73,7 +99,7 @@ public class ViewReferences implements GotoCompletionRegistrar {
             ViewCollector.visitFile(getProject(), new ViewCollector.ViewVisitor() {
                 @Override
                 public void visit(@NotNull VirtualFile virtualFile, String name) {
-                    lookupElements.add(LookupElementBuilder.create(name).withIcon(PhpIcons.PHP_FILE));
+                    lookupElements.add(LookupElementBuilder.create(name).withIcon(virtualFile.getFileType().getIcon()));
                 }
             });
 
@@ -86,7 +112,7 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
             final String content = element.getContents();
             if(StringUtils.isBlank(content)) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
 
             final Collection<PsiElement> targets = new ArrayList<PsiElement>();
@@ -107,8 +133,5 @@ public class ViewReferences implements GotoCompletionRegistrar {
             return targets;
         }
     }
-
-
-
 
 }
