@@ -130,9 +130,9 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
             // disable this, is in core but not really nice
             // if we enable this, Blade path goto is not possible, without a filter on "." prefix
-            if(true == true) {
+            /* if(true == true) {
                 return Collections.emptyList();
-            }
+            } */
 
             final String contents = element.getContents();
             if(StringUtils.isBlank(contents)) {
