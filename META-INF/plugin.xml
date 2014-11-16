@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.6</version>
+  <version>0.7</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -27,22 +27,31 @@
         <li>PHP/Config: "providers" class array completion</li>
         <li>PHP/Config: Config key indexer, completion and goto</li>
         <li>PHP/Translation: Translation key indexer, completion and goto</li>
-        <li>Blade: extends and include linemarker</li>
+        <li>Blade: extends, include and Php usage linemarker</li>
         <li>Blade: section, yield overwrite and implements linemarker</li>
-        <li>Blade: Improvements in blade template name completion</li>
+        <li>Blade: Improvements in blade template name completion and navigation</li>
+        <li>Template: Index for Php usage</li>
       </ul>
 
       <h2>Todo</h2>
       <ul>
         <li>Try to remove "IDE Helper Generator" deps</li>
         <li>Require Symfony2 Plugin, to reduce duplicate code</li>
-        <li>Support multiple view namespaces</li>
         <li>Support trans/transChoice translation syntax</li>
       </ul>
 
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.7</h2>
+    <ul>
+        <li>Add template namespace support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/9">#9</a></li>
+        <li>Add support views() and config() of Laravel5</li>
+        <li>Allow multiple template path and add Laravel4 and 5 default paths</li>
+        <li>Add index for templates in php files and provide linemarker <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/15">#15</a></li>
+        <li>Enable better @include and @extends template navigation handling for the new features</li>
+   </ul>
 
     <h2>0.6</h2>
     <ul>
