@@ -10,6 +10,9 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.Map;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class BladeDirectivePsiElementWalkingVisitor extends PsiRecursiveElementWalkingVisitor {
 
     private final BladeDirectiveElementType directiveElementType;

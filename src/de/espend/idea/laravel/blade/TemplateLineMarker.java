@@ -36,6 +36,9 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.util.*;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class TemplateLineMarker implements LineMarkerProvider {
 
     @Nullable

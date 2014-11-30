@@ -10,6 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 @Tag("templatePath")
 public class TemplatePath {
 

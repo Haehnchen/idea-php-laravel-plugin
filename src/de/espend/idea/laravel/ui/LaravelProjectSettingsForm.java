@@ -19,6 +19,9 @@ import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class LaravelProjectSettingsForm implements Configurable {
 
     private Project project;

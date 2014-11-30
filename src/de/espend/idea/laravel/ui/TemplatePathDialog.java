@@ -15,6 +15,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.event.*;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class TemplatePathDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;

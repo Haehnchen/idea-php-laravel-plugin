@@ -10,6 +10,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class ViewCollector {
 
     public static Collection<TemplatePath> getPaths(@NotNull Project project, boolean includeSettings) {

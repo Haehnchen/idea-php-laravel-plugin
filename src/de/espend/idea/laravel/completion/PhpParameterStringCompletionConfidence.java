@@ -14,6 +14,9 @@ import de.espend.idea.laravel.LaravelSettings;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class PhpParameterStringCompletionConfidence extends CompletionConfidence {
 
     @NotNull

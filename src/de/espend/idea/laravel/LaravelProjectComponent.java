@@ -8,7 +8,9 @@ import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class LaravelProjectComponent implements ProjectComponent {
     @Override
     public void projectOpened() {

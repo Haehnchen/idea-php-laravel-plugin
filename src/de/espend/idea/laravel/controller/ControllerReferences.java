@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class ControllerReferences implements GotoCompletionRegistrar {
 
     private static MethodMatcher.CallToSignature[] ROUTE = new MethodMatcher.CallToSignature[] {

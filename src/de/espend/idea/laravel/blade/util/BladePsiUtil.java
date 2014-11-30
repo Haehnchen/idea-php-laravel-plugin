@@ -6,6 +6,9 @@ import de.espend.idea.laravel.util.PsiElementUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class BladePsiUtil {
 
     @Nullable

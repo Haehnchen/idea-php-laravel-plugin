@@ -30,6 +30,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class AppConfigReferences implements GotoCompletionRegistrar {
 
     private static MethodMatcher.CallToSignature[] CONFIG = new MethodMatcher.CallToSignature[] {
