@@ -4,6 +4,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
+import com.jetbrains.php.blade.BladeFileType;
+import com.jetbrains.php.lang.PhpFileType;
 import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.view.dict.TemplatePath;
 import org.jetbrains.annotations.NotNull;
@@ -57,8 +59,7 @@ public class ViewCollector {
             @Override
             public boolean visitFile(@NotNull VirtualFile virtualFile) {
 
-                String extension = virtualFile.getExtension();
-                if(extension == null || !extension.equalsIgnoreCase("php")) {
+                if(virtualFile.isDirectory() || !isTemplateFile(virtualFile)) {
                     return true;
                 }
 
@@ -70,8 +71,13 @@ public class ViewCollector {
                 if(filename.endsWith(".php")) {
                     filename = filename.substring(0, filename.length() - 4);
                 }
+
                 if(filename.endsWith(".blade")) {
                     filename = filename.substring(0, filename.length() - 6);
+                }
+
+                if(filename.endsWith(".html.twig")) {
+                    filename = filename.substring(0, filename.length() - ".html.twig".length());
                 }
 
                 if(templatePath.getNamespace() != null) {
@@ -80,9 +86,23 @@ public class ViewCollector {
                     visitor.visit(virtualFile, filename);
                 }
 
-
                 return true;
             }
+
+            private boolean isTemplateFile(VirtualFile virtualFile) {
+
+                if(virtualFile.getFileType() == BladeFileType.INSTANCE || virtualFile.getFileType() == PhpFileType.INSTANCE) {
+                    return true;
+                }
+
+                String extension = virtualFile.getExtension();
+                if(extension != null && (extension.equalsIgnoreCase("php") || extension.equalsIgnoreCase("twig"))) {
+                    return true;
+                }
+
+                return false;
+            }
+
         });
 
     }

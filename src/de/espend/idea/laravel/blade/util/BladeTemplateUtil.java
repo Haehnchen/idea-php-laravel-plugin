@@ -48,8 +48,10 @@ public class BladeTemplateUtil {
             templateName = templateName.substring(i + 2, templateName.length());
         }
 
-        templateNames.add(templateName.replace(".", "/"));
-        templateNames.add(templateName.replace(".", "/").concat(".blade.php"));
+        String pointName = templateName.replace(".", "/");
+        templateNames.add(pointName.concat(".blade.php"));
+        templateNames.add(pointName.concat(".html.twig"));
+        templateNames.add(pointName.concat(".php"));
 
         Set<VirtualFile> templateFiles = new HashSet<VirtualFile>();
         for(TemplatePath templatePath : ViewCollector.getPaths(project, true)) {
@@ -91,6 +93,10 @@ public class BladeTemplateUtil {
             if(relativePath != null) {
                 if(relativePath.endsWith(".blade.php")) {
                     relativePath = relativePath.substring(0, relativePath.length() - ".blade.php".length());
+                }
+
+                if(relativePath.endsWith(".twig.html")) {
+                    relativePath = relativePath.substring(0, relativePath.length() - ".twig.html".length());
                 }
 
                 if(templatePath.getNamespace() != null && StringUtils.isNotBlank(templatePath.getNamespace())) {
