@@ -10,6 +10,7 @@ import com.jetbrains.php.lang.psi.elements.PhpClass;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.util.PsiElementUtils;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
@@ -81,6 +82,10 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 PsiElement parent = psiElement.getParent();
                 if(parent == null) {
                     return null;
+                }
+
+                if(PsiElementUtils.isFunctionReference(parent, "route", 0)) {
+                    return new ControllerRoute(parent);
                 }
 
                 if (MethodMatcher.getMatchedSignatureWithDepth(parent, ROUTE, 1) != null) {
