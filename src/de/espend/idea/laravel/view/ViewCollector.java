@@ -16,7 +16,12 @@ import java.util.*;
 public class ViewCollector {
 
     public static Collection<TemplatePath> getPaths(@NotNull Project project, boolean includeSettings) {
-        String[] defaultDirs = new String[] {"resources/views", "app/views"};
+
+        // "resources/views" -> laravel 4
+        // "app/views" -> laravel 5 (deprecated)
+        // "resources/templates" -> laravel 5
+
+        String[] defaultDirs = new String[] {"resources/views", "app/views", "resources/templates"};
         Collection<TemplatePath> templatePaths = new ArrayList<TemplatePath>();
 
         for(String path: new HashSet<String>(Arrays.asList(defaultDirs))) {
