@@ -84,9 +84,11 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                     return null;
                 }
 
+                /*
+                @TODO: Use "dev/storage/framework/routes.php"
                 if(PsiElementUtils.isFunctionReference(parent, "route", 0)) {
                     return new ControllerRoute(parent);
-                }
+                }*/
 
                 if (MethodMatcher.getMatchedSignatureWithDepth(parent, ROUTE, 1) != null) {
                     return new ControllerRoute(parent);
