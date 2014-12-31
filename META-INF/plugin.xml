@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.7</version>
+  <version>0.7.1</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -43,6 +43,13 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.7.1</h2>
+    <ul>
+        <li>Fix multiple class resolve</li>
+        <li>Fix non namespaces action completion <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/11">#11</a></li>
+        <li>Add new Laravel5 view resources path</li>
+   </ul>
 
     <h2>0.7</h2>
     <ul>
