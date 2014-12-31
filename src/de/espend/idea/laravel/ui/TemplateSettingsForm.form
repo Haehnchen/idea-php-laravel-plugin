@@ -21,7 +21,7 @@
           <component id="c5e9d" class="javax.swing.JLabel">
             <constraints border-constraint="Center"/>
             <properties>
-              <text value="Manage Twig Namespaces (restart required after change)" noi18n="true"/>
+              <text value="Manage Blade Namespaces (restart required after change)" noi18n="true"/>
             </properties>
           </component>
           <component id="bead7" class="javax.swing.JButton" binding="resetToDefault">

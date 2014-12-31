@@ -96,7 +96,7 @@ public class TemplateSettingsForm implements Configurable {
     @Nls
     @Override
     public String getDisplayName() {
-        return "Twig";
+        return "Blade";
     }
 
     @Nullable
@@ -255,7 +255,7 @@ public class TemplateSettingsForm implements Configurable {
 
         Dimension dim = new Dimension();
         dim.setSize(500, 190);
-        templatePathDialog.setTitle("Twig Namespace");
+        templatePathDialog.setTitle("Blade Namespace");
         templatePathDialog.setMinimumSize(dim);
         templatePathDialog.pack();
         templatePathDialog.setLocationRelativeTo(TemplateSettingsForm.this.panel1);
