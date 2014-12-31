@@ -83,12 +83,6 @@ public class PhpElementsUtil {
             return null;
         }
 
-        MethodReference methodReference = (MethodReference) parameterList.getContext();
-        PsiElement method = methodReference.resolve();
-        if(!(method instanceof Method)) {
-            return null;
-        }
-
         ParameterBag currentIndex = getCurrentParameterIndex(psiElement);
         if(currentIndex == null) {
             return null;
@@ -98,7 +92,7 @@ public class PhpElementsUtil {
             return null;
         }
 
-        return new MethodReferenceBag(parameterList, methodReference, currentIndex);
+        return new MethodReferenceBag(parameterList, (MethodReference) parameterList.getContext(), currentIndex);
 
     }
 
