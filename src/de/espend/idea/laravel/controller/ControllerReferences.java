@@ -4,12 +4,10 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
-import com.jetbrains.php.PhpIndex;
 import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.psi.elements.*;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
-import de.espend.idea.laravel.util.PsiElementUtils;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
@@ -207,7 +205,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         public Collection<LookupElement> getLookupElements() {
             final Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
 
-            ControllerCollector.visitController(getProject(), new ControllerCollector.ControllerVisitor() {
+            ControllerCollector.visitControllerActions(getProject(), new ControllerCollector.ControllerActionVisitor() {
                 @Override
                 public void visit(@NotNull Method method, String name) {
                     lookupElements.add(LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE));
@@ -228,7 +226,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
             final Collection<PsiElement> targets = new ArrayList<PsiElement>();
 
-            ControllerCollector.visitController(getProject(), new ControllerCollector.ControllerVisitor() {
+            ControllerCollector.visitControllerActions(getProject(), new ControllerCollector.ControllerActionVisitor() {
                 @Override
                 public void visit(@NotNull Method method, String name) {
                     if (content.equalsIgnoreCase(name)) {
@@ -252,17 +250,15 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         @NotNull
         @Override
         public Collection<LookupElement> getLookupElements() {
+
             final Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
 
-            for(PhpClass phpClass: PhpIndex.getInstance(getProject()).getAllSubclasses("\\Illuminate\\Routing\\Controller")) {
-                if(!phpClass.isAbstract()) {
-                    // TODO: how they handle namespaces?
-                    String className = phpClass.getPresentableFQN();
-                    if(className != null) {
-                        lookupElements.add(LookupElementBuilder.create(className).withIcon(LaravelIcons.ROUTE));
-                    }
+            ControllerCollector.visitController(getProject(), new ControllerCollector.ControllerVisitor() {
+                @Override
+                public void visit(@NotNull PhpClass method, @NotNull String name) {
+                    lookupElements.add(LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE));
                 }
-            }
+            });
 
             return lookupElements;
         }
@@ -276,10 +272,16 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 return Collections.emptyList();
             }
 
-            Collection<PsiElement> targets = new ArrayList<PsiElement>();
-            for(PhpClass phpClass: PhpIndex.getInstance(getProject()).getAnyByFQN(content)) {
-                targets.add(phpClass);
-            }
+            final Collection<PsiElement> targets = new ArrayList<PsiElement>();
+
+            ControllerCollector.visitController(getProject(), new ControllerCollector.ControllerVisitor() {
+                @Override
+                public void visit(@NotNull PhpClass phpClass, @NotNull String name) {
+                    if(name.equals(content)) {
+                        targets.add(phpClass);
+                    }
+                }
+            });
 
             return targets;
 

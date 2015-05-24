@@ -19,7 +19,7 @@ import java.util.HashSet;
  */
 public class ControllerCollector {
 
-    public static void visitController(final Project project, ControllerVisitor visitor) {
+    public static void visitControllerActions(final Project project, ControllerActionVisitor visitor) {
 
         Collection<PhpClass> allSubclasses = new HashSet<PhpClass>() {{
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Routing\\Controller"));
@@ -78,8 +78,42 @@ public class ControllerCollector {
         return "\\App\\Http\\Controllers";
     }
 
-    public static interface ControllerVisitor {
+    public static interface ControllerActionVisitor {
         public void visit(@NotNull Method method, String name);
+    }
+
+    public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor) {
+
+        Collection<PhpClass> allSubclasses = new HashSet<PhpClass>() {{
+            addAll(PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Routing\\Controller"));
+            addAll(PhpIndex.getInstance(project).getAllSubclasses("\\App\\Http\\Controllers\\Controller"));
+        }};
+
+        String ns = getDefaultNamespace(project);
+
+        for(PhpClass phpClass: allSubclasses) {
+
+            if(phpClass.isAbstract()) {
+                continue;
+            }
+
+            String className = phpClass.getPresentableFQN();
+            if(className == null) {
+                continue;
+            }
+
+            if(className.startsWith(ns + "\\")) {
+                className = className.substring(ns.length() + 1);
+            }
+
+            if(StringUtils.isNotBlank(className)) {
+                visitor.visit(phpClass, className);
+            }
+        }
+    }
+
+    public static interface ControllerVisitor {
+        public void visit(@NotNull PhpClass phpClass, @NotNull String name);
     }
 
 }
