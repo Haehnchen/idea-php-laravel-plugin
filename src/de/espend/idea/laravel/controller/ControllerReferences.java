@@ -39,6 +39,10 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "any"),
     };
 
+    private static MethodMatcher.CallToSignature[] CONTROLLERS = new MethodMatcher.CallToSignature[] {
+            new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "controllers"),
+    };
+
     private static MethodMatcher.CallToSignature[] ACTIONS = new MethodMatcher.CallToSignature[] {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Redirector", "action"),
         new MethodMatcher.CallToSignature("\\Illuminate\\Html\\HtmlBuilder", "linkAction"),
@@ -128,6 +132,60 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                                     return arrayCreation;
                                 }
                             }
+                        }
+                    }
+                }
+
+                return null;
+            }
+
+        });
+
+
+        /*
+        Route::controllers([
+	        'auth' => 'Auth\AuthController',
+	        'password' => 'Auth\PasswordController',
+        ]);
+        */
+        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
+            @Nullable
+            @Override
+            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
+
+                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                    return null;
+                }
+
+                PsiElement parent = psiElement.getParent();
+                if(parent == null) {
+                    return null;
+                }
+
+                PsiElement controllerParameter = getArrayMethodParameter(parent);
+                if(controllerParameter == null) {
+                    return null;
+                }
+
+                MethodMatcher.MethodMatchParameter matchedSignatureWithDepth = MethodMatcher.getMatchedSignatureWithDepth(controllerParameter, CONTROLLERS);
+                if(matchedSignatureWithDepth == null) {
+                    return null;
+                }
+
+                return new ControllerResource(parent);
+            }
+
+            @Nullable
+            private PsiElement getArrayMethodParameter(@NotNull PsiElement psiElement) {
+
+                PsiElement arrayValue = psiElement.getParent();
+                if (arrayValue.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE) {
+                    PsiElement arrayHashElement = arrayValue.getParent();
+                    if (arrayHashElement instanceof ArrayHashElement) {
+
+                        PsiElement arrayCreation = arrayHashElement.getParent();
+                        if (arrayCreation instanceof ArrayCreationExpression) {
+                            return arrayCreation;
                         }
                     }
                 }
