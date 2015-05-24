@@ -41,6 +41,10 @@ public class ControllerReferences implements GotoCompletionRegistrar {
             new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "controllers"),
     };
 
+    private static MethodMatcher.CallToSignature[] CONTROLLER = new MethodMatcher.CallToSignature[] {
+            new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "controller"),
+    };
+
     private static MethodMatcher.CallToSignature[] ACTIONS = new MethodMatcher.CallToSignature[] {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Redirector", "action"),
         new MethodMatcher.CallToSignature("\\Illuminate\\Html\\HtmlBuilder", "linkAction"),
@@ -192,6 +196,33 @@ public class ControllerReferences implements GotoCompletionRegistrar {
             }
 
         });
+
+        /**
+         * Route::controller('users', 'UserController');
+         */
+        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
+            @Nullable
+            @Override
+            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
+
+                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                    return null;
+                }
+
+                PsiElement parent = psiElement.getParent();
+                if(parent == null) {
+                    return null;
+                }
+                MethodMatcher.MethodMatchParameter matchedSignatureWithDepth = MethodMatcher.getMatchedSignatureWithDepth(parent, CONTROLLER, 1);
+                if(matchedSignatureWithDepth == null) {
+                    return null;
+                }
+
+                return new ControllerResource(parent);
+            }
+
+        });
+
     }
 
     private class ControllerRoute extends GotoCompletionProvider {
