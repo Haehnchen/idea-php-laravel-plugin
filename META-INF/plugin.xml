@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.7.2</version>
+  <version>0.8</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -43,6 +43,13 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.8</h2>
+    <ul>
+        <li>Fix handling of namespace controller classes <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/31">#31</a></li>
+        <li>Add "uses" route references</li>
+        <li>Add references for "Route::controller" controller names</li>
+   </ul>
 
     <h2>0.7.2</h2>
     <ul>

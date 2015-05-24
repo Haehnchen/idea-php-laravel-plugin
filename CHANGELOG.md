@@ -1,3 +1,23 @@
+## 0.9
+- Fix handling of namespace controller classes #31
+- Add "uses" route references
+- Add references for "Route::controller" controller names
+
+## 0.7.1.2
+- Template navigation improvements, also twig support for view render in php
+
+## 0.7.1
+- Fix multiple class resolve
+- Fix non namespaces action completion #11
+- Add new Laravel5 view resources path
+
+## 0.7
+- Add template namespace support #9
+- Add support views() and config() of Laravel5
+- Allow multiple template path and add Laravel4 and 5 default paths
+- Add index for templates in php files and provide linemarker #15
+- Enable better @include and @extends template navigation handling for the new features
+
 ## 0.6
 - Fix "SqlStringLiteralExpression" import for popovers
 - Add blade yield index and refactoring all other index element walkers
