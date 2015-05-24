@@ -5,9 +5,8 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.php.PhpIndex;
-import com.jetbrains.php.lang.psi.elements.Method;
-import com.jetbrains.php.lang.psi.elements.PhpClass;
-import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
+import com.jetbrains.php.lang.parser.PhpElementTypes;
+import com.jetbrains.php.lang.psi.elements.*;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.util.PsiElementUtils;
@@ -101,9 +100,41 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                     return new ControllerRoute(parent);
                 }
 
+                /*
+                Route::get('user/profile', ['uses' => 'UserController@showProfile']);
+                */
+                PsiElement uses = getUsesArrayMethodParameter(parent);
+                if (uses != null && MethodMatcher.getMatchedSignatureWithDepth(uses, ROUTE, 1) != null) {
+                    return new ControllerRoute(parent);
+                }
+
                 return null;
 
             }
+
+            @Nullable
+            private PsiElement getUsesArrayMethodParameter(@NotNull PsiElement psiElement) {
+
+                PsiElement arrayValue = psiElement.getParent();
+                if(arrayValue.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE) {
+                    PsiElement arrayHashElement = arrayValue.getParent();
+                    if(arrayHashElement instanceof ArrayHashElement) {
+                        PhpPsiElement key = ((ArrayHashElement) arrayHashElement).getKey();
+                        if(key instanceof StringLiteralExpression) {
+                            String contents = ((StringLiteralExpression) key).getContents();
+                            if(contents.equals("uses")) {
+                                PsiElement arrayCreation = arrayHashElement.getParent();
+                                if(arrayCreation instanceof ArrayCreationExpression) {
+                                    return arrayCreation;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return null;
+            }
+
         });
     }
 
