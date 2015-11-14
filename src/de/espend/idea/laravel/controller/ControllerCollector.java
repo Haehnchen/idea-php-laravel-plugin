@@ -58,8 +58,11 @@ public class ControllerCollector {
     @NotNull
     public static String getDefaultNamespace(@NotNull Project project) {
 
-        PhpClass providerPhpClass = PhpElementsUtil.getClassInterface(project, "\\App\\Providers\\RouteServiceProvider");
-        if(providerPhpClass != null) {
+        for (PhpClass providerPhpClass: PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Support\\ServiceProvider")) {
+            if(!"RouteServiceProvider".equals(providerPhpClass.getName())) {
+                continue;
+            }
+
             Field namespace = providerPhpClass.findOwnFieldByName("namespace", false);
             if(namespace != null) {
                 PsiElement defaultValue = namespace.getDefaultValue();
