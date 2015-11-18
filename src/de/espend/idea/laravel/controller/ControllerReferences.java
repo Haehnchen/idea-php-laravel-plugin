@@ -1,5 +1,6 @@
 package de.espend.idea.laravel.controller;
 
+import com.google.common.collect.Lists;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
@@ -54,6 +55,10 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "resource"),
     };
 
+    private static MethodMatcher.CallToSignature[] ROUTE_GROUP = new MethodMatcher.CallToSignature[] {
+            new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "group"),
+    };
+
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
         registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
@@ -67,7 +72,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
                 PsiElement parent = psiElement.getParent();
                 if(parent != null && MethodMatcher.getMatchedSignatureWithDepth(parent, ROUTE_RESOURCE, 1) != null) {
-                    return new ControllerResource(parent);
+                    return createResourceCompletion(parent);
                 }
 
                 return null;
@@ -96,14 +101,14 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 }*/
 
                 if (MethodMatcher.getMatchedSignatureWithDepth(parent, ROUTE, 1) != null) {
-                    return new ControllerRoute(parent);
+                    return createRouteCompletion(parent);
                 }
 
                 if (MethodMatcher.getMatchedSignatureWithDepth(parent, ACTIONS) != null ||
                     PhpElementsUtil.isFunctionReference(psiElement.getParent(), 0, "link_to_action", "action")
                     ) {
 
-                    return new ControllerRoute(parent);
+                    return createRouteCompletion(parent);
                 }
 
                 /*
@@ -111,7 +116,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 */
                 PsiElement uses = getUsesArrayMethodParameter(parent);
                 if (uses != null && MethodMatcher.getMatchedSignatureWithDepth(uses, ROUTE, 1) != null) {
-                    return new ControllerRoute(parent);
+                    return createRouteCompletion(parent);
                 }
 
                 return null;
@@ -174,7 +179,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                     return null;
                 }
 
-                return new ControllerResource(parent);
+                return createResourceCompletion(parent);
             }
 
             @Nullable
@@ -218,17 +223,81 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                     return null;
                 }
 
-                return new ControllerResource(parent);
+                return createResourceCompletion(parent);
             }
 
         });
 
     }
 
+    private ControllerResource createResourceCompletion(PsiElement element) {
+        if ("routes.php".equals(element.getContainingFile().getName())) {
+            return new ControllerResource(element, getControllerGroupPrefix(element));
+        }
+
+        return new ControllerResource(element);
+    }
+
+    private ControllerRoute createRouteCompletion(PsiElement element) {
+        if ("routes.php".equals(element.getContainingFile().getName())) {
+            return new ControllerRoute(element, getControllerGroupPrefix(element));
+        }
+
+        return new ControllerRoute(element);
+    }
+
+    @NotNull
+    private String getControllerGroupPrefix(PsiElement element) {
+        try {
+            PsiElement possibleGroup = element;
+
+            ArrayList<String> groupNamespaces = new ArrayList<>();
+
+            while (possibleGroup != null) {
+                if (MethodMatcher.getMatchedSignatureWithDepth(possibleGroup, ROUTE_GROUP, 1) != null) {
+                    PsiElement possibleArrayCreation = possibleGroup.getPrevSibling();
+                    while (possibleArrayCreation != null) {
+                        if (possibleArrayCreation instanceof ArrayCreationExpression) {
+                            for (ArrayHashElement hashElement : ((ArrayCreationExpression) possibleArrayCreation).getHashElements()) {
+                                if (hashElement.getKey() instanceof StringLiteralExpression) {
+                                    if ("namespace".equals(((StringLiteralExpression) hashElement.getKey()).getContents())) {
+                                        if (hashElement.getValue() instanceof StringLiteralExpression) {
+                                            groupNamespaces.add(((StringLiteralExpression) hashElement.getValue()).getContents());
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+
+                        possibleArrayCreation = possibleArrayCreation.getPrevSibling();
+                    }
+                }
+
+                possibleGroup = possibleGroup.getParent();
+            }
+
+            return String.join("\\", Lists.reverse(groupNamespaces));
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     private class ControllerRoute extends GotoCompletionProvider {
+
+        private String prefix;
 
         public ControllerRoute(PsiElement element) {
             super(element);
+
+            this.prefix = "";
+        }
+
+        public ControllerRoute(PsiElement element, String prefix) {
+            super(element);
+
+            this.prefix = prefix;
         }
 
         @NotNull
@@ -241,7 +310,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 public void visit(@NotNull Method method, String name) {
                     lookupElements.add(LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE));
                 }
-            });
+            }, prefix);
 
             return lookupElements;
         }
@@ -265,7 +334,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                     }
 
                 }
-            });
+            }, prefix);
 
             return targets;
 
@@ -274,8 +343,18 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
     private class ControllerResource extends GotoCompletionProvider {
 
+        private String prefix;
+
         public ControllerResource(PsiElement element) {
             super(element);
+
+            this.prefix = "";
+        }
+
+        public ControllerResource(PsiElement element, String prefix) {
+            super(element);
+
+            this.prefix = prefix;
         }
 
         @NotNull
@@ -289,7 +368,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 public void visit(@NotNull PhpClass method, @NotNull String name) {
                     lookupElements.add(LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE));
                 }
-            });
+            }, prefix);
 
             return lookupElements;
         }
@@ -312,7 +391,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                         targets.add(phpClass);
                     }
                 }
-            });
+            }, prefix);
 
             return targets;
 
