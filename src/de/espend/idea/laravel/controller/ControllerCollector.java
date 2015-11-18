@@ -19,7 +19,7 @@ import java.util.HashSet;
  */
 public class ControllerCollector {
 
-    public static void visitControllerActions(final Project project, ControllerActionVisitor visitor) {
+    public static void visitControllerActions(final Project project, ControllerActionVisitor visitor, String prefix) {
 
         Collection<PhpClass> allSubclasses = new HashSet<PhpClass>() {{
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Routing\\Controller"));
@@ -27,6 +27,7 @@ public class ControllerCollector {
         }};
 
         String ns = getDefaultNamespace(project);
+        String nsWithPrefix = getDefaultNamespace(project) + (prefix.isEmpty() ? "" : "\\" + prefix);
 
         for(PhpClass phpClass: allSubclasses) {
             if(!phpClass.isAbstract()) {
@@ -38,7 +39,9 @@ public class ControllerCollector {
                             PhpClass phpTrait = method.getContainingClass();
                             if(phpTrait == null || !("ValidatesRequests".equals(phpTrait.getName()) || "DispatchesCommands".equals(phpTrait.getName()) || "Controller".equals(phpTrait.getName()))) {
 
-                                if(className.startsWith(ns + "\\")) {
+                                if(className.startsWith(nsWithPrefix + "\\")) {
+                                    className = className.substring(nsWithPrefix.length() + 1);
+                                } else if(className.startsWith(ns + "\\")) {
                                     className = className.substring(ns.length() + 1);
                                 }
 
@@ -88,7 +91,7 @@ public class ControllerCollector {
         void visit(@NotNull Method method, String name);
     }
 
-    public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor) {
+    public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor, String prefix) {
 
         Collection<PhpClass> allSubclasses = new HashSet<PhpClass>() {{
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Routing\\Controller"));
@@ -96,6 +99,7 @@ public class ControllerCollector {
         }};
 
         String ns = getDefaultNamespace(project);
+        String nsWithPrefix = getDefaultNamespace(project) + (prefix.isEmpty() ? "" : "\\" + prefix);
 
         for(PhpClass phpClass: allSubclasses) {
 
@@ -108,7 +112,9 @@ public class ControllerCollector {
                 continue;
             }
 
-            if(className.startsWith(ns + "\\")) {
+            if(className.startsWith(nsWithPrefix + "\\")) {
+                className = className.substring(nsWithPrefix.length() + 1);
+            } else if(className.startsWith(ns + "\\")) {
                 className = className.substring(ns.length() + 1);
             }
 
