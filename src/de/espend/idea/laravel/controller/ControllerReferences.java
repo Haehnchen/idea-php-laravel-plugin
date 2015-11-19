@@ -5,6 +5,7 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.psi.elements.*;
 import de.espend.idea.laravel.LaravelIcons;
@@ -246,41 +247,38 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         return new ControllerRoute(element);
     }
 
-    @NotNull
+    @Nullable
     private String getControllerGroupPrefix(PsiElement element) {
-        try {
-            PsiElement possibleGroup = element;
 
-            ArrayList<String> groupNamespaces = new ArrayList<>();
+        ArrayList<String> groupNamespaces = new ArrayList<>();
 
-            while (possibleGroup != null) {
-                if (MethodMatcher.getMatchedSignatureWithDepth(possibleGroup, ROUTE_GROUP, 1) != null) {
-                    PsiElement possibleArrayCreation = possibleGroup.getPrevSibling();
-                    while (possibleArrayCreation != null) {
-                        if (possibleArrayCreation instanceof ArrayCreationExpression) {
-                            for (ArrayHashElement hashElement : ((ArrayCreationExpression) possibleArrayCreation).getHashElements()) {
-                                if (hashElement.getKey() instanceof StringLiteralExpression) {
-                                    if ("namespace".equals(((StringLiteralExpression) hashElement.getKey()).getContents())) {
-                                        if (hashElement.getValue() instanceof StringLiteralExpression) {
-                                            groupNamespaces.add(((StringLiteralExpression) hashElement.getValue()).getContents());
-                                        }
-                                        break;
-                                    }
-                                }
+        PsiElement routeGroup = PsiTreeUtil.findFirstParent(element, true,
+                psiElement -> MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null);
+
+        while (routeGroup != null) {
+            ArrayCreationExpression arrayCreation = PsiTreeUtil.getChildOfType(routeGroup.getParent(), ArrayCreationExpression.class);
+
+            if (arrayCreation != null) {
+                for (ArrayHashElement hashElement : arrayCreation.getHashElements()) {
+                    if (hashElement.getKey() instanceof StringLiteralExpression) {
+                        if ("namespace".equals(((StringLiteralExpression) hashElement.getKey()).getContents())) {
+                            if (hashElement.getValue() instanceof StringLiteralExpression) {
+                                groupNamespaces.add(((StringLiteralExpression) hashElement.getValue()).getContents());
                             }
                             break;
                         }
-
-                        possibleArrayCreation = possibleArrayCreation.getPrevSibling();
                     }
                 }
-
-                possibleGroup = possibleGroup.getParent();
             }
 
+            routeGroup = PsiTreeUtil.findFirstParent(routeGroup, true,
+                    psiElement -> MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null);
+        }
+
+        if(groupNamespaces.size() > 0) {
             return String.join("\\", Lists.reverse(groupNamespaces));
-        } catch (Exception e) {
-            return "";
+        } else {
+            return null;
         }
     }
 
@@ -290,8 +288,6 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
         public ControllerRoute(PsiElement element) {
             super(element);
-
-            this.prefix = "";
         }
 
         public ControllerRoute(PsiElement element, String prefix) {
@@ -347,8 +343,6 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
         public ControllerResource(PsiElement element) {
             super(element);
-
-            this.prefix = "";
         }
 
         public ControllerResource(PsiElement element, String prefix) {
