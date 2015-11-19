@@ -27,7 +27,7 @@ public class ControllerCollector {
         }};
 
         String ns = getDefaultNamespace(project);
-        String nsWithPrefix = getDefaultNamespace(project) + (prefix.isEmpty() ? "" : "\\" + prefix);
+        String nsWithPrefix = ns + (prefix != null && !prefix.isEmpty() ? "\\" + prefix : "");
 
         for(PhpClass phpClass: allSubclasses) {
             if(!phpClass.isAbstract()) {
@@ -96,7 +96,7 @@ public class ControllerCollector {
         }};
 
         String ns = getDefaultNamespace(project);
-        String nsWithPrefix = getDefaultNamespace(project) + (prefix.isEmpty() ? "" : "\\" + prefix);
+        String nsWithPrefix = ns + (prefix != null && !prefix.isEmpty() ? "\\" + prefix : "");
 
         for(PhpClass phpClass: allSubclasses) {
 
