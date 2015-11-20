@@ -109,7 +109,8 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                     PhpElementsUtil.isFunctionReference(psiElement.getParent(), 0, "link_to_action", "action")
                     ) {
 
-                    return createRouteCompletion(parent);
+                    // Simple completion. Without searching parent Route::group's
+                    return new ControllerRoute(parent);
                 }
 
                 /*
@@ -231,24 +232,16 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
     }
 
-    private ControllerResource createResourceCompletion(PsiElement element) {
-        if ("routes.php".equals(element.getContainingFile().getName())) {
-            return new ControllerResource(element, getControllerGroupPrefix(element));
-        }
-
-        return new ControllerResource(element);
+    private ControllerResource createResourceCompletion(@NotNull PsiElement element) {
+        return new ControllerResource(element, getControllerGroupPrefix(element));
     }
 
-    private ControllerRoute createRouteCompletion(PsiElement element) {
-        if ("routes.php".equals(element.getContainingFile().getName())) {
-            return new ControllerRoute(element, getControllerGroupPrefix(element));
-        }
-
-        return new ControllerRoute(element);
+    private ControllerRoute createRouteCompletion(@NotNull PsiElement element) {
+        return new ControllerRoute(element, getControllerGroupPrefix(element));
     }
 
     @Nullable
-    private String getControllerGroupPrefix(PsiElement element) {
+    private String getControllerGroupPrefix(@NotNull PsiElement element) {
 
         ArrayList<String> groupNamespaces = new ArrayList<>();
 
