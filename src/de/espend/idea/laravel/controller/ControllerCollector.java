@@ -28,8 +28,10 @@ public class ControllerCollector {
         }};
 
         String ns = prefix;
+        boolean prioritised = false;
         if(prefix == null) {
             ns = getDefaultNamespace(project);
+            prioritised = true;
         }
 
         for(PhpClass phpClass: allSubclasses) {
@@ -47,7 +49,7 @@ public class ControllerCollector {
                                 }
 
                                 if(StringUtils.isNotBlank(className)) {
-                                    visitor.visit(method, className + "@" + methodName);
+                                    visitor.visit(method, className + "@" + methodName, prioritised);
                                 }
                             }
                         }
@@ -89,7 +91,7 @@ public class ControllerCollector {
     }
 
     public interface ControllerActionVisitor {
-        void visit(@NotNull Method method, String name);
+        void visit(@NotNull Method method, @NotNull String name, boolean prioritised);
     }
 
     public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor, @Nullable String prefix) {
@@ -100,8 +102,10 @@ public class ControllerCollector {
         }};
 
         String ns = prefix;
+        boolean prioritised = false;
         if(prefix == null) {
             ns = getDefaultNamespace(project);
+            prioritised = true;
         }
 
         for(PhpClass phpClass: allSubclasses) {
@@ -120,13 +124,13 @@ public class ControllerCollector {
             }
 
             if(StringUtils.isNotBlank(className)) {
-                visitor.visit(phpClass, className);
+                visitor.visit(phpClass, className, prioritised);
             }
         }
     }
 
     public interface ControllerVisitor {
-        void visit(@NotNull PhpClass phpClass, @NotNull String name);
+        void visit(@NotNull PhpClass phpClass, @NotNull String name, boolean prioritised);
     }
 
 }
