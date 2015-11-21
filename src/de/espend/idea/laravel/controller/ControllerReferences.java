@@ -1,6 +1,7 @@
 package de.espend.idea.laravel.controller;
 
 import com.google.common.collect.Lists;
+import com.intellij.codeInsight.completion.PrioritizedLookupElement;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
@@ -292,12 +293,19 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         @NotNull
         @Override
         public Collection<LookupElement> getLookupElements() {
+
             final Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
 
             ControllerCollector.visitControllerActions(getProject(), new ControllerCollector.ControllerActionVisitor() {
                 @Override
-                public void visit(@NotNull Method method, String name) {
-                    lookupElements.add(LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE));
+                public void visit(@NotNull Method method, String name, boolean prioritised) {
+                    LookupElement lookupElement = LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE);
+
+                    if(prioritised) {
+                        lookupElement = PrioritizedLookupElement.withPriority(lookupElement, 10);
+                    }
+
+                    lookupElements.add(lookupElement);
                 }
             }, prefix);
 
@@ -317,7 +325,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
             ControllerCollector.visitControllerActions(getProject(), new ControllerCollector.ControllerActionVisitor() {
                 @Override
-                public void visit(@NotNull Method method, String name) {
+                public void visit(@NotNull Method method, String name, boolean prioritised) {
                     if (content.equalsIgnoreCase(name)) {
                         targets.add(method);
                     }
@@ -352,8 +360,14 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
             ControllerCollector.visitController(getProject(), new ControllerCollector.ControllerVisitor() {
                 @Override
-                public void visit(@NotNull PhpClass method, @NotNull String name) {
-                    lookupElements.add(LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE));
+                public void visit(@NotNull PhpClass method, @NotNull String name, boolean prioritised) {
+                    LookupElement lookupElement = LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE);
+
+                    if(prioritised) {
+                        lookupElement = PrioritizedLookupElement.withPriority(lookupElement, 10);
+                    }
+
+                    lookupElements.add(lookupElement);
                 }
             }, prefix);
 
@@ -373,7 +387,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
             ControllerCollector.visitController(getProject(), new ControllerCollector.ControllerVisitor() {
                 @Override
-                public void visit(@NotNull PhpClass phpClass, @NotNull String name) {
+                public void visit(@NotNull PhpClass phpClass, @NotNull String name, boolean prioritised) {
                     if(name.equals(content)) {
                         targets.add(phpClass);
                     }

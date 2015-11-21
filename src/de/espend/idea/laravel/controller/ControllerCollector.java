@@ -39,14 +39,16 @@ public class ControllerCollector {
                             PhpClass phpTrait = method.getContainingClass();
                             if(phpTrait == null || !("ValidatesRequests".equals(phpTrait.getName()) || "DispatchesCommands".equals(phpTrait.getName()) || "Controller".equals(phpTrait.getName()))) {
 
-                                if(className.startsWith(nsWithPrefix + "\\")) {
+                                boolean prioritised = false;
+                                if(prefix != null && className.startsWith(nsWithPrefix + "\\")) {
                                     className = className.substring(nsWithPrefix.length() + 1);
+                                    prioritised = true;
                                 } else if(className.startsWith(ns + "\\")) {
                                     className = className.substring(ns.length() + 1);
                                 }
 
                                 if(StringUtils.isNotBlank(className)) {
-                                    visitor.visit(method, className + "@" + methodName);
+                                    visitor.visit(method, className + "@" + methodName, prioritised);
                                 }
                             }
                         }
@@ -85,7 +87,7 @@ public class ControllerCollector {
     }
 
     public static interface ControllerActionVisitor {
-        public void visit(@NotNull Method method, String name);
+        public void visit(@NotNull Method method, String name, boolean prioritised);
     }
 
     public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor, String prefix) {
@@ -109,20 +111,22 @@ public class ControllerCollector {
                 continue;
             }
 
-            if(className.startsWith(nsWithPrefix + "\\")) {
+            boolean prioritised = false;
+            if(prefix != null && className.startsWith(nsWithPrefix + "\\")) {
                 className = className.substring(nsWithPrefix.length() + 1);
+                prioritised = true;
             } else if(className.startsWith(ns + "\\")) {
                 className = className.substring(ns.length() + 1);
             }
 
             if(StringUtils.isNotBlank(className)) {
-                visitor.visit(phpClass, className);
+                visitor.visit(phpClass, className, prioritised);
             }
         }
     }
 
     public static interface ControllerVisitor {
-        public void visit(@NotNull PhpClass phpClass, @NotNull String name);
+        public void visit(@NotNull PhpClass phpClass, @NotNull String name, boolean prioritised);
     }
 
 }
