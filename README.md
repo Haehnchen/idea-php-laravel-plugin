@@ -16,6 +16,9 @@ Once installed, you must activate per-project by going to `Settings > Laravel Pl
 
 *Note* Currently, you must install and use the [Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) in order for PHPStorm to know how to find the Laravel classes.
 
+## Documentation and tutorials
+ * JetBrains: [Laravel Development using PhpStorm](https://confluence.jetbrains.com/display/PhpStorm/Laravel+Development+using+PhpStorm)
+
 ## Current Features
  * PHP/Route: Controller completion and goto
  * PHP/Route: Router::resource references
