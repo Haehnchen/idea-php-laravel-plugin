@@ -1,5 +1,6 @@
 Laravel Plugin for PHPStorm
 -------------
+[![Build Status](https://travis-ci.org/Haehnchen/idea-php-laravel-plugin.svg?branch=master)](https://travis-ci.org/Haehnchen/idea-php-laravel-plugin)
 [![Version](http://phpstorm.espend.de/badge/7532/version)](https://plugins.jetbrains.com/plugin/7532)
 [![Downloads](http://phpstorm.espend.de/badge/7532/downloads)](https://plugins.jetbrains.com/plugin/7532)
 [![Downloads last month](http://phpstorm.espend.de/badge/7532/last-month)](https://plugins.jetbrains.com/plugin/7532)
