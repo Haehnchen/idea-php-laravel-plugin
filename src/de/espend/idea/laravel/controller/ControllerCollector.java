@@ -56,7 +56,7 @@ public class ControllerCollector {
     }
 
     @NotNull
-    private static String getDefaultNamespace(@NotNull Project project) {
+    public static String getDefaultNamespace(@NotNull Project project) {
 
         PhpClass providerPhpClass = PhpElementsUtil.getClassInterface(project, "\\App\\Providers\\RouteServiceProvider");
         if(providerPhpClass != null) {
@@ -78,8 +78,8 @@ public class ControllerCollector {
         return "\\App\\Http\\Controllers";
     }
 
-    public static interface ControllerActionVisitor {
-        public void visit(@NotNull Method method, String name);
+    public interface ControllerActionVisitor {
+        void visit(@NotNull Method method, String name);
     }
 
     public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor) {
@@ -112,8 +112,8 @@ public class ControllerCollector {
         }
     }
 
-    public static interface ControllerVisitor {
-        public void visit(@NotNull PhpClass phpClass, @NotNull String name);
+    public interface ControllerVisitor {
+        void visit(@NotNull PhpClass phpClass, @NotNull String name);
     }
 
 }
