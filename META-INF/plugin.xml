@@ -128,11 +128,16 @@
 
   <extensions defaultExtensionNs="com.intellij">
 
-      <projectConfigurable instance="de.espend.idea.laravel.ui.LaravelProjectSettingsForm" id="Laravel.SettingsForm" displayName="Laravel Plugin"/>
+      <projectConfigurable instance="de.espend.idea.laravel.ui.LaravelProjectSettingsForm"
+                           id="Laravel.SettingsForm"
+                           displayName="Laravel Plugin"
+                           nonDefaultProject="true"
+              />
 
       <projectConfigurable instance="de.espend.idea.laravel.ui.TemplateSettingsForm"
                            displayName="Views / Template"
                            parentId="Laravel.SettingsForm"
+                           nonDefaultProject="true"
               />
 
 
