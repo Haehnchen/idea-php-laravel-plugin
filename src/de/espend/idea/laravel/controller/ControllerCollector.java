@@ -6,7 +6,7 @@ import com.jetbrains.php.PhpIndex;
 import com.jetbrains.php.lang.psi.elements.Field;
 import com.jetbrains.php.lang.psi.elements.Method;
 import com.jetbrains.php.lang.psi.elements.PhpClass;
-import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
+import de.espend.idea.laravel.LaravelSettings;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -58,23 +58,26 @@ public class ControllerCollector {
     @NotNull
     public static String getDefaultNamespace(@NotNull Project project) {
 
-        for (PhpClass providerPhpClass: PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Support\\ServiceProvider")) {
-            if(!"RouteServiceProvider".equals(providerPhpClass.getName())) {
+        String controllerNamespace = LaravelSettings.getInstance(project).routerNamespace;
+        if(controllerNamespace != null && StringUtils.isNotBlank(controllerNamespace)) {
+            return StringUtils.stripStart(controllerNamespace, "\\");
+        }
+
+        for (PhpClass providerPhpClass: PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Foundation\\Support\\Providers\\RouteServiceProvider")) {
+
+            Field namespace = providerPhpClass.findOwnFieldByName("namespace", false);
+            if(namespace == null) {
                 continue;
             }
 
-            Field namespace = providerPhpClass.findOwnFieldByName("namespace", false);
-            if(namespace != null) {
-                PsiElement defaultValue = namespace.getDefaultValue();
-                if(defaultValue instanceof StringLiteralExpression) {
-                    String contents = ((StringLiteralExpression) defaultValue).getContents();
-                    if(StringUtils.isNotBlank(contents)) {
-                        if(contents.startsWith("\\")) {
-                            contents = contents.substring(1);
-                        }
-                        return contents;
-                    }
-                }
+            PsiElement defaultValue = namespace.getDefaultValue();
+            if(defaultValue == null) {
+                continue;
+            }
+
+            String stringValue = PhpElementsUtil.getStringValue(defaultValue);
+            if(stringValue != null) {
+                return stringValue;
             }
         }
 

@@ -1,5 +1,7 @@
 package de.espend.idea.laravel.tests.controller;
 
+import com.jetbrains.php.lang.PhpFileType;
+import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.controller.ControllerCollector;
 import de.espend.idea.laravel.tests.LaravelLightCodeInsightFixtureTestCase;
 
@@ -22,6 +24,31 @@ public class ControllerCollectorTest extends LaravelLightCodeInsightFixtureTestC
     }
 
     public void testGetDefaultNamespace() {
+        myFixture.configureByText(PhpFileType.INSTANCE, "<?php\n" +
+            "namespace App\\Providers\n" +
+            "{\n" +
+            "    class RouteServiceProvider implements \\Illuminate\\Foundation\\Support\\Providers\\RouteServiceProvider\n" +
+            "    {\n" +
+            "        protected $namespace = 'App\\Http\\Controllers\\Foo';\n" +
+            "    }\n" +
+            "}"
+        );
+
         assertEquals("App\\Http\\Controllers\\Foo", ControllerCollector.getDefaultNamespace(getProject()));
+    }
+
+    public void testGetDefaultNamespaceProvidesFallback() {
+        assertEquals("\\App\\Http\\Controllers", ControllerCollector.getDefaultNamespace(getProject()));
+    }
+
+    public void testGetDefaultNamespaceSettingsWins() {
+        LaravelSettings.getInstance(getProject()).routerNamespace = "\\Foo";
+        assertEquals("Foo", ControllerCollector.getDefaultNamespace(getProject()));
+
+        LaravelSettings.getInstance(getProject()).routerNamespace = "Foo";
+        assertEquals("Foo", ControllerCollector.getDefaultNamespace(getProject()));
+
+        LaravelSettings.getInstance(getProject()).routerNamespace = "";
+        assertEquals("\\App\\Http\\Controllers", ControllerCollector.getDefaultNamespace(getProject()));
     }
 }

@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Providers
+namespace Illuminate\Foundation\Support\Providers
 {
-    class RouteServiceProvider
+    interface RouteServiceProvider
     {
-        protected $namespace = 'App\Http\Controllers\Foo';
     }
 }

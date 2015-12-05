@@ -24,6 +24,7 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
 
     public boolean pluginEnabled = false;
     public boolean useAutoPopup = false;
+    public String routerNamespace;
 
     protected Project project;
 
