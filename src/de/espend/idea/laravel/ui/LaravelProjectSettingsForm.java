@@ -113,9 +113,14 @@ public class LaravelProjectSettingsForm implements Configurable {
                     return; // Ignore but keep the previous path
                 }
 
-                String path = VfsUtil.getRelativePath(selectedFile, projectDirectory, '/');
-                if (null == path) {
-                    path = selectedFile.getPath();
+                String path = selectedFile.getPath();
+
+                // try to build relative path
+                if(projectDirectory != null) {
+                    String relativePath = VfsUtil.getRelativePath(selectedFile, projectDirectory, '/');
+                    if (relativePath != null) {
+                        path = relativePath;
+                    }
                 }
 
                 textField.setText(path);
