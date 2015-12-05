@@ -281,7 +281,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         }
 
         if(groupNamespaces.size() > 0) {
-            return StringUtils.join(Lists.reverse(groupNamespaces), "\\");
+            return StringUtils.stripStart(StringUtils.join(Lists.reverse(groupNamespaces), "\\"), "\\");
         } else {
             return null;
         }

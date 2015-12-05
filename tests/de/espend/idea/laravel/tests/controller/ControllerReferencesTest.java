@@ -67,4 +67,22 @@ public class ControllerReferencesTest extends LaravelLightCodeInsightFixtureTest
             )
         );
     }
+
+    public void testRouteGroupsStartsWithBackslashRemovesFirstChar() {
+        assertCompletionContains(PhpFileType.INSTANCE, "<?php\n" +
+                "Route::group(['namespace' => '\\Foo\\Controllers'], function() {\n" +
+                "    Route::get('/', '<caret>');\n" +
+                "});",
+            "BarController@foo"
+        );
+
+        assertNavigationMatch(PhpFileType.INSTANCE, "<?php\n" +
+                "Route::group(['namespace' => '\\Foo\\Controllers'], function() {\n" +
+                "    Route::get('/', 'BarController@foo<caret>');\n" +
+                "});",
+            PlatformPatterns.psiElement(Method.class).withParent(
+                PlatformPatterns.psiElement(PhpClass.class).withName("BarController")
+            )
+        );
+    }
 }
