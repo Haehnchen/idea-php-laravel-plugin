@@ -8,6 +8,7 @@ import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.lang.PhpFileType;
 import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.view.dict.TemplatePath;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -80,8 +81,9 @@ public class ViewCollector {
                     filename = filename.substring(0, filename.length() - ".html.twig".length());
                 }
 
-                if(templatePath.getNamespace() != null) {
-                    visitor.visit(virtualFile, templatePath.getNamespace() + "::" + filename);
+                String namespace = templatePath.getNamespace();
+                if(namespace != null && StringUtils.isNotBlank(namespace)) {
+                    visitor.visit(virtualFile, namespace + "::" + filename);
                 } else {
                     visitor.visit(virtualFile, filename);
                 }
