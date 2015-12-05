@@ -3,6 +3,7 @@ package de.espend.idea.laravel.controller;
 import com.google.common.collect.Lists;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.openapi.util.Condition;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -23,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
@@ -243,10 +245,14 @@ public class ControllerReferences implements GotoCompletionRegistrar {
     @Nullable
     private String getControllerGroupPrefix(@NotNull PsiElement element) {
 
-        ArrayList<String> groupNamespaces = new ArrayList<>();
+        List<String> groupNamespaces = new ArrayList<String>();
 
-        PsiElement routeGroup = PsiTreeUtil.findFirstParent(element, true,
-                psiElement -> MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null);
+        PsiElement routeGroup = PsiTreeUtil.findFirstParent(element, true, new Condition<PsiElement>() {
+            @Override
+            public boolean value(PsiElement psiElement) {
+                return MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null;
+            }
+        });
 
         while (routeGroup != null) {
             ArrayCreationExpression arrayCreation = PsiTreeUtil.getChildOfType(routeGroup.getParent(), ArrayCreationExpression.class);
@@ -264,12 +270,17 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 }
             }
 
-            routeGroup = PsiTreeUtil.findFirstParent(routeGroup, true,
-                    psiElement -> MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null);
+
+            routeGroup = PsiTreeUtil.findFirstParent(routeGroup, true, new Condition<PsiElement>() {
+                @Override
+                public boolean value(PsiElement psiElement) {
+                    return MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null;
+                }
+            });
         }
 
         if(groupNamespaces.size() > 0) {
-            return String.join("\\", Lists.reverse(groupNamespaces));
+            return StringUtils.join(Lists.reverse(groupNamespaces), "\\");
         } else {
             return null;
         }

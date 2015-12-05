@@ -38,7 +38,7 @@ public class ControllerCollectorTest extends LaravelLightCodeInsightFixtureTestC
     }
 
     public void testGetDefaultNamespaceProvidesFallback() {
-        assertEquals("\\App\\Http\\Controllers", ControllerCollector.getDefaultNamespace(getProject()));
+        assertEquals("App\\Http\\Controllers", ControllerCollector.getDefaultNamespace(getProject()));
     }
 
     public void testGetDefaultNamespaceSettingsWins() {
@@ -49,6 +49,6 @@ public class ControllerCollectorTest extends LaravelLightCodeInsightFixtureTestC
         assertEquals("Foo", ControllerCollector.getDefaultNamespace(getProject()));
 
         LaravelSettings.getInstance(getProject()).routerNamespace = "";
-        assertEquals("\\App\\Http\\Controllers", ControllerCollector.getDefaultNamespace(getProject()));
+        assertEquals("App\\Http\\Controllers", ControllerCollector.getDefaultNamespace(getProject()));
     }
 }

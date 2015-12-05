@@ -10,6 +10,7 @@ import de.espend.idea.laravel.LaravelSettings;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,15 +20,17 @@ import java.util.HashSet;
  */
 public class ControllerCollector {
 
-    public static void visitControllerActions(final Project project, ControllerActionVisitor visitor, String prefix) {
+    public static void visitControllerActions(@NotNull final Project project, @NotNull ControllerActionVisitor visitor, @Nullable String prefix) {
 
         Collection<PhpClass> allSubclasses = new HashSet<PhpClass>() {{
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Routing\\Controller"));
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\App\\Http\\Controllers\\Controller"));
         }};
 
-        String ns = getDefaultNamespace(project);
-        String nsWithPrefix = ns + (prefix != null && !prefix.isEmpty() ? "\\" + prefix : "");
+        String ns = prefix;
+        if(prefix == null) {
+            ns = getDefaultNamespace(project);
+        }
 
         for(PhpClass phpClass: allSubclasses) {
             if(!phpClass.isAbstract()) {
@@ -39,9 +42,7 @@ public class ControllerCollector {
                             PhpClass phpTrait = method.getContainingClass();
                             if(phpTrait == null || !("ValidatesRequests".equals(phpTrait.getName()) || "DispatchesCommands".equals(phpTrait.getName()) || "Controller".equals(phpTrait.getName()))) {
 
-                                if(className.startsWith(nsWithPrefix + "\\")) {
-                                    className = className.substring(nsWithPrefix.length() + 1);
-                                } else if(className.startsWith(ns + "\\")) {
+                                if(className.startsWith(ns + "\\")) {
                                     className = className.substring(ns.length() + 1);
                                 }
 
@@ -80,26 +81,28 @@ public class ControllerCollector {
 
             String stringValue = PhpElementsUtil.getStringValue(defaultValue);
             if(stringValue != null) {
-                return stringValue;
+                return StringUtils.stripStart(stringValue, "\\");
             }
         }
 
-        return "\\App\\Http\\Controllers";
+        return "App\\Http\\Controllers";
     }
 
     public interface ControllerActionVisitor {
         void visit(@NotNull Method method, String name);
     }
 
-    public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor, String prefix) {
+    public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor, @Nullable String prefix) {
 
         Collection<PhpClass> allSubclasses = new HashSet<PhpClass>() {{
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Routing\\Controller"));
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\App\\Http\\Controllers\\Controller"));
         }};
 
-        String ns = getDefaultNamespace(project);
-        String nsWithPrefix = ns + (prefix != null && !prefix.isEmpty() ? "\\" + prefix : "");
+        String ns = prefix;
+        if(prefix == null) {
+            ns = getDefaultNamespace(project);
+        }
 
         for(PhpClass phpClass: allSubclasses) {
 
@@ -112,9 +115,7 @@ public class ControllerCollector {
                 continue;
             }
 
-            if(className.startsWith(nsWithPrefix + "\\")) {
-                className = className.substring(nsWithPrefix.length() + 1);
-            } else if(className.startsWith(ns + "\\")) {
+            if(className.startsWith(ns + "\\")) {
                 className = className.substring(ns.length() + 1);
             }
 
