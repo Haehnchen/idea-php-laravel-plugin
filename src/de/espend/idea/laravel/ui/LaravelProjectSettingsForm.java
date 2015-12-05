@@ -34,6 +34,7 @@ public class LaravelProjectSettingsForm implements Configurable {
     private JCheckBox enabled;
     private JPanel panel1;
     private TextFieldWithBrowseButton textViewsPath;
+    private JButton buttonViewsPathReset;
     private JCheckBox useAutoPopopForCompletionCheckBox;
     private JTextField textRouterNamespace;
 
