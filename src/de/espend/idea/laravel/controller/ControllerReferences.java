@@ -309,7 +309,16 @@ public class ControllerReferences implements GotoCompletionRegistrar {
             ControllerCollector.visitControllerActions(getProject(), new ControllerCollector.ControllerActionVisitor() {
                 @Override
                 public void visit(@NotNull Method method, @NotNull String name, boolean prioritised) {
-                    LookupElement lookupElement = LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE);
+
+                    String typeText = null;
+                    PhpClass containingClass = method.getContainingClass();
+                    if(containingClass != null) {
+                        typeText = containingClass.getPresentableFQN();
+                    }
+
+                    LookupElement lookupElement = LookupElementBuilder.create(name)
+                        .withIcon(LaravelIcons.ROUTE)
+                        .withTypeText(typeText, true);
 
                     if(prioritised) {
                         lookupElement = PrioritizedLookupElement.withPriority(lookupElement, 10);
