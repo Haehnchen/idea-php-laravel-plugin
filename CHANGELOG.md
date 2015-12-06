@@ -1,4 +1,16 @@
 ## 0.9
+- Better default router namespace detection; also add settings for customize #35
+- Non-standard root namespaces support @adelf
+- Fixing npe in ControllerReferences #40
+- Route::group support @adelf #8
+- Prioritized controller completion inside groups @adelf
+- fix navigation to view in custom view folder without namespace problem #30
+- Only try optional view path on settings form #24
+- Add support for naming routes #21, #34
+- Add blade @lang directive support #19
+- Add service dic support #42
+
+## 0.8
 - Fix handling of namespace controller classes #31
 - Add "uses" route references
 - Add references for "Route::controller" controller names

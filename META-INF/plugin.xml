@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.8</version>
+  <version>0.9</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -23,19 +23,22 @@
       <ul>
         <li>PHP/Route: Controller completion and goto</li>
         <li>PHP/Route: Router::resource references</li>
+        <li>PHP/Route: detect route names on "as" key</li>
         <li>PHP/View: completion and goto for view templates</li>
         <li>PHP/Config: "providers" class array completion</li>
         <li>PHP/Config: Config key indexer, completion and goto</li>
         <li>PHP/Translation: Translation key indexer, completion and goto</li>
+        <li>PHP: Service dic</li>
         <li>Blade: extends, include and Php usage linemarker</li>
         <li>Blade: section, yield overwrite and implements linemarker</li>
         <li>Blade: Improvements in blade template name completion and navigation</li>
+        <li>Blade: trans directive</li>
         <li>Template: Index for Php usage</li>
       </ul>
 
       <h2>Todo</h2>
       <ul>
-        <li>Try to remove "IDE Helper Generator" deps</li>
+        <li>Try to remove "IDE Helper Generator" deps; mostly done :)</li>
         <li>Require Symfony2 Plugin, to reduce duplicate code</li>
         <li>Support trans/transChoice translation syntax</li>
       </ul>
@@ -43,6 +46,20 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.9</h2>
+    <ul>
+        <li>Better default router namespace detection; also add settings for customize <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/35">#35</a></li>
+        <li>Non-standard root namespaces support @adelf</li>
+        <li>Fixing npe in ControllerReferences <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/40">#40</a></li>
+        <li>Route::group support @adelf <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/8">#8</a></li>
+        <li>Prioritized controller completion inside groups @adelf</li>
+        <li>fix navigation to view in custom view folder without namespace problem <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/30">#30</a></li>
+        <li>Only try optional view path on settings form <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/24">#24</a></li>
+        <li>Add support for naming routes <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/21">#21</a>, <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/34">#34</a></li>
+        <li>Add blade @lang directive support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/19">#19</a></li>
+        <li>Add service dic support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/42">#42</a></li>
+   </ul>
 
     <h2>0.8</h2>
     <ul>
