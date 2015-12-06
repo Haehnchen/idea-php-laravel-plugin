@@ -72,7 +72,7 @@ public class DicCompletionRegistrar implements GotoCompletionRegistrar {
         public Collection<LookupElement> getLookupElements() {
             Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
             for (Map.Entry<String, Collection<String>> entry : LaravelDicUtil.getDicMap(getProject()).entrySet()) {
-                lookupElements.add(LookupElementBuilder.create(entry.getKey()).withIcon(LaravelIcons.LARAVEL).withTypeText(StringUtils.join(entry.getValue(), " ,"), true));
+                lookupElements.add(LookupElementBuilder.create(entry.getKey()).withIcon(LaravelIcons.LARAVEL).withTypeText(StringUtils.join(entry.getValue(), ", "), true));
             }
 
             return lookupElements;

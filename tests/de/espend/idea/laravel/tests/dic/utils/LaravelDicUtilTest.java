@@ -1,5 +1,8 @@
 package de.espend.idea.laravel.tests.dic.utils;
 
+import com.intellij.patterns.PlatformPatterns;
+import com.intellij.util.containers.ContainerUtil;
+import com.jetbrains.php.lang.psi.elements.PhpClass;
 import de.espend.idea.laravel.dic.utils.LaravelDicUtil;
 import de.espend.idea.laravel.tests.LaravelLightCodeInsightFixtureTestCase;
 
@@ -21,6 +24,7 @@ public class LaravelDicUtilTest extends LaravelLightCodeInsightFixtureTestCase {
         super.setUp();
 
         myFixture.copyFileToProject("Application.php");
+        myFixture.copyFileToProject("ServiceProvider.php");
     }
 
     protected String getTestDataPath() {
@@ -54,6 +58,42 @@ public class LaravelDicUtilTest extends LaravelLightCodeInsightFixtureTestCase {
             map.get("blade.compiler")
         );
 
+        assertContainsElements(
+            Collections.singletonList("Illuminate\\Auth\\Passwords\\TokenRepositoryInterface"),
+            map.get("auth.password.tokens")
+        );
+
         assertSize(0, map.get("blade.compiler_foo"));
+    }
+
+    /**
+     * @see de.espend.idea.laravel.dic.utils.LaravelDicUtil#getServiceProviderMap
+     */
+    public void testGetServiceProviderMap() {
+        Map<String, Collection<String>> map = LaravelDicUtil.getServiceProviderMap(getProject());
+        assertContainsElements(map.get("foo"), "DateTime");
+        assertContainsElements(map.get("foo1"), "DateTime");
+    }
+
+    /**
+     * @see de.espend.idea.laravel.dic.utils.LaravelDicUtil#getDicMap
+     */
+    public void testGetDicMap() {
+        Map<String, Collection<String>> map = LaravelDicUtil.getDicMap(getProject());
+        assertContainsElements(map.get("foo"), "DateTime");
+        assertContainsElements(map.get("blade.compiler"), "Illuminate\\View\\Compilers\\BladeCompiler");
+    }
+
+    /**
+     * @see de.espend.idea.laravel.dic.utils.LaravelDicUtil#getDicTargets
+     */
+    public void testGetDicTargets() {
+        PlatformPatterns.psiElement(PhpClass.class).withName("DateTime").accepts(
+            ContainerUtil.getFirstItem(LaravelDicUtil.getDicTargets(getProject(), "foo"))
+        );
+
+        PlatformPatterns.psiElement(PhpClass.class).withName("DateTime").accepts(
+            ContainerUtil.getFirstItem(LaravelDicUtil.getDicTargets(getProject(), "foo1"))
+        );
     }
 }

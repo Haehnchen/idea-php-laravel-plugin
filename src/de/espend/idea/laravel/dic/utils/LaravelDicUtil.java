@@ -5,6 +5,10 @@ import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiRecursiveElementVisitor;
 import com.intellij.psi.util.*;
+import com.intellij.util.Function;
+import com.intellij.util.containers.ContainerUtil;
+import com.jetbrains.php.PhpIndex;
+import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.psi.elements.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +32,19 @@ public class LaravelDicUtil {
                 @Nullable
                 @Override
                 public Result<Map<String, Collection<String>>> compute() {
-                    return Result.create(getCoreAliasMap(project), PsiModificationTracker.MODIFICATION_COUNT);
+                    Map<String, Collection<String>> coreAliasMap = getCoreAliasMap(project);
+
+                    for (Map.Entry<String, Collection<String>> entry : getServiceProviderMap(project).entrySet()) {
+                        if(coreAliasMap.containsKey(entry.getKey())) {
+                            coreAliasMap.get(entry.getKey()).addAll(entry.getValue());
+                            continue;
+                        }
+
+                        coreAliasMap.put(entry.getKey(), entry.getValue());
+                    }
+
+
+                    return Result.create(coreAliasMap, PsiModificationTracker.MODIFICATION_COUNT);
                 }
             }, false);
 
@@ -38,7 +54,7 @@ public class LaravelDicUtil {
         return cache.getValue();
     }
 
-    synchronized public static Collection<PsiElement> getDicTargets(@NotNull final Project project, @NotNull String dicName) {
+    public static Collection<PsiElement> getDicTargets(@NotNull final Project project, @NotNull String dicName) {
         Map<String, Collection<String>> dicMap = getDicMap(project);
         if(!dicMap.containsKey(dicName)) {
             return Collections.emptyList();
@@ -64,10 +80,15 @@ public class LaravelDicUtil {
                 if(value instanceof StringLiteralExpression) {
                     String contents = ((StringLiteralExpression) value).getContents();
                     if(StringUtils.isNotBlank(contents)) {
-                        values.add(contents);
+                        values.add(StringUtils.stripStart(contents, "\\"));
                     }
                 } else if(value instanceof ArrayCreationExpression) {
-                    values.addAll(PhpElementsUtil.getArrayValuesAsString((ArrayCreationExpression) value));
+                    values.addAll(ContainerUtil.map(PhpElementsUtil.getArrayValuesAsString((ArrayCreationExpression) value), new Function<String, String>() {
+                        @Override
+                        public String fun(String s) {
+                            return StringUtils.stripStart(s, "\\");
+                        }
+                    }));
                 }
 
                 map.put(keyName, values);
@@ -129,8 +150,81 @@ public class LaravelDicUtil {
         }
     }
 
+    public static Map<String, Collection<String>> getServiceProviderMap(@NotNull Project project) {
+
+        Map<String, Collection<String>> map = new HashMap<String, Collection<String>>();
+
+        for (PhpClass phpClass : PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Support\\ServiceProvider")) {
+
+            Collection<MethodReference> methodReferences = new ArrayList<MethodReference>();
+
+            for (Method method : phpClass.getMethods()) {
+                method.acceptChildren(new AppDicRecursiveElementVisitor(methodReferences));
+            }
+
+            if(methodReferences.size() == 0) {
+                continue;
+            }
+
+            for (MethodReference methodReference : methodReferences) {
+
+                PsiElement[] parameters = methodReference.getParameters();
+                if(parameters.length < 2 || !(parameters[0] instanceof StringLiteralExpression) || parameters[1].getNode().getElementType() != PhpElementTypes.CLOSURE) {
+                    continue;
+                }
+
+                String dicName = ((StringLiteralExpression) parameters[0]).getContents();
+                if(StringUtils.isBlank(dicName)) {
+                    continue;
+                }
+
+                final Set<String> types = new HashSet<String>();
+
+                parameters[1].acceptChildren(new PsiRecursiveElementVisitor() {
+                    @Override
+                    public void visitElement(PsiElement element) {
+                        if(element instanceof PhpReturn) {
+                            PhpPsiElement firstPsiChild = ((PhpReturn) element).getFirstPsiChild();
+                            if(firstPsiChild instanceof PhpTypedElement) {
+                                for (String s : ((PhpTypedElement) firstPsiChild).getType().getTypes()) {
+                                    if(s.startsWith("#")) {
+                                        continue;
+                                    }
+                                    types.add(StringUtils.stripStart(s, "\\"));
+                                }
+                            }
+                        }
+                        super.visitElement(element);
+                    }
+                });
+
+                map.put(dicName, types);
+            }
+
+        }
+
+        return map;
+    }
+
     interface DicAliasVisitor {
         void visit(@NotNull PsiElement value, @NotNull String keyName);
     }
 
+    private static class AppDicRecursiveElementVisitor extends PsiRecursiveElementVisitor {
+
+        private final Collection<MethodReference> methodReferences;
+
+        public AppDicRecursiveElementVisitor(Collection<MethodReference> methodReferences) {
+            this.methodReferences = methodReferences;
+        }
+
+        @Override
+        public void visitElement(PsiElement element) {
+            if(element instanceof MethodReference && "singleton".equals(((MethodReference) element).getName())) {
+                this.methodReferences.add((MethodReference) element);
+            }
+
+            super.visitElement(element);
+        }
+    }
 }
