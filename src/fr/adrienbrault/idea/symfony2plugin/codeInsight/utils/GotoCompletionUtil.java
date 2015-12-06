@@ -6,6 +6,7 @@ import de.espend.idea.laravel.blade.BladeDirectiveReferences;
 import de.espend.idea.laravel.config.AppConfigReferences;
 import de.espend.idea.laravel.config.ProviderGotoCompletion;
 import de.espend.idea.laravel.controller.ControllerReferences;
+import de.espend.idea.laravel.routing.RoutingGotoCompletionRegistrar;
 import de.espend.idea.laravel.translation.TranslationReferences;
 import de.espend.idea.laravel.view.ViewReferences;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
@@ -24,7 +25,8 @@ public class GotoCompletionUtil {
         new ControllerReferences(),
         new AppConfigReferences(),
         new BladeDirectiveReferences(),
-        new TranslationReferences()
+        new TranslationReferences(),
+        new RoutingGotoCompletionRegistrar()
     };
 
     public static Collection<GotoCompletionContributor> getContributors(final PsiElement psiElement) {
