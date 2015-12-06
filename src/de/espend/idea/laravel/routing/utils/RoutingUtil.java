@@ -1,18 +1,19 @@
 package de.espend.idea.laravel.routing.utils;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiRecursiveElementVisitor;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.util.indexing.FileBasedIndex;
+import com.intellij.psi.util.*;
 import com.jetbrains.php.lang.psi.elements.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,6 +25,8 @@ import java.util.Set;
 public class RoutingUtil {
 
     public static final String[] HTTP_METHODS = new String[]{"get", "post", "put", "delete", "patch", "delete", "options", "any"};
+
+    private static final Key<CachedValue<Collection<String>>> ROUTE_NAMES = new Key<CachedValue<Collection<String>>>("LaravelRoutingUtilNames");
 
     public static Collection<PsiElement> getRoutesAsTargets(@NotNull PsiFile psiFile, final @NotNull String routeName) {
         final Set<PsiElement> names = new HashSet<PsiElement>();
@@ -48,12 +51,28 @@ public class RoutingUtil {
         return targets;
     }
 
-    public static Collection<String> getRoutesAsNames(@NotNull Project project) {
-        Collection<String> names = new HashSet<String>();
-        for (PsiFile psiFile : FilenameIndex.getFilesByName(project, "routes.php", GlobalSearchScope.allScope(project))) {
-            names.addAll(getRoutesAsNames(psiFile));
+    public static Collection<String> getRoutesAsNames(final @NotNull Project project) {
+        CachedValue<Collection<String>> cache = project.getUserData(ROUTE_NAMES);
+
+        if(cache == null) {
+            cache = CachedValuesManager.getManager(project).createCachedValue(new CachedValueProvider<Collection<String>>() {
+                @Nullable
+                @Override
+                public Result<Collection<String>> compute() {
+                    Collection<String> names = new HashSet<String>();
+
+                    for (PsiFile psiFile : FilenameIndex.getFilesByName(project, "routes.php", GlobalSearchScope.allScope(project))) {
+                        names.addAll(getRoutesAsNames(psiFile));
+                    }
+
+                    return Result.create(names, PsiModificationTracker.MODIFICATION_COUNT);
+                }
+            }, false);
+
+            project.putUserData(ROUTE_NAMES, cache);
         }
-        return names;
+
+        return cache.getValue();
     }
 
     public static Collection<String> getRoutesAsNames(@NotNull PsiFile psiFile) {
