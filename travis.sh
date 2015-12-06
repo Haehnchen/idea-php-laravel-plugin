@@ -98,9 +98,9 @@ fi
 
 # Run the tests
 if [ "$1" = "-d" ]; then
-    ant -d -f build-test.xml -DIDEA_HOME=./idea
+    ant -d -f build-test.xml -DIDEA_HOME=./idea coverage
 else
-    ant -f build-test.xml -DIDEA_HOME=./idea
+    ant -f build-test.xml -DIDEA_HOME=./idea coverage
 fi
 
 # Was our build successful?

@@ -2,20 +2,18 @@ sudo: false
 language: java
 jdk:
   - openjdk6
-  - openjdk7
+
 
 script: "./travis.sh"
 cache:
   directories:
     - .cache
 before_script:
+ - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.core/0.7.4.201502262128/org.jacoco.core-0.7.4.201502262128.jar -o lib/jacoco.jar
+ - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.ant/0.7.4.201502262128/org.jacoco.ant-0.7.4.201502262128.jar -o lib/jacocoant.jar
+ - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.agent/0.7.4.201502262128/org.jacoco.agent-0.7.4.201502262128.jar -o lib/jacocoagent.jar
+ - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.report/0.7.4.201502262128/org.jacoco.report-0.7.4.201502262128.jar -o lib/jacocoreport.jar
  - chmod +x travis.sh
 
 env:
   - PHPSTORM_ENV=9
-  - PHPSTORM_ENV=10
-  - PHPSTORM_ENV=10eap
-  
-matrix:
-  allow_failures:
-    - env: PHPSTORM_ENV=10eap

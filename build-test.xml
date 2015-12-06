@@ -18,6 +18,9 @@
         <fileset dir="${idea.build}/lib">
             <include name="*.jar"/>
         </fileset>
+        <fileset dir="${basedir}/lib">
+            <include name="*.jar"/>
+        </fileset>
         <fileset dir="${plugins}">
             <include name="*.jar"/>
         </fileset>
@@ -107,6 +110,9 @@
             <copy toDir="@{dest}/classes">
                 <fileset dir="${src}"/>
             </copy>
+            <copy toDir="@{dest}/lib">
+                <fileset dir="${basedir}/lib"/>
+            </copy>
             <copy toDir="@{dest}/META-INF">
                 <fileset dir="${basedir}/META-INF"/>
             </copy>
@@ -183,6 +189,38 @@
         </junit>
 
         <antcall target="check_test"/>
+    </target>
+
+    <target name="coverage" description="run tests with coverage" depends="compile_test">
+        <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+            <classpath refid="classpath.test"/>
+        </taskdef>
+        <jacoco:coverage>
+            <junit printSummary="no" fork="yes" failureproperty="junit.failure">
+                <classpath refid="classpath.test"/>
+                <formatter type="plain" usefile="false" />
+                <formatter type="plain" />
+                <batchtest>
+                    <fileset dir="${test.src}">
+                        <include name="**/*Test.java"/>
+                        <exclude name="**/*TestCase.java"/>
+                    </fileset>
+                </batchtest>
+            </junit>
+        </jacoco:coverage>
+        <jacoco:report>
+            <executiondata>
+                <file file="jacoco.exec"/>
+            </executiondata>
+            <structure name="laravel project">
+                <sourcefiles encoding="UTF-8">
+                    <fileset dir="src"/>
+                </sourcefiles>
+            </structure>
+            <xml destfile="jacoco.xml"/>
+            <html destdir="jacoco"/>
+        </jacoco:report>
+        <fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
     </target>
 
     <target name="check_test" if="failure_found">
