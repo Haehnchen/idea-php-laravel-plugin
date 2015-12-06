@@ -1,4 +1,4 @@
-<project name="Laravel Idea Plugin" default="test" basedir=".">
+<project name="Laravel Idea Plugin" default="test" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
 
     <property file="build.properties" />
 
@@ -13,6 +13,9 @@
     <property name="idea.build" location="${basedir}/idea/" />
     <property name="plugins" location="${basedir}/plugins"/>
     <property name="deploy" location="${basedir}/deploy"/>
+
+    <property name="result.report.dir" location="${basedir}/jacoco"/>
+    <property name="result.exec.file" location="${basedir}/jacoco.exec"/>
 
     <path id="idea.classpath">
         <fileset dir="${idea.build}/lib">
@@ -52,6 +55,9 @@
         <fileset dir="${idea.build}/lib">
             <include name="**/*.jar" />
             <exclude name="ant/lib/**/*.jar" />
+        </fileset>
+        <fileset dir="${basedir}/lib">
+            <include name="*.jar"/>
         </fileset>
          <fileset dir="${plugins}">
             <include name="*.jar"/>
@@ -93,8 +99,8 @@
                 <include name="**/*.png"/>
                 <include name="**/*.xml"/>
                 <include name="**/*.yml"/>
-                <include name="**/*.xlf"/>                
-            </patternset>            
+                <include name="**/*.xlf"/>
+            </patternset>
 
             <copy toDir="@{dest}">
                 <fileset dir="@{src}">
@@ -196,10 +202,24 @@
             <classpath refid="classpath.test"/>
         </taskdef>
         <jacoco:coverage>
-            <junit printSummary="no" fork="yes" failureproperty="junit.failure">
+            <junit printsummary="yes"
+                   haltonfailure="false"
+                   failureProperty="failure_found"
+                   fork="yes" forkmode="once" reloading="no" showoutput="yes">
+
+                <jvmarg value="-Didea.home.path=${idea.build}"/>
+                <jvmarg value="-Xbootclasspath/a:${idea.build}/lib/boot.jar"/>
+                <jvmarg value="-Dfile.encoding=UTF-8"/>
+                <jvmarg value="-Didea.load.plugins.id=com.jetbrains.php,com.jetbrains.php.blade,de.espend.idea.laravel"/>
+                <jvmarg value="-ea"/>
+                <jvmarg value="-Didea.plugins.path=${plugins}"/>
+                <jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=${suspend},address=43251"/>
+                <jvmarg value="-Didea.launcher.bin.path=${idea.build}/bin"/>
+
                 <classpath refid="classpath.test"/>
-                <formatter type="plain" usefile="false" />
-                <formatter type="plain" />
+
+                <formatter type="brief" usefile="false"/>
+
                 <batchtest>
                     <fileset dir="${test.src}">
                         <include name="**/*Test.java"/>
@@ -210,7 +230,7 @@
         </jacoco:coverage>
         <jacoco:report>
             <executiondata>
-                <file file="jacoco.exec"/>
+                <file file="${result.exec.file}"/>
             </executiondata>
             <structure name="laravel project">
                 <sourcefiles encoding="UTF-8">
@@ -218,7 +238,6 @@
                 </sourcefiles>
             </structure>
             <xml destfile="jacoco.xml"/>
-            <html destdir="jacoco"/>
         </jacoco:report>
         <fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
     </target>

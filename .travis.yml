@@ -9,6 +9,7 @@ cache:
   directories:
     - .cache
 before_script:
+ - mkdir lib
  - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.core/0.7.4.201502262128/org.jacoco.core-0.7.4.201502262128.jar -o lib/jacoco.jar
  - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.ant/0.7.4.201502262128/org.jacoco.ant-0.7.4.201502262128.jar -o lib/jacocoant.jar
  - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.agent/0.7.4.201502262128/org.jacoco.agent-0.7.4.201502262128.jar -o lib/jacocoagent.jar
