@@ -25,7 +25,7 @@ public class DicTypeProviderTest extends LaravelLightCodeInsightFixtureTestCase 
         return new File(this.getClass().getResource("fixtures").getFile()).getAbsolutePath();
     }
 
-    public void testCompletion() {
+    public void testTypeReferences() {
         assertPhpReferenceResolveTo(PhpFileType.INSTANCE, "<?php\n" +
                 "app('foo')->b<caret>ar()",
             PlatformPatterns.psiElement(Method.class).withName("bar")

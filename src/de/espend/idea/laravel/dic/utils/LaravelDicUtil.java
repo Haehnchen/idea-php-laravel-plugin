@@ -38,6 +38,20 @@ public class LaravelDicUtil {
         return cache.getValue();
     }
 
+    synchronized public static Collection<PsiElement> getDicTargets(@NotNull final Project project, @NotNull String dicName) {
+        Map<String, Collection<String>> dicMap = getDicMap(project);
+        if(!dicMap.containsKey(dicName)) {
+            return Collections.emptyList();
+        }
+
+        Collection<PsiElement> targets = new ArrayList<PsiElement>();
+        for (String s : dicMap.get(dicName)) {
+            targets.addAll(PhpElementsUtil.getClassesOrInterfaces(project, s));
+        }
+
+        return targets;
+    }
+
     public static Map<String, Collection<String>> getCoreAliasMap(@NotNull Project project) {
         final Map<String, Collection<String>> map = new HashMap<String, Collection<String>>();
 
