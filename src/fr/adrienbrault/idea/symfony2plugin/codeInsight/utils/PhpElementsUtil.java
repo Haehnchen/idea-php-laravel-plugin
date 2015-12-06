@@ -1,6 +1,7 @@
 package fr.adrienbrault.idea.symfony2plugin.codeInsight.utils;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Condition;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiElementFilter;
@@ -8,6 +9,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.php.PhpIndex;
 import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.patterns.PhpPatterns;
+import com.jetbrains.php.lang.psi.PhpPsiUtil;
 import com.jetbrains.php.lang.psi.elements.*;
 import fr.adrienbrault.idea.symfony2plugin.dic.MethodReferenceBag;
 import fr.adrienbrault.idea.symfony2plugin.util.ParameterBag;
@@ -15,8 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 
 public class PhpElementsUtil {
 
@@ -287,5 +288,68 @@ public class PhpElementsUtil {
         }
 
         return null;
+    }
+
+    /**
+     * Gets array key-value as single PsiElement map
+     *
+     * ['foo' => $bar]
+     */
+    @NotNull
+    static public Map<String, PsiElement> getArrayValueMap(@NotNull ArrayCreationExpression arrayCreationExpression) {
+        Map<String, PsiElement> keys = new HashMap<String, PsiElement>();
+
+        for(ArrayHashElement arrayHashElement: arrayCreationExpression.getHashElements()) {
+            PhpPsiElement child = arrayHashElement.getKey();
+            if(child instanceof StringLiteralExpression) {
+                PhpPsiElement value = arrayHashElement.getValue();
+                if(value != null) {
+                    keys.put(((StringLiteralExpression) child).getContents(), value);
+                }
+            }
+        }
+
+        return keys;
+    }
+
+
+    /**
+     * Gets string values of array
+     *
+     * ["value", "value2"]
+     */
+    @NotNull
+    static public Set<String> getArrayValuesAsString(@NotNull ArrayCreationExpression arrayCreationExpression) {
+        return getArrayValuesAsMap(arrayCreationExpression).keySet();
+    }
+
+    /**
+     * Get array string values mapped with their PsiElements
+     *
+     * ["value", "value2"]
+     */
+    @NotNull
+    static public Map<String, PsiElement> getArrayValuesAsMap(@NotNull ArrayCreationExpression arrayCreationExpression) {
+
+        List<PsiElement> arrayValues = PhpPsiUtil.getChildren(arrayCreationExpression, new Condition<PsiElement>() {
+            @Override
+            public boolean value(PsiElement psiElement) {
+                return psiElement.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE;
+            }
+        });
+
+        if(arrayValues == null) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, PsiElement> keys = new HashMap<String, PsiElement>();
+        for (PsiElement child : arrayValues) {
+            String stringValue = PhpElementsUtil.getStringValue(child.getFirstChild());
+            if(stringValue != null && StringUtils.isNotBlank(stringValue)) {
+                keys.put(stringValue, child);
+            }
+        }
+
+        return keys;
     }
 }
