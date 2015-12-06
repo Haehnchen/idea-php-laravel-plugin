@@ -2,6 +2,7 @@ package fr.adrienbrault.idea.symfony2plugin.codeInsight.utils;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Condition;
+import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiElementFilter;
@@ -351,5 +352,32 @@ public class PhpElementsUtil {
         }
 
         return keys;
+    }
+
+    /**
+     * $this->methodName('service_name')
+     * $this->methodName(SERVICE::NAME)
+     * $this->methodName($this->name)
+     */
+    static public boolean isMethodWithFirstStringOrFieldReference(PsiElement psiElement, String... methodName) {
+
+        if(!PlatformPatterns
+            .psiElement(PhpElementTypes.METHOD_REFERENCE)
+            .withChild(PlatformPatterns
+                    .psiElement(PhpElementTypes.PARAMETER_LIST)
+                    .withFirstChild(PlatformPatterns.or(
+                        PlatformPatterns.psiElement(PhpElementTypes.STRING),
+                        PlatformPatterns.psiElement(PhpElementTypes.FIELD_REFERENCE),
+                        PlatformPatterns.psiElement(PhpElementTypes.CLASS_CONSTANT_REFERENCE)
+                    ))
+            ).accepts(psiElement)) {
+
+            return false;
+        }
+
+        // cant we move it up to PlatformPatterns? withName condition dont looks working
+        String methodRefName = ((MethodReference) psiElement).getName();
+
+        return null != methodRefName && Arrays.asList(methodName).contains(methodRefName);
     }
 }

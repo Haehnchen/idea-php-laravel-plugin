@@ -14,8 +14,7 @@ import java.util.Map;
  *
  * @see de.espend.idea.laravel.dic.utils.LaravelDicUtil
  */
-public class LaravelDicUtilTest  extends LaravelLightCodeInsightFixtureTestCase {
-
+public class LaravelDicUtilTest extends LaravelLightCodeInsightFixtureTestCase {
 
     @Override
     public void setUp() throws Exception {

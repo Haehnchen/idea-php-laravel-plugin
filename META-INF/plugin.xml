@@ -140,6 +140,7 @@
                            nonDefaultProject="true"
               />
 
+      <php.typeProvider2 implementation="de.espend.idea.laravel.dic.DicTypeProvider"/>
 
       <projectService serviceImplementation="de.espend.idea.laravel.LaravelSettings"/>
 
