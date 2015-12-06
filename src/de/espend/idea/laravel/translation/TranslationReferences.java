@@ -70,7 +70,7 @@ public class TranslationReferences implements GotoCompletionRegistrar {
 
     }
 
-    private static class TranslationKey extends GotoCompletionProvider {
+    public static class TranslationKey extends GotoCompletionProvider {
 
         public TranslationKey(PsiElement element) {
             super(element);

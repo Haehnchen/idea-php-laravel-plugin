@@ -21,12 +21,15 @@ import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
+import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
+import de.espend.idea.laravel.translation.TranslationReferences;
 import de.espend.idea.laravel.view.ViewCollector;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,6 +78,27 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
                 if(isDirectiveWithName(psiElement, "make")) {
                     return new BladeExtendGotoProvider(psiElement);
+                }
+
+                return null;
+
+            }
+
+        });
+
+        // @lang('lang.foo')
+        registrar.register(PlatformPatterns.psiElement().inVirtualFile(PlatformPatterns.virtualFile().withName(PlatformPatterns.string().endsWith("blade.php"))), new GotoCompletionContributor() {
+
+            @Nullable
+            @Override
+            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
+
+                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                    return null;
+                }
+
+                if(BladePsiUtil.isDirectiveWithInstance(psiElement, "Illuminate\\Support\\Facades\\Lang", "get")) {
+                    return new TranslationReferences.TranslationKey(psiElement);
                 }
 
                 return null;
