@@ -38,6 +38,14 @@ namespace App\Http\Controllers
     }
 }
 
+namespace App\Http\Controllers\Group
+{
+    class GroupController implements \App\Http\Controllers\Controller
+    {
+        public function foo() {}
+    }
+}
+
 namespace Foo\Controllers
 {
     class BarController implements \App\Http\Controllers\Controller
