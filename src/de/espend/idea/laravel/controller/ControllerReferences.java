@@ -316,7 +316,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
                     Parameter[] parameters = method.getParameters();
                     if(parameters.length > 0) {
-                        lookupElementBuilder = lookupElementBuilder.withTailText(PhpPresentationUtil.formatFunction(method));
+                        lookupElementBuilder = lookupElementBuilder.withTailText(PhpPresentationUtil.formatParameters(null, parameters).toString());
                     }
 
                     LookupElement lookupElement = lookupElementBuilder;
