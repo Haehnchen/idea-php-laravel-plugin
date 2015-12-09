@@ -48,8 +48,20 @@ namespace App\Http\Controllers\Group
 
 namespace Foo\Controllers
 {
+    use Foo\Bar\Foo;
+
     class BarController implements \App\Http\Controllers\Controller
     {
+        use Foo;
+
         public function foo() {}
+    }
+}
+
+namespace Foo\Bar
+{
+    trait Foo
+    {
+        public function auth(\DateTime $foo) {}
     }
 }

@@ -32,6 +32,7 @@ import com.jetbrains.php.lang.psi.elements.Function;
 import com.jetbrains.php.lang.psi.elements.Method;
 import com.jetbrains.php.lang.psi.elements.PhpReference;
 import de.espend.idea.laravel.LaravelSettings;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -246,11 +247,15 @@ public abstract class LaravelLightCodeInsightFixtureTestCase extends LightCodeIn
     }
 
     public void assertCompletionLookupTailEquals(LanguageFileType languageFileType, String configureByText, String lookupString, String tailText) {
+        assertCompletionLookup(languageFileType, configureByText, lookupString, new LookupElement.TailTextEqualsAssert(tailText));
+    }
+
+    public void assertCompletionLookup(LanguageFileType languageFileType, String configureByText, String lookupString, LookupElement.Assert assertMatch) {
 
         myFixture.configureByText(languageFileType, configureByText);
         myFixture.completeBasic();
 
-        for (LookupElement lookupElement : myFixture.getLookupElements()) {
+        for (com.intellij.codeInsight.lookup.LookupElement lookupElement : myFixture.getLookupElements()) {
 
             if(!lookupElement.getLookupString().equals(lookupString)) {
                 continue;
@@ -259,20 +264,17 @@ public abstract class LaravelLightCodeInsightFixtureTestCase extends LightCodeIn
             LookupElementPresentation presentation = new LookupElementPresentation();
             lookupElement.renderElement(presentation);
 
-            if(presentation.getTailText() == null) {
-                fail(String.format("failed to check '%s'", lookupString));
+            if(assertMatch.match(presentation)) {
+                return;
             }
 
-            if(!presentation.getTailText().equals(tailText)) {
-                fail(String.format("failed that on '%s' '%s' is equal '%s'", lookupString, tailText, presentation.getTailText()));
-            }
-
-            return;
-
+            fail(String.format("fail that on element '%s' with '%s' matches '%s'", lookupString, assertMatch.getClass(), presentation.toString()));
         }
 
         fail(String.format("failed to check '%s' because it's unknown", lookupString));
+
     }
+
 
     public void assertPhpReferenceResolveTo(LanguageFileType languageFileType, String configureByText, ElementPattern<?> pattern) {
         myFixture.configureByText(languageFileType, configureByText);
@@ -563,6 +565,49 @@ public abstract class LaravelLightCodeInsightFixtureTestCase extends LightCodeIn
                 }
 
                 return false;
+            }
+        }
+    }
+
+    public static class LookupElement {
+        public interface Assert {
+            boolean match(@NotNull LookupElementPresentation lookupElement);
+        }
+
+        public static class TailTextEqualsAssert implements Assert {
+
+            @NotNull
+            private final String contents;
+
+            public TailTextEqualsAssert(@NotNull String contents) {
+                this.contents = contents;
+            }
+
+            @Override
+            public boolean match(@NotNull LookupElementPresentation lookupElement) {
+                return this.contents.equals(lookupElement.getTailText());
+            }
+        }
+
+        public static class TypeTextEqualsAssert implements Assert {
+
+            @NotNull
+            private final String contents;
+
+            public TypeTextEqualsAssert(@NotNull String contents) {
+                this.contents = contents;
+            }
+
+            @Override
+            public boolean match(@NotNull LookupElementPresentation lookupElement) {
+                return this.contents.equals(lookupElement.getTypeText());
+            }
+        }
+
+        public static class TailTextIsBlankAssert implements Assert {
+            @Override
+            public boolean match(@NotNull LookupElementPresentation lookupElement) {
+                return StringUtils.isBlank(lookupElement.getTailText());
             }
         }
     }

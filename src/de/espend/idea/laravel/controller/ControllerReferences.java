@@ -8,6 +8,7 @@ import com.intellij.openapi.util.Condition;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.jetbrains.php.PhpPresentationUtil;
 import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.psi.elements.*;
 import de.espend.idea.laravel.LaravelIcons;
@@ -308,20 +309,19 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
             ControllerCollector.visitControllerActions(getProject(), new ControllerCollector.ControllerActionVisitor() {
                 @Override
-                public void visit(@NotNull Method method, @NotNull String name, boolean prioritised) {
+                public void visit(@NotNull PhpClass phpClass, @NotNull Method method, @NotNull String name, boolean prioritised) {
+                    LookupElementBuilder lookupElementBuilder = LookupElementBuilder.create(name)
+                        .withIcon(LaravelIcons.ROUTE)
+                        .withTypeText(phpClass.getPresentableFQN(), true);
 
-                    String typeText = null;
-                    PhpClass containingClass = method.getContainingClass();
-                    if(containingClass != null) {
-                        typeText = containingClass.getPresentableFQN();
+                    Parameter[] parameters = method.getParameters();
+                    if(parameters.length > 0) {
+                        lookupElementBuilder = lookupElementBuilder.withTailText(PhpPresentationUtil.formatFunction(method));
                     }
 
-                    LookupElement lookupElement = LookupElementBuilder.create(name)
-                        .withIcon(LaravelIcons.ROUTE)
-                        .withTypeText(typeText, true);
-
+                    LookupElement lookupElement = lookupElementBuilder;
                     if(prioritised) {
-                        lookupElement = PrioritizedLookupElement.withPriority(lookupElement, 10);
+                        lookupElement = PrioritizedLookupElement.withPriority(lookupElementBuilder, 10);
                     }
 
                     lookupElements.add(lookupElement);
@@ -344,7 +344,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
             ControllerCollector.visitControllerActions(getProject(), new ControllerCollector.ControllerActionVisitor() {
                 @Override
-                public void visit(@NotNull Method method, @NotNull String name, boolean prioritised) {
+                public void visit(@NotNull PhpClass phpClass, @NotNull Method method, @NotNull String name, boolean prioritised) {
                     if (content.equalsIgnoreCase(name)) {
                         targets.add(method);
                     }

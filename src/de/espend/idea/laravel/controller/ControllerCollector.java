@@ -48,7 +48,7 @@ public class ControllerCollector {
                             }
 
                             if(StringUtils.isNotBlank(className)) {
-                                visitor.visit(method, className + "@" + methodName, prioritised);
+                                visitor.visit(phpClass, method, className + "@" + methodName, prioritised);
                             }
                         }
                     }
@@ -87,7 +87,7 @@ public class ControllerCollector {
     }
 
     public interface ControllerActionVisitor {
-        void visit(@NotNull Method method, @NotNull String name, boolean prioritised);
+        void visit(@NotNull PhpClass phpClass, @NotNull Method method, @NotNull String name, boolean prioritised);
     }
 
     public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor, @Nullable String prefix) {

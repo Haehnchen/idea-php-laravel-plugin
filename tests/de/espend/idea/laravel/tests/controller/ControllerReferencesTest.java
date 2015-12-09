@@ -85,4 +85,29 @@ public class ControllerReferencesTest extends LaravelLightCodeInsightFixtureTest
             )
         );
     }
+
+    public void testThatTraitMethodUseOriginClassFqnAsCompletionTypeText() {
+        assertCompletionContains(PhpFileType.INSTANCE, "<?php\n" +
+                "Route::get(null, '<caret>');\n",
+            "Foo\\Controllers\\BarController@auth"
+        );
+
+        assertCompletionLookup(PhpFileType.INSTANCE, "<?php\n" +
+                "Route::get(null, '<caret>');\n",
+            "Foo\\Controllers\\BarController@auth",
+            new LookupElement.TypeTextEqualsAssert("Foo\\Controllers\\BarController")
+        );
+
+        assertCompletionLookup(PhpFileType.INSTANCE, "<?php\n" +
+                "Route::get(null, '<caret>');\n",
+            "Foo\\Controllers\\BarController@auth",
+            new LookupElement.TailTextEqualsAssert("(foo : \\DateTime)")
+        );
+
+        assertCompletionLookup(PhpFileType.INSTANCE, "<?php\n" +
+                "Route::get(null, '<caret>');\n",
+            "FooController@foo",
+            new LookupElement.TailTextIsBlankAssert()
+        );
+    }
 }
