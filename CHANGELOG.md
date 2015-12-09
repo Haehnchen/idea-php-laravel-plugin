@@ -1,3 +1,7 @@
+## 0.9.1
+- Fix Route::group and Laravel doesn't allow Route::group for controllers not in default namespace #46 @adelf
+- Route completion displays origin class of trait methods and provides parameter tail text
+
 ## 0.9
 - Better default router namespace detection; also add settings for customize #35
 - Non-standard root namespaces support @adelf
