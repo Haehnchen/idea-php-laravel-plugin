@@ -27,7 +27,7 @@ public class ControllerReferencesTest extends LaravelLightCodeInsightFixtureTest
     public void testRouteParameter() {
         assertCompletionContains(PhpFileType.INSTANCE, "<?php\n" +
             "Route::get(null, '<caret>');\n",
-            "FooController@foo", "Foo\\Controllers\\BarController@foo"
+            "FooController@foo", "Foo\\Controllers\\BarController@foo", "Group\\GroupController@foo"
         );
 
         assertNavigationMatch(PhpFileType.INSTANCE, "<?php\n" +
@@ -46,42 +46,42 @@ public class ControllerReferencesTest extends LaravelLightCodeInsightFixtureTest
                 "Route::get('/', [\n" +
                 "  'uses' => '<caret>', \n" +
                 "]);",
-            "FooController@foo", "Foo\\Controllers\\BarController@foo"
+            "FooController@foo", "Foo\\Controllers\\BarController@foo", "Group\\GroupController@foo"
         );
     }
 
     public void testRouteGroups() {
         assertCompletionContains(PhpFileType.INSTANCE, "<?php\n" +
-                "Route::group(['namespace' => 'Foo\\Controllers'], function() {\n" +
+                "Route::group(['namespace' => 'Group'], function() {\n" +
                 "    Route::get('/', '<caret>');\n" +
                 "});",
-            "BarController@foo"
+            "GroupController@foo"
         );
 
         assertNavigationMatch(PhpFileType.INSTANCE, "<?php\n" +
-                "Route::group(['namespace' => 'Foo\\Controllers'], function() {\n" +
-                "    Route::get('/', 'BarController@foo<caret>');\n" +
+                "Route::group(['namespace' => 'Group'], function() {\n" +
+                "    Route::get('/', 'GroupController@foo<caret>');\n" +
                 "});",
             PlatformPatterns.psiElement(Method.class).withParent(
-                PlatformPatterns.psiElement(PhpClass.class).withName("BarController")
+                PlatformPatterns.psiElement(PhpClass.class).withName("GroupController")
             )
         );
     }
 
     public void testRouteGroupsStartsWithBackslashRemovesFirstChar() {
         assertCompletionContains(PhpFileType.INSTANCE, "<?php\n" +
-                "Route::group(['namespace' => '\\Foo\\Controllers'], function() {\n" +
+                "Route::group(['namespace' => '\\Group'], function() {\n" +
                 "    Route::get('/', '<caret>');\n" +
                 "});",
-            "BarController@foo"
+            "GroupController@foo"
         );
 
         assertNavigationMatch(PhpFileType.INSTANCE, "<?php\n" +
-                "Route::group(['namespace' => '\\Foo\\Controllers'], function() {\n" +
-                "    Route::get('/', 'BarController@foo<caret>');\n" +
+                "Route::group(['namespace' => '\\Group'], function() {\n" +
+                "    Route::get('/', 'GroupController@foo<caret>');\n" +
                 "});",
             PlatformPatterns.psiElement(Method.class).withParent(
-                PlatformPatterns.psiElement(PhpClass.class).withName("BarController")
+                PlatformPatterns.psiElement(PhpClass.class).withName("GroupController")
             )
         );
     }

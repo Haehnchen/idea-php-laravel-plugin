@@ -27,37 +27,33 @@ public class ControllerCollector {
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\App\\Http\\Controllers\\Controller"));
         }};
 
-        String ns = prefix;
-        boolean prioritised = false;
-        if(prefix == null) {
-            ns = getDefaultNamespace(project);
-            prioritised = true;
-        }
+        String ns = getDefaultNamespace(project) + "\\";
+        String prefixedNs = ns + (prefix != null && !prefix.equals("") ? prefix + "\\":"");
 
         for(PhpClass phpClass: allSubclasses) {
             if(!phpClass.isAbstract()) {
                 for(Method method: phpClass.getMethods()) {
                     String className = phpClass.getPresentableFQN();
-                    if(className != null) {
-                        String methodName = method.getName();
-                        if(!method.isStatic() && method.getAccess().isPublic() && !methodName.startsWith("__")) {
-                            PhpClass phpTrait = method.getContainingClass();
-                            if(phpTrait == null || !("ValidatesRequests".equals(phpTrait.getName()) || "DispatchesCommands".equals(phpTrait.getName()) || "Controller".equals(phpTrait.getName()))) {
+                    String methodName = method.getName();
+                    if(!method.isStatic() && method.getAccess().isPublic() && !methodName.startsWith("__")) {
+                        PhpClass phpTrait = method.getContainingClass();
+                        if(phpTrait == null || !("ValidatesRequests".equals(phpTrait.getName()) || "DispatchesCommands".equals(phpTrait.getName()) || "Controller".equals(phpTrait.getName()))) {
 
-                                if(className.startsWith(ns + "\\")) {
-                                    className = className.substring(ns.length() + 1);
-                                }
+                            boolean prioritised = false;
+                            if(prefix != null && className.startsWith(prefixedNs)) {
+                                className = className.substring(prefixedNs.length());
+                                prioritised = true;
+                            } else if(className.startsWith(ns)) {
+                                className = className.substring(ns.length());
+                            }
 
-                                if(StringUtils.isNotBlank(className)) {
-                                    visitor.visit(method, className + "@" + methodName, prioritised);
-                                }
+                            if(StringUtils.isNotBlank(className)) {
+                                visitor.visit(method, className + "@" + methodName, prioritised);
                             }
                         }
                     }
-
                 }
             }
-
         }
     }
 
@@ -69,7 +65,7 @@ public class ControllerCollector {
             return StringUtils.stripStart(controllerNamespace, "\\");
         }
 
-        for (PhpClass providerPhpClass: PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Foundation\\Support\\Providers\\RouteServiceProvider")) {
+        for(PhpClass providerPhpClass: PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Foundation\\Support\\Providers\\RouteServiceProvider")) {
 
             Field namespace = providerPhpClass.findOwnFieldByName("namespace", false);
             if(namespace == null) {
@@ -101,12 +97,8 @@ public class ControllerCollector {
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\App\\Http\\Controllers\\Controller"));
         }};
 
-        String ns = prefix;
-        boolean prioritised = false;
-        if(prefix == null) {
-            ns = getDefaultNamespace(project);
-            prioritised = true;
-        }
+        String ns = getDefaultNamespace(project) + "\\";
+        String prefixedNs = ns + (prefix != null && !prefix.equals("") ? prefix + "\\":"");
 
         for(PhpClass phpClass: allSubclasses) {
 
@@ -115,12 +107,13 @@ public class ControllerCollector {
             }
 
             String className = phpClass.getPresentableFQN();
-            if(className == null) {
-                continue;
-            }
 
-            if(className.startsWith(ns + "\\")) {
-                className = className.substring(ns.length() + 1);
+            boolean prioritised = false;
+            if(prefix != null && className.startsWith(prefixedNs)) {
+                className = className.substring(prefixedNs.length());
+                prioritised = true;
+            } else if(className.startsWith(ns)) {
+                className = className.substring(ns.length());
             }
 
             if(StringUtils.isNotBlank(className)) {
