@@ -27,6 +27,12 @@ public class ControllerCollector {
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\App\\Http\\Controllers\\Controller"));
         }};
 
+        HashSet<String> commonTraits = new HashSet<>();
+        commonTraits.add("ValidatesRequests");
+        commonTraits.add("DispatchesCommands");
+        commonTraits.add("AuthorizesRequests");
+        commonTraits.add("Controller");
+
         String ns = getDefaultNamespace(project) + "\\";
         String prefixedNs = ns + (prefix != null && !prefix.equals("") ? prefix + "\\":"");
 
@@ -37,7 +43,7 @@ public class ControllerCollector {
                     String methodName = method.getName();
                     if(!method.isStatic() && method.getAccess().isPublic() && !methodName.startsWith("__")) {
                         PhpClass phpTrait = method.getContainingClass();
-                        if(phpTrait == null || !("ValidatesRequests".equals(phpTrait.getName()) || "DispatchesCommands".equals(phpTrait.getName()) || "Controller".equals(phpTrait.getName()))) {
+                        if(phpTrait == null || !commonTraits.contains(phpTrait.getName())) {
 
                             boolean prioritised = false;
                             if(prefix != null && className.startsWith(prefixedNs)) {
