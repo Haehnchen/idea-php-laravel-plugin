@@ -45,6 +45,8 @@ public class ControllerCollector {
                                 prioritised = true;
                             } else if(className.startsWith(ns)) {
                                 className = className.substring(ns.length());
+                            } if(prefix != null && className.startsWith(prefix)) {
+                                className = className.substring(prefix.length() + 1);
                             }
 
                             if(StringUtils.isNotBlank(className)) {
@@ -114,6 +116,8 @@ public class ControllerCollector {
                 prioritised = true;
             } else if(className.startsWith(ns)) {
                 className = className.substring(ns.length());
+            } if(prefix != null && className.startsWith(prefix)) {
+                className = className.substring(prefix.length() + 1);
             }
 
             if(StringUtils.isNotBlank(className)) {
