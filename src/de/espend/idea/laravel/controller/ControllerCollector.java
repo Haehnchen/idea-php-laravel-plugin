@@ -125,7 +125,7 @@ public class ControllerCollector {
 
     @NotNull
     private static Set<String> getCommonControllerTraits() {
-        Set<String> traits = new HashSet<>();
+        Set<String> traits = new HashSet<String>();
 
         traits.add("ValidatesRequests");
         traits.add("DispatchesCommands");
