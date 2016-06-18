@@ -177,6 +177,7 @@
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.ConfigKeyStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeYieldStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.PhpTemplateUsageStubIndex"/>
+      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeTemplateUsageStubIndex"/>
 
       <codeInsight.lineMarkerProvider language="Blade" implementationClass="de.espend.idea.laravel.blade.TemplateLineMarker"/>
 
