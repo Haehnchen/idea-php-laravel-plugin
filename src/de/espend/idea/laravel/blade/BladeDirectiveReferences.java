@@ -161,21 +161,20 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
                 return Collections.emptyList();
             } */
 
-            final String contents = element.getContents();
+            String contents = element.getContents();
             if(StringUtils.isBlank(contents)) {
                 return Collections.emptyList();
             }
-
+            
+            contents = contents.replace("/", ".");
             final Collection<PsiElement> psiElements = new ArrayList<PsiElement>();
 
-            ViewCollector.visitFile(getProject(), new ViewCollector.ViewVisitor() {
-                @Override
-                public void visit(@NotNull VirtualFile virtualFile, String name) {
-                    if(contents.equalsIgnoreCase(name)) {
-                        PsiFile psiFile = PsiManager.getInstance(getProject()).findFile(virtualFile);
-                        if(psiFile != null) {
-                            psiElements.add(psiFile);
-                        }
+            final String finalContents = contents;
+            ViewCollector.visitFile(getProject(), (virtualFile, name) -> {
+                if(finalContents.equalsIgnoreCase(name)) {
+                    PsiFile psiFile = PsiManager.getInstance(getProject()).findFile(virtualFile);
+                    if(psiFile != null) {
+                        psiElements.add(psiFile);
                     }
                 }
             });
