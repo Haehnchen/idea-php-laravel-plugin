@@ -26,10 +26,7 @@ import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
-import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
-import de.espend.idea.laravel.stub.BladeIncludeStubIndex;
-import de.espend.idea.laravel.stub.BladeSectionStubIndex;
-import de.espend.idea.laravel.stub.PhpTemplateUsageStubIndex;
+import de.espend.idea.laravel.stub.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -132,50 +129,46 @@ public class TemplateLineMarker implements LineMarkerProvider {
             return;
         }
 
+        // normalize all template names and support both: "foo.bar" and "foo/bar"
+        for (String templateName : templateNames) {
+            templateNames.add(templateName.replace(".", "/"));
+        }
+
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
 
         for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY)) {
             for(String templateName: templateNames) {
-                FileBasedIndexImpl.getInstance().getFilesWithKey(key, new HashSet<String>(Arrays.asList(templateName)), new Processor<VirtualFile>() {
-                    @Override
-                    public boolean process(VirtualFile virtualFile) {
-                        PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
+                FileBasedIndexImpl.getInstance().getFilesWithKey(key, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
+                    PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
 
-                        if(psiFileTarget != null) {
-                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiFileTarget).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
-                        }
-
-                        return true;
+                    if(psiFileTarget != null) {
+                        gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiFileTarget).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
                     }
+
+                    return true;
                 }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(psiFile.getProject()), BladeFileType.INSTANCE, BladeFileType.INSTANCE));
             }
         }
 
-
         for(final String templateName: templateNames) {
-            FileBasedIndexImpl.getInstance().getFilesWithKey(PhpTemplateUsageStubIndex.KEY, new HashSet<String>(Arrays.asList(templateName)), new Processor<VirtualFile>() {
-                @Override
-                public boolean process(VirtualFile virtualFile) {
-
-                    PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
-                    if(psiFileTarget == null) {
-                        return true;
-                    }
-
-                    psiFileTarget.accept(new PsiRecursiveElementWalkingVisitor() {
-                        @Override
-                        public void visitElement(PsiElement element) {
-
-                            if(element instanceof StringLiteralExpression && element.getParent() instanceof ParameterList && templateName.equals(((StringLiteralExpression) element).getContents())) {
-                                gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(element).withIcon(PhpIcons.IMPLEMENTED, PhpIcons.IMPLEMENTED));
-                            }
-
-                            super.visitElement(element);
-                        }
-                    });
+            FileBasedIndexImpl.getInstance().getFilesWithKey(PhpTemplateUsageStubIndex.KEY, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
+                PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
+                if(psiFileTarget == null) {
                     return true;
                 }
-                
+
+                psiFileTarget.accept(new PsiRecursiveElementWalkingVisitor() {
+                    @Override
+                    public void visitElement(PsiElement element) {
+                        if(element instanceof StringLiteralExpression && element.getParent() instanceof ParameterList && templateName.equals(((StringLiteralExpression) element).getContents())) {
+                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(element).withIcon(PhpIcons.IMPLEMENTED, PhpIcons.IMPLEMENTED));
+                        }
+
+                        super.visitElement(element);
+                    }
+                });
+
+                return true;
             }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(psiFile.getProject()), PhpFileType.INSTANCE));
         }
 
