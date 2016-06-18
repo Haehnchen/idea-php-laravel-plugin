@@ -18,6 +18,9 @@ public class TranslationKeyStubIndexTest extends LaravelLightCodeInsightFixtureT
         myFixture.copyFileToProject("translation.php", "app/lang/fr_FR/foo_fr.php");
         myFixture.copyFileToProject("translation.php", "app/lang/packages/en/packages/packages_messages.php");
         myFixture.copyFileToProject("translation.php", "app/lang/packages/fr_FR/packages/packages_fr_messages.php");
+
+        myFixture.copyFileToProject("translation.php", "app/lang/fr/admin/messages.php");
+        myFixture.copyFileToProject("translation.php", "app/lang/packages/fr_FR/packages/admin/packages_fr_messages.php");
     }
 
     protected String getTestDataPath() {
@@ -29,5 +32,7 @@ public class TranslationKeyStubIndexTest extends LaravelLightCodeInsightFixtureT
         assertIndexContains(TranslationKeyStubIndex.KEY, "foo_fr.foo");
         assertIndexContains(TranslationKeyStubIndex.KEY, "packages_messages.foo");
         assertIndexContains(TranslationKeyStubIndex.KEY, "packages_fr_messages.foo");
+        assertIndexContains(TranslationKeyStubIndex.KEY, "admin/messages.foo");
+        assertIndexContains(TranslationKeyStubIndex.KEY, "admin/packages_fr_messages.foo");
     }
 }

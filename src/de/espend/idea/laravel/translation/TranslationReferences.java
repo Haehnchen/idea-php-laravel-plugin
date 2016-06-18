@@ -18,6 +18,7 @@ import de.espend.idea.laravel.config.AppConfigReferences;
 import de.espend.idea.laravel.stub.TranslationKeyStubIndex;
 import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
 import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
+import de.espend.idea.laravel.translation.utils.TranslationUtil;
 import de.espend.idea.laravel.util.ArrayReturnPsiRecursiveVisitor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
@@ -102,25 +103,24 @@ public class TranslationReferences implements GotoCompletionRegistrar {
                 return targets;
             }
 
-            FileBasedIndexImpl.getInstance().getFilesWithKey(TranslationKeyStubIndex.KEY, new HashSet<String>(Arrays.asList(contents)), new Processor<VirtualFile>() {
-                @Override
-                public boolean process(VirtualFile virtualFile) {
-                    PsiFile psiFileTarget = PsiManager.getInstance(getProject()).findFile(virtualFile);
-                    if(psiFileTarget == null) {
-                        return true;
-                    }
-
-                    psiFileTarget.acceptChildren(new ArrayReturnPsiRecursiveVisitor(virtualFile.getNameWithoutExtension(), new ArrayKeyVisitor() {
-                        @Override
-                        public void visit(String key, PsiElement psiKey, boolean isRootElement) {
-                            if(!isRootElement && key.equals(contents)) {
-                                targets.add(psiKey);
-                            }
-                        }
-                    }));
-
+            FileBasedIndexImpl.getInstance().getFilesWithKey(TranslationKeyStubIndex.KEY, new HashSet<String>(Collections.singletonList(contents)), virtualFile -> {
+                PsiFile psiFileTarget = PsiManager.getInstance(getProject()).findFile(virtualFile);
+                if(psiFileTarget == null) {
                     return true;
                 }
+
+                String namespace = TranslationUtil.getNamespaceFromFilePath(virtualFile.getPath());
+                if(namespace == null) {
+                    return true;
+                }
+
+                psiFileTarget.acceptChildren(new ArrayReturnPsiRecursiveVisitor(namespace, (key, psiKey, isRootElement) -> {
+                    if(!isRootElement && key.equalsIgnoreCase(contents)) {
+                        targets.add(psiKey);
+                    }
+                }));
+
+                return true;
             }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(getProject()), PhpFileType.INSTANCE));
 
             return targets;

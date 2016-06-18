@@ -1,7 +1,5 @@
 package de.espend.idea.laravel.stub;
 
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
@@ -9,8 +7,7 @@ import com.intellij.util.io.EnumeratorStringDescriptor;
 import com.intellij.util.io.KeyDescriptor;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.psi.PhpFile;
-import de.espend.idea.laravel.config.AppConfigReferences;
-import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
+import de.espend.idea.laravel.translation.utils.TranslationUtil;
 import de.espend.idea.laravel.util.ArrayReturnPsiRecursiveVisitor;
 import gnu.trove.THashMap;
 import org.jetbrains.annotations.NotNull;
@@ -34,35 +31,25 @@ public class TranslationKeyStubIndex extends FileBasedIndexExtension<String, Voi
     @NotNull
     @Override
     public DataIndexer<String, Void, FileContent> getIndexer() {
-        return new DataIndexer<String, Void, FileContent>() {
-            @NotNull
-            @Override
-            public Map<String, Void> map(@NotNull FileContent fileContent) {
+        return fileContent -> {
 
-                final Map<String, Void> map = new THashMap<String, Void>();
+            final Map<String, Void> map = new THashMap<>();
 
-                PsiFile psiFile = fileContent.getPsiFile();
-                if(!(psiFile instanceof PhpFile)) {
-                    return map;
-                }
-
-                String path = fileContent.getFile().getPath();
-
-                // app/lang/fr_FR/messages.php
-                // app/lang/fr/messages.php
-                // app/lang/packages/en/hearthfire/messages.php
-                // app/lang/packages/fr_FR/hearthfire/messages.php
-                if(path.matches(".*/lang/(\\w{2}|\\w{2}_\\w{2})/\\w+.php$") || path.matches(".*/lang/packages/(\\w{2}|\\w{2}_\\w{2})/\\w+/\\w+.php$")) {
-                    psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(fileContent.getFile().getNameWithoutExtension(), new ArrayKeyVisitor() {
-                        @Override
-                        public void visit(String key, PsiElement psiKey, boolean isRootElement) {
-                            map.put(key, null);
-                        }
-                    }));
-                }
-
+            PsiFile psiFile = fileContent.getPsiFile();
+            if(!(psiFile instanceof PhpFile)) {
                 return map;
             }
+
+            String namespace = TranslationUtil.getNamespaceFromFilePath(fileContent.getFile().getPath());
+            if(namespace == null) {
+                return map;
+            }
+
+            psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(
+                namespace, (key, psiKey, isRootElement) -> map.put(key, null))
+            );
+
+            return map;
         };
     }
 
@@ -81,12 +68,7 @@ public class TranslationKeyStubIndex extends FileBasedIndexExtension<String, Voi
     @NotNull
     @Override
     public FileBasedIndex.InputFilter getInputFilter() {
-        return new FileBasedIndex.InputFilter() {
-            @Override
-            public boolean acceptInput(@NotNull VirtualFile file) {
-                return file.getFileType() == PhpFileType.INSTANCE;
-            }
-        };
+        return file -> file.getFileType() == PhpFileType.INSTANCE;
     }
 
     @Override
@@ -96,8 +78,6 @@ public class TranslationKeyStubIndex extends FileBasedIndexExtension<String, Voi
 
     @Override
     public int getVersion() {
-        return 1;
+        return 2;
     }
-
-
 }
