@@ -33,8 +33,6 @@ public class LaravelProjectSettingsForm implements Configurable {
 
     private JCheckBox enabled;
     private JPanel panel1;
-    private TextFieldWithBrowseButton textViewsPath;
-    private JButton buttonViewsPathReset;
     private JCheckBox useAutoPopopForCompletionCheckBox;
     private JTextField textRouterNamespace;
 
@@ -53,9 +51,6 @@ public class LaravelProjectSettingsForm implements Configurable {
     @Nullable
     @Override
     public JComponent createComponent() {
-
-        textViewsPath.getButton().addMouseListener(createPathButtonMouseListener(textViewsPath.getTextField(), FileChooserDescriptorFactory.createSingleFolderDescriptor()));
-
         return (JComponent) panel1;
     }
 
