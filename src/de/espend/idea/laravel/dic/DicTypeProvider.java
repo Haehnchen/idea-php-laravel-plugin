@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.php.PhpIndex;
 import com.jetbrains.php.lang.psi.elements.*;
-import com.jetbrains.php.lang.psi.elements.impl.FunctionReferenceImpl;
 import com.jetbrains.php.lang.psi.resolve.types.PhpTypeProvider2;
 import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.dic.utils.LaravelDicUtil;
@@ -42,11 +41,11 @@ public class DicTypeProvider implements PhpTypeProvider2 {
 
         // container calls are only on "get" methods
         if(psiElement instanceof FunctionReference && "app".equals(((FunctionReference) psiElement).getName())) {
-            PsiElement[] parameters = ((FunctionReferenceImpl) psiElement).getParameters();
+            PsiElement[] parameters = ((FunctionReference) psiElement).getParameters();
             if(parameters.length > 0 && parameters[0] instanceof StringLiteralExpression) {
                 String contents = ((StringLiteralExpression) parameters[0]).getContents();
                 if(StringUtils.isNotBlank(contents)) {
-                    return ((FunctionReferenceImpl) psiElement).getSignature() + TRIM_KEY + contents;
+                    return ((FunctionReference) psiElement).getSignature() + TRIM_KEY + contents;
                 }
             }
         }
