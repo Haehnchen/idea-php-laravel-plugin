@@ -1,10 +1,12 @@
 #!/bin/bash
 
-ideaVersion="14.1.4"
-if [ "$PHPSTORM_ENV" == "10" ]; then
-    ideaVersion="15.0"
-elif [ "$PHPSTORM_ENV" == "10eap" ]; then
-    ideaVersion="143.870.1"  
+ideaVersion="2016.1"
+if [ "$PHPSTORM_ENV" == "2016.1" ]; then
+    ideaVersion="2016.1"
+elif [ "$PHPSTORM_ENV" == "2016.1.2" ]; then
+    ideaVersion="2016.1.2"
+elif [ "$PHPSTORM_ENV" == "eap" ]; then
+    ideaVersion="162.426.1"
 fi
 
 travisCache=".cache"
@@ -54,42 +56,35 @@ if [ -d ./plugins ]; then
   echo "created plugin dir"  
 fi
 
-if [ "$PHPSTORM_ENV" == "9" ]; then
+if [ "$PHPSTORM_ENV" == "2016.1" ]; then
 
     #php
-    download "http://plugins.jetbrains.com/files/6610/20930/php-141.2462.zip"
-    unzip -qo $travisCache/php-141.2462.zip -d ./plugins
+    download "https://plugins.jetbrains.com/files/6610/24752/php-145.258.2.zip"
+    unzip -qo $travisCache/php-145.258.2.zip -d ./plugins
 
     #blade
-    download "http://plugins.jetbrains.com/files/7569/22053/blade-143.381.48.zip"
-    unzip -qo $travisCache/blade-143.381.48.zip -d ./plugins
+    download "http://plugins.jetbrains.com/files/7569/24762/blade-145.258.2.zip"
+    unzip -qo $travisCache/blade-145.258.2.zip -d ./plugins
 
-elif [ "$PHPSTORM_ENV" == "10" ]; then
+elif [ "$PHPSTORM_ENV" == "2016.1.2" ]; then
 
     #php
-    download "http://plugins.jetbrains.com/files/6610/22045/php-143.381.48.zip"
-    unzip -qo $travisCache/php-143.381.48.zip -d ./plugins
+    download "https://plugins.jetbrains.com/files/6610/25793/php-145.970.40.zip"
+    unzip -qo $travisCache/php-145.970.40.zip -d ./plugins
 
     #blade
-    download "http://plugins.jetbrains.com/files/7569/20766/blade-141.2325.zip"
-    unzip -qo $travisCache/blade-141.2325.zip -d ./plugins
+    download "http://plugins.jetbrains.com/files/7569/25962/blade-145.970.40.zip"
+    unzip -qo $travisCache/blade-145.970.40.zip -d ./plugins
 
-elif [ "$PHPSTORM_ENV" == "10eap" ]; then
-
-    #php
-    download "http://plugins.jetbrains.com/files/6610/22267/php-143.790.zip"
-    unzip -qo $travisCache/php-143.790.zip -d ./plugins
-
-    #blade
-    download "http://plugins.jetbrains.com/files/7569/20766/blade-141.2325.zip"
-    unzip -qo $travisCache/blade-141.2325.zip -d ./plugins
-    
 elif [ "$PHPSTORM_ENV" == "eap" ]; then
 
-    # TODO: extract latest builds for plugins from eap site they are not public
-    # https://confluence.jetbrains.com/display/PhpStorm/PhpStorm+Early+Access+Program
-    echo "No configuration for PhpStorm: $PHPSTORM_ENV"
-    exit 1
+    #php
+    download "http://phpstorm.espend.de/version-proxy/6610/162.426.10"
+    unzip -qo $travisCache/php-162.426.10.zip -d ./plugins
+
+    #blade
+    download "http://plugins.jetbrains.com/files/7569/25962/blade-145.970.40.zip"
+    unzip -qo $travisCache/blade-145.970.40.zip -d ./plugins
 
 else
     echo "Unknown PHPSTORM_ENV value: $PHPSTORM_ENV"
