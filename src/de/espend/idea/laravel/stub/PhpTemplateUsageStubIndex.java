@@ -93,7 +93,8 @@ public class PhpTemplateUsageStubIndex extends FileBasedIndexExtension<String, V
                             return;
                         }
 
-                        map.put(contents, null);
+                        // replace done by Laravel before rendering
+                        map.put(contents.replace(".", "/").toLowerCase(), null);
                     }
 
                     public void visitMethodReference(MethodReference methodReference) {
@@ -122,8 +123,8 @@ public class PhpTemplateUsageStubIndex extends FileBasedIndexExtension<String, V
                             return;
                         }
 
-                        map.put(contents, null);
-
+                        // replace done by Laravel before rendering
+                        map.put(contents.replace(".", "/").toLowerCase(), null);
                     }
 
                 });

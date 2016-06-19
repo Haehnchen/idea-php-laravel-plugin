@@ -1,15 +1,15 @@
 package de.espend.idea.laravel.tests.stubs;
 
-import de.espend.idea.laravel.stub.BladeTemplateUsageStubIndex;
+import de.espend.idea.laravel.stub.PhpTemplateUsageStubIndex;
 import de.espend.idea.laravel.tests.LaravelLightCodeInsightFixtureTestCase;
 
 import java.io.File;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
- * @see de.espend.idea.laravel.stub.BladeTemplateUsageStubIndex
+ * @see de.espend.idea.laravel.stub.PhpTemplateUsageStubIndex
  */
-public class BladeTemplateUsageStubIndexTest extends LaravelLightCodeInsightFixtureTestCase {
+public class PhpTemplateUsageStubIndexTest extends LaravelLightCodeInsightFixtureTestCase {
 
     @Override
     public void setUp() throws Exception {
@@ -22,7 +22,7 @@ public class BladeTemplateUsageStubIndexTest extends LaravelLightCodeInsightFixt
     }
 
     public void testThatViewInIndex() {
-        assertIndexContains(BladeTemplateUsageStubIndex.KEY,
+        assertIndexContains(PhpTemplateUsageStubIndex.KEY,
             "foobar", "foobar_car", "foo/bar", "foo/bar_cat"
         );
     }
