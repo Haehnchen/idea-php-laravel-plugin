@@ -19,7 +19,9 @@ import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import com.jetbrains.php.lang.PhpFileType;
+import com.jetbrains.php.lang.psi.elements.Method;
 import com.jetbrains.php.lang.psi.elements.ParameterList;
+import com.jetbrains.php.lang.psi.elements.PhpClass;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
@@ -27,6 +29,7 @@ import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import de.espend.idea.laravel.stub.*;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,6 +66,10 @@ public class TemplateLineMarker implements LineMarkerProvider {
                 collectTemplateFileRelatedFiles((PsiFile) psiElement, collection);
             }
 
+            if(psiElement instanceof PhpClass) {
+                collectControllerMethod((PhpClass) psiElement, collection);
+            }
+
             if(psiElement.getNode().getElementType() == BladeTokenTypes.SECTION_DIRECTIVE) {
                 PsiElement nextSibling = psiElement.getNextSibling();
                 if(nextSibling instanceof BladePsiDirectiveParameter) {
@@ -86,6 +93,23 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
         }
 
+    }
+
+    /**
+     *
+     */
+    private void collectControllerMethod(@NotNull PhpClass phpClass, @NotNull Collection<LineMarkerInfo> collection) {
+        if(!PhpElementsUtil.isInstanceOf(phpClass, "\\Illuminate\\Routing\\Controller")) {
+            return;
+        }
+
+        for (Method method : phpClass.getOwnMethods()) {
+            if(!method.getAccess().isPublic()) {
+                return;
+            }
+
+            BladeTemplateUtil.getViewTemplatesScope(method);
+        }
     }
 
     /**

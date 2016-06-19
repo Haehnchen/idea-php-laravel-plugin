@@ -12,6 +12,7 @@ import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.patterns.PhpPatterns;
 import com.jetbrains.php.lang.psi.PhpPsiUtil;
 import com.jetbrains.php.lang.psi.elements.*;
+import com.jetbrains.php.lang.psi.resolve.types.PhpType;
 import fr.adrienbrault.idea.symfony2plugin.dic.MethodReferenceBag;
 import fr.adrienbrault.idea.symfony2plugin.util.ParameterBag;
 import org.apache.commons.lang.StringUtils;
@@ -379,5 +380,13 @@ public class PhpElementsUtil {
         String methodRefName = ((MethodReference) psiElement).getName();
 
         return null != methodRefName && Arrays.asList(methodName).contains(methodRefName);
+    }
+
+    /**
+     * @param subjectClass eg DateTime
+     * @param expectedClass eg DateTimeInterface
+     */
+    public static boolean isInstanceOf(@NotNull PhpClass subjectClass, @NotNull String expectedClass) {
+        return new PhpType().add(expectedClass).isConvertibleFrom(new PhpType().add(subjectClass), PhpIndex.getInstance(subjectClass.getProject()));
     }
 }
