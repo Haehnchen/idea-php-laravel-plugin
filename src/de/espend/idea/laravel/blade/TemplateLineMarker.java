@@ -4,34 +4,34 @@ import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
 import com.intellij.navigation.GotoRelatedItem;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.ConstantFunction;
-import com.intellij.util.Processor;
 import com.intellij.util.indexing.FileBasedIndexImpl;
 import com.intellij.util.indexing.ID;
 import com.jetbrains.php.PhpIcons;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
-import com.jetbrains.php.lang.PhpFileType;
-import com.jetbrains.php.lang.psi.elements.ParameterList;
-import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
-import de.espend.idea.laravel.stub.*;
+import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
+import de.espend.idea.laravel.stub.BladeIncludeStubIndex;
+import de.espend.idea.laravel.stub.BladeSectionStubIndex;
+import de.espend.idea.laravel.stub.PhpTemplateUsageStubIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
@@ -124,15 +124,23 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
     private void collectTemplateFileRelatedFiles(final PsiFile psiFile, @NotNull Collection<LineMarkerInfo> collection) {
 
-        Set<String> templateNames = BladeTemplateUtil.getFileTemplateName(psiFile.getProject(), psiFile.getVirtualFile());
-        if(templateNames.size() == 0) {
+        Set<String> collectedTemplates = BladeTemplateUtil.getFileTemplateName(psiFile.getProject(), psiFile.getVirtualFile());
+        if(collectedTemplates.size() == 0) {
             return;
         }
 
-        // normalize all template names and support both: "foo.bar" and "foo/bar"
-        for (String templateName : templateNames) {
-            templateNames.add(templateName.replace(".", "/"));
+        // lowercase for index
+        Set<String> templateNames = new HashSet<>();
+        for (String templateName : collectedTemplates) {
+            templateNames.add(templateName);
+            templateNames.add(templateName.toLowerCase());
         }
+
+        // normalize all template names and support both: "foo.bar" and "foo/bar"
+        templateNames.addAll(new HashSet<>(templateNames)
+            .stream().map(templateName -> templateName.replace(".", "/"))
+            .collect(Collectors.toList())
+        );
 
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
 
@@ -150,26 +158,28 @@ public class TemplateLineMarker implements LineMarkerProvider {
             }
         }
 
+        // collect tagged index files
+        Collection<VirtualFile> files = new HashSet<>();
         for(final String templateName: templateNames) {
-            FileBasedIndexImpl.getInstance().getFilesWithKey(PhpTemplateUsageStubIndex.KEY, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
-                PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
-                if(psiFileTarget == null) {
-                    return true;
-                }
+            files.addAll(
+                FileBasedIndexImpl.getInstance().getContainingFiles(PhpTemplateUsageStubIndex.KEY, templateName, GlobalSearchScope.allScope(psiFile.getProject()))
+            );
+        }
 
-                psiFileTarget.accept(new PsiRecursiveElementWalkingVisitor() {
-                    @Override
-                    public void visitElement(PsiElement element) {
-                        if(element instanceof StringLiteralExpression && element.getParent() instanceof ParameterList && templateName.equals(((StringLiteralExpression) element).getContents())) {
-                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(element).withIcon(PhpIcons.IMPLEMENTED, PhpIcons.IMPLEMENTED));
-                        }
+        for (VirtualFile file : files) {
+            PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(file);
+            if(psiFileTarget == null) {
+                continue;
+            }
 
-                        super.visitElement(element);
+            Collection<Pair<String, PsiElement>> pairs = BladeTemplateUtil.getViewTemplatesPairScope(psiFileTarget);
+            for (String templateName : templateNames) {
+                for (Pair<String, PsiElement> pair : pairs) {
+                    if(templateName.equalsIgnoreCase(pair.first)) {
+                        gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(pair.getSecond()).withIcon(PhpIcons.IMPLEMENTED, PhpIcons.IMPLEMENTED));
                     }
-                });
-
-                return true;
-            }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(psiFile.getProject()), PhpFileType.INSTANCE));
+                }
+            }
         }
 
         if(gotoRelatedItems.size() == 0) {

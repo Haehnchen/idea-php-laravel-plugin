@@ -1,6 +1,7 @@
 package de.espend.idea.laravel.blade.util;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -13,10 +14,12 @@ import com.intellij.util.Processor;
 import com.intellij.util.indexing.FileBasedIndexImpl;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.psi.BladeDirectiveElementType;
-import com.jetbrains.php.blade.psi.BladeDirectiveParameterPsiImpl;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
-import de.espend.idea.laravel.LaravelSettings;
+import com.jetbrains.php.lang.psi.elements.ClassReference;
+import com.jetbrains.php.lang.psi.elements.FunctionReference;
+import com.jetbrains.php.lang.psi.elements.MethodReference;
+import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
 import de.espend.idea.laravel.util.PsiElementUtils;
@@ -24,17 +27,18 @@ import de.espend.idea.laravel.view.ViewCollector;
 import de.espend.idea.laravel.view.dict.TemplatePath;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
 public class BladeTemplateUtil {
+    public static Set<String> RENDER_METHODS = new HashSet<String>() {{
+        add("make");
+        add("of");
+    }};
 
     @NotNull
     public static Set<VirtualFile> resolveTemplateName(Project project, String templateName) {
@@ -257,4 +261,88 @@ public class BladeTemplateUtil {
         public void visit(@NotNull DirectiveParameterVisitorParameter parameter);
     }
 
+    public static Collection<Pair<String, PsiElement>> getViewTemplatesPairScope(@NotNull PsiElement psiElement) {
+        Collection<Pair<String, PsiElement>> views = new ArrayList<>();
+
+        psiElement.accept(new MyViewRecursiveElementWalkingVisitor(views));
+
+        return views;
+    }
+
+    public static Collection<String> getViewTemplatesScope(@NotNull PsiElement psiElement) {
+        return getViewTemplatesPairScope(psiElement)
+                .stream().map(view -> view.getFirst())
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    private static class MyViewRecursiveElementWalkingVisitor extends PsiRecursiveElementWalkingVisitor {
+        private final Collection<Pair<String, PsiElement>> views;
+
+        private MyViewRecursiveElementWalkingVisitor(Collection<Pair<String, PsiElement>> views) {
+            this.views = views;
+        }
+
+        @Override
+        public void visitElement(PsiElement element) {
+
+            if(element instanceof MethodReference) {
+                visitMethodReference((MethodReference) element);
+            }
+
+            if(element instanceof FunctionReference) {
+                visitFunctionReference((FunctionReference) element);
+            }
+
+            super.visitElement(element);
+        }
+
+        private void visitFunctionReference(FunctionReference functionReference) {
+
+            if(!"view".equals(functionReference.getName())) {
+                return;
+            }
+
+            PsiElement[] parameters = functionReference.getParameters();
+
+            if(parameters.length < 1 || !(parameters[0] instanceof StringLiteralExpression)) {
+                return;
+            }
+
+            String contents = ((StringLiteralExpression) parameters[0]).getContents();
+            if(StringUtils.isBlank(contents)) {
+                return;
+            }
+
+            views.add(Pair.create(contents, parameters[0]));
+        }
+
+        private void visitMethodReference(MethodReference methodReference) {
+
+            String methodName = methodReference.getName();
+            if(!RENDER_METHODS.contains(methodName)) {
+                return;
+            }
+
+            PsiElement classReference = methodReference.getFirstChild();
+            if(!(classReference instanceof ClassReference)) {
+                return;
+            }
+
+            if(!"View".equals(((ClassReference) classReference).getName())) {
+                return;
+            }
+
+            PsiElement[] parameters = methodReference.getParameters();
+            if(parameters.length == 0 || !(parameters[0] instanceof StringLiteralExpression)) {
+                return;
+            }
+
+            String contents = ((StringLiteralExpression) parameters[0]).getContents();
+            if(StringUtils.isBlank(contents)) {
+                return;
+            }
+
+            views.add(Pair.create(contents, parameters[0]));
+        }
+    }
 }
