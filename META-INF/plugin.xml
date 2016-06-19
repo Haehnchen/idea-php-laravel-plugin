@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.9.1</version>
+  <version>0.10.0</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -46,6 +46,17 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.10.0</h2>
+    <ul>
+        <li>Dont print full function signature in tail text, only extract parameter</li>
+        <li>Dropping redundant view path setting elements <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/59">#59</a></li>
+        <li>Route::group old laravel versions support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/47">#47</a></li>
+        <li>Fix MethodReferenceImpl cannot be cast to ... in dic type provider <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/54">#54</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/60">#60</a></li>
+        <li>Update travis environment to use PhpStorm.2016+ and Java8 deps</li>
+        <li>Fix jump to doesn't work for @include('some/view/path') <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/62">#62</a></li>
+        <li>Support translate in subdirectories <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/61">#61</a></li>
+    </ul>
 
     <h2>0.9.1</h2>
     <ul>

@@ -1,3 +1,12 @@
+## 0.10.0
+- Dont print full function signature in tail text, only extract parameter
+- Dropping redundant view path setting elements #59
+- Route::group old laravel versions support #47
+- Fix MethodReferenceImpl cannot be cast to ... in dic type provider #54 #60
+- Update travis environment to use PhpStorm.2016+ and Java8 deps
+- Fix jump to doesn't work for @include('some/view/path') #62
+- Support translate in subdirectories #61
+
 ## 0.9.1
 - Fix Route::group and Laravel doesn't allow Route::group for controllers not in default namespace #46 @adelf
 - Route completion displays origin class of trait methods and provides parameter tail text
