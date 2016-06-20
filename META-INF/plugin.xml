@@ -170,6 +170,7 @@
       <projectConfigurable instance="de.espend.idea.laravel.ui.LaravelProjectSettingsForm"
                            id="Laravel.SettingsForm"
                            displayName="Laravel Plugin"
+                           parentId="reference.webide.settings.project.settings.php"
                            nonDefaultProject="true"
               />
 
