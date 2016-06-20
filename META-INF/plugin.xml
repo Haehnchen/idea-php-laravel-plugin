@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.10.0</version>
+  <version>0.10.1</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -46,6 +46,11 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.10.1</h2>
+    <ul>
+        <li>Fix Plugin throws java.util.ConcurrentModificationException <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/64">#64</a></li>
+    </ul>
 
     <h2>0.10.0</h2>
     <ul>

@@ -1,3 +1,6 @@
+## 0.10.1
+- Fix Plugin throws java.util.ConcurrentModificationException #64
+
 ## 0.10.0
 - Dont print full function signature in tail text, only extract parameter
 - Dropping redundant view path setting elements #59
