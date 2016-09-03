@@ -18,7 +18,6 @@ import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,17 +31,14 @@ public class RoutingUtil {
 
     public static final String[] HTTP_METHODS = new String[]{"get", "post", "put", "delete", "patch", "delete", "options", "any"};
 
-    private static final Key<CachedValue<Collection<String>>> ROUTE_NAMES = new Key<CachedValue<Collection<String>>>("LaravelRoutingUtilNames");
+    private static final Key<CachedValue<Collection<String>>> ROUTE_NAMES = new Key<>("LaravelRoutingUtilNames");
 
     public static Collection<PsiElement> getRoutesAsTargets(@NotNull PsiFile psiFile, final @NotNull String routeName) {
-        final Set<PsiElement> names = new HashSet<PsiElement>();
+        final Set<PsiElement> names = new HashSet<>();
 
-        visitRoutesForAs(psiFile, new RouteAsNameVisitor() {
-            @Override
-            public void visit(@NotNull PsiElement psiElement, @NotNull String name) {
-                if(name.equals(routeName)) {
-                    names.add(psiElement);
-                }
+        visitRoutesForAs(psiFile, (psiElement, name) -> {
+            if(name.equals(routeName)) {
+                names.add(psiElement);
             }
         });
 
@@ -50,7 +46,7 @@ public class RoutingUtil {
     }
 
     public static Collection<PsiElement> getRoutesAsTargets(@NotNull Project project, @NotNull String routeName) {
-        Set<PsiElement> targets = new HashSet<PsiElement>();
+        Set<PsiElement> targets = new HashSet<>();
 
         Set<VirtualFile> virtualFiles = new HashSet<>();
 
@@ -76,16 +72,12 @@ public class RoutingUtil {
         CachedValue<Collection<String>> cache = project.getUserData(ROUTE_NAMES);
 
         if(cache == null) {
-            cache = CachedValuesManager.getManager(project).createCachedValue(new CachedValueProvider<Collection<String>>() {
-                @Nullable
-                @Override
-                public Result<Collection<String>> compute() {
-                    Collection<String> names = new HashSet<>(
-                        CollectProjectUniqueKeys.collect(project, RouteIndexExtension.KEY)
-                    );
+            cache = CachedValuesManager.getManager(project).createCachedValue(() -> {
+                Collection<String> names = new HashSet<>(
+                    CollectProjectUniqueKeys.collect(project, RouteIndexExtension.KEY)
+                );
 
-                    return Result.create(names, PsiModificationTracker.MODIFICATION_COUNT);
-                }
+                return CachedValueProvider.Result.create(names, PsiModificationTracker.MODIFICATION_COUNT);
             }, false);
 
             project.putUserData(ROUTE_NAMES, cache);
@@ -95,14 +87,11 @@ public class RoutingUtil {
     }
 
     public static Collection<String> getRoutesAsNames(@NotNull PsiFile psiFile) {
-        final Set<String> names = new HashSet<String>();
+        final Set<String> names = new HashSet<>();
 
-        visitRoutesForAs(psiFile, new RouteAsNameVisitor() {
-            @Override
-            public void visit(@NotNull PsiElement psiElement, @NotNull String name) {
-                names.add(name);
-            }
-        });
+        visitRoutesForAs(psiFile, (psiElement, name) ->
+            names.add(name)
+        );
 
         return names;
     }

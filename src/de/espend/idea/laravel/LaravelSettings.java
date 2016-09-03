@@ -4,7 +4,6 @@ import com.intellij.openapi.components.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import de.espend.idea.laravel.view.dict.TemplatePath;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
     protected Project project;
 
     @Nullable
-    public List<TemplatePath> templatePaths = new ArrayList<TemplatePath>();
+    public List<TemplatePath> templatePaths = new ArrayList<>();
 
     public static LaravelSettings getInstance(Project project) {
         LaravelSettings settings = ServiceManager.getService(project, LaravelSettings.class);

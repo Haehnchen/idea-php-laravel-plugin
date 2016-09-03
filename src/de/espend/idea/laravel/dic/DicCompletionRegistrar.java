@@ -8,8 +8,6 @@ import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.dic.utils.LaravelDicUtil;
-import de.espend.idea.laravel.routing.utils.RoutingUtil;
-import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
@@ -17,7 +15,6 @@ import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,27 +33,20 @@ public class DicCompletionRegistrar implements GotoCompletionRegistrar {
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
-        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
-
-            @Nullable
-            @Override
-            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
-
-                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
-                    return null;
-                }
-
-                PsiElement parent = psiElement.getParent();
-                if(parent != null && (
-                    MethodMatcher.getMatchedSignatureWithDepth(parent, DIC) != null ||
-                    PhpElementsUtil.isFunctionReference(parent, 0, "app")
-                )) {
-                    return new DicGotoCompletionProvider(parent);
-                }
-
+        registrar.register(PlatformPatterns.psiElement(), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
-
             }
+
+            PsiElement parent = psiElement.getParent();
+            if(parent != null && (
+                MethodMatcher.getMatchedSignatureWithDepth(parent, DIC) != null ||
+                PhpElementsUtil.isFunctionReference(parent, 0, "app")
+            )) {
+                return new DicGotoCompletionProvider(parent);
+            }
+
+            return null;
 
         });
     }
@@ -70,7 +60,7 @@ public class DicCompletionRegistrar implements GotoCompletionRegistrar {
         @NotNull
         @Override
         public Collection<LookupElement> getLookupElements() {
-            Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
+            Collection<LookupElement> lookupElements = new ArrayList<>();
             for (Map.Entry<String, Collection<String>> entry : LaravelDicUtil.getDicMap(getProject()).entrySet()) {
                 lookupElements.add(LookupElementBuilder.create(entry.getKey()).withIcon(LaravelIcons.LARAVEL).withTypeText(StringUtils.join(entry.getValue(), ", "), true));
             }

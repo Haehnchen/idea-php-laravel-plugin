@@ -2,7 +2,6 @@ package de.espend.idea.laravel.blade;
 
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler;
 import com.intellij.codeInsight.navigation.NavigationUtil;
-import com.intellij.ide.actions.GotoRelatedFileAction;
 import com.intellij.navigation.GotoRelatedItem;
 import com.intellij.psi.PsiElement;
 import com.intellij.ui.awt.RelativePoint;

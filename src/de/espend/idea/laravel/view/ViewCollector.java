@@ -25,9 +25,9 @@ public class ViewCollector {
         // "resources/templates" -> laravel 5
 
         String[] defaultDirs = new String[] {"resources/views", "app/views", "resources/templates"};
-        Collection<TemplatePath> templatePaths = new ArrayList<TemplatePath>();
+        Collection<TemplatePath> templatePaths = new ArrayList<>();
 
-        for(String path: new HashSet<String>(Arrays.asList(defaultDirs))) {
+        for(String path: new HashSet<>(Arrays.asList(defaultDirs))) {
             templatePaths.add(new TemplatePath(path, false));
         }
 
@@ -109,8 +109,7 @@ public class ViewCollector {
 
     }
 
-    public static interface ViewVisitor {
-        public void visit(@NotNull VirtualFile virtualFile, String name);
+    public interface ViewVisitor {
+        void visit(@NotNull VirtualFile virtualFile, String name);
     }
-
 }

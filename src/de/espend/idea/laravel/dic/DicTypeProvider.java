@@ -100,7 +100,7 @@ public class DicTypeProvider implements PhpTypeProvider2 {
             return phpNamedElementCollections;
         }
 
-        Collection<PhpNamedElement> phpClasses = new ArrayList<PhpNamedElement>();
+        Collection<PhpNamedElement> phpClasses = new ArrayList<>();
 
         Map<String, Collection<String>> coreAliasMap = LaravelDicUtil.getDicMap(project);
         if(!coreAliasMap.containsKey(parameter) || coreAliasMap.get(parameter).size() == 0) {

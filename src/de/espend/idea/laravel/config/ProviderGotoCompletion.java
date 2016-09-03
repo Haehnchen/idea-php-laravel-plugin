@@ -11,11 +11,11 @@ import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
@@ -24,40 +24,34 @@ public class ProviderGotoCompletion implements GotoCompletionRegistrar {
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
-        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
+        registrar.register(PlatformPatterns.psiElement(), psiElement -> {
+            if(psiElement == null || !psiElement.getContainingFile().getName().contains("app.php")) {
+                return null;
+            }
 
-            @Nullable
-            @Override
-            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
-
-                if(psiElement == null || !psiElement.getContainingFile().getName().contains("app.php")) {
-                    return null;
-                }
-
-                // array('providers' => array('foo'))
-                PsiElement literal = psiElement.getParent();
-                if(literal instanceof StringLiteralExpression) {
-                    PsiElement arrayValue = literal.getParent();
-                    if(arrayValue.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE) {
-                        PsiElement arrayCreation = arrayValue.getParent();
-                        if(arrayCreation instanceof ArrayCreationExpression) {
-                            PsiElement arrayValueKey = arrayCreation.getParent();
-                            if(arrayValueKey.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE) {
-                                PsiElement hashArrayElement = arrayValueKey.getParent();
-                                if(hashArrayElement instanceof ArrayHashElement) {
-                                    PhpPsiElement key = ((ArrayHashElement) hashArrayElement).getKey();
-                                    if(key instanceof StringLiteralExpression && "providers".equals(((StringLiteralExpression) key).getContents())) {
-                                        return new ProviderName(psiElement);
-                                    }
-
+            // array('providers' => array('foo'))
+            PsiElement literal = psiElement.getParent();
+            if(literal instanceof StringLiteralExpression) {
+                PsiElement arrayValue = literal.getParent();
+                if(arrayValue.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE) {
+                    PsiElement arrayCreation = arrayValue.getParent();
+                    if(arrayCreation instanceof ArrayCreationExpression) {
+                        PsiElement arrayValueKey = arrayCreation.getParent();
+                        if(arrayValueKey.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE) {
+                            PsiElement hashArrayElement = arrayValueKey.getParent();
+                            if(hashArrayElement instanceof ArrayHashElement) {
+                                PhpPsiElement key = ((ArrayHashElement) hashArrayElement).getKey();
+                                if(key instanceof StringLiteralExpression && "providers".equals(((StringLiteralExpression) key).getContents())) {
+                                    return new ProviderName(psiElement);
                                 }
+
                             }
                         }
                     }
                 }
-
-                return null;
             }
+
+            return null;
         });
 
     }
@@ -72,16 +66,11 @@ public class ProviderGotoCompletion implements GotoCompletionRegistrar {
         @Override
         public Collection<LookupElement> getLookupElements() {
 
-            Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
-
-            for(PhpClass phpClass: PhpIndex.getInstance(getProject()).getAllSubclasses("\\Illuminate\\Support\\ServiceProvider")) {
-                String presentableFQN = phpClass.getPresentableFQN();
-                if(presentableFQN != null) {
-                    lookupElements.add(LookupElementBuilder.create(presentableFQN).withIcon(phpClass.getIcon()));
-                }
-            }
-
-            return lookupElements;
+            return PhpIndex.getInstance(getProject()).getAllSubclasses("\\Illuminate\\Support\\ServiceProvider")
+                .stream()
+                .map(phpClass -> LookupElementBuilder.create(phpClass.getPresentableFQN())
+                    .withIcon(phpClass.getIcon())).collect(Collectors.toCollection(ArrayList::new)
+                );
         }
 
         @NotNull
@@ -90,10 +79,10 @@ public class ProviderGotoCompletion implements GotoCompletionRegistrar {
 
             String contents = element.getContents();
             if(StringUtils.isBlank(contents)) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
 
-            Collection<PsiElement> psiElements = new ArrayList<PsiElement>();
+            Collection<PsiElement> psiElements = new ArrayList<>();
             for(PhpClass phpClass: PhpElementsUtil.getClassesOrInterfaces(element.getProject(), contents)) {
                 psiElements.add(phpClass);
             }

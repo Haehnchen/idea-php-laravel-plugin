@@ -1,6 +1,5 @@
 package de.espend.idea.laravel.stub;
 
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
@@ -32,23 +31,17 @@ public class BladeExtendsStubIndex extends FileBasedIndexExtension<String, Void>
     @NotNull
     @Override
     public DataIndexer<String, Void, FileContent> getIndexer() {
-        return new DataIndexer<String, Void, FileContent>() {
-            @NotNull
-            @Override
-            public Map<String, Void> map(@NotNull FileContent fileContent) {
+        return fileContent -> {
+            Map<String, Void> map = new THashMap<>();
+            PsiFile psiFile = fileContent.getPsiFile();
 
-                Map<String, Void> map = new THashMap<String, Void>();
-
-                PsiFile psiFile = fileContent.getPsiFile();
-
-                if(!(psiFile instanceof BladeFileImpl)) {
-                    return map;
-                }
-
-                psiFile.acceptChildren(new BladeDirectivePsiElementWalkingVisitor(BladeTokenTypes.EXTENDS_DIRECTIVE, map));
-
+            if(!(psiFile instanceof BladeFileImpl)) {
                 return map;
             }
+
+            psiFile.acceptChildren(new BladeDirectivePsiElementWalkingVisitor(BladeTokenTypes.EXTENDS_DIRECTIVE, map));
+
+            return map;
         };
     }
 
@@ -67,12 +60,7 @@ public class BladeExtendsStubIndex extends FileBasedIndexExtension<String, Void>
     @NotNull
     @Override
     public FileBasedIndex.InputFilter getInputFilter() {
-        return new FileBasedIndex.InputFilter() {
-            @Override
-            public boolean acceptInput(@NotNull VirtualFile file) {
-                return file.getFileType() == BladeFileType.INSTANCE;
-            }
-        };
+        return file -> file.getFileType() == BladeFileType.INSTANCE;
     }
 
     @Override

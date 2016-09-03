@@ -13,7 +13,6 @@ import com.jetbrains.php.lang.psi.elements.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -22,30 +21,25 @@ import java.util.*;
  */
 public class LaravelDicUtil {
 
-    private static final Key<CachedValue<Map<String, Collection<String>>>> DIC_CACHE = new Key<CachedValue<Map<String, Collection<String>>>>("LaravelDicUtilMap");
+    private static final Key<CachedValue<Map<String, Collection<String>>>> DIC_CACHE = new Key<>("LaravelDicUtilMap");
 
     synchronized public static Map<String, Collection<String>> getDicMap(@NotNull final Project project) {
         CachedValue<Map<String, Collection<String>>> cache = project.getUserData(DIC_CACHE);
 
         if(cache == null) {
-            cache = CachedValuesManager.getManager(project).createCachedValue(new CachedValueProvider<Map<String, Collection<String>>>() {
-                @Nullable
-                @Override
-                public Result<Map<String, Collection<String>>> compute() {
-                    Map<String, Collection<String>> coreAliasMap = getCoreAliasMap(project);
+            cache = CachedValuesManager.getManager(project).createCachedValue(() -> {
+                Map<String, Collection<String>> coreAliasMap = getCoreAliasMap(project);
 
-                    for (Map.Entry<String, Collection<String>> entry : getServiceProviderMap(project).entrySet()) {
-                        if(coreAliasMap.containsKey(entry.getKey())) {
-                            coreAliasMap.get(entry.getKey()).addAll(entry.getValue());
-                            continue;
-                        }
-
-                        coreAliasMap.put(entry.getKey(), entry.getValue());
+                for (Map.Entry<String, Collection<String>> entry : getServiceProviderMap(project).entrySet()) {
+                    if(coreAliasMap.containsKey(entry.getKey())) {
+                        coreAliasMap.get(entry.getKey()).addAll(entry.getValue());
+                        continue;
                     }
 
-
-                    return Result.create(coreAliasMap, PsiModificationTracker.MODIFICATION_COUNT);
+                    coreAliasMap.put(entry.getKey(), entry.getValue());
                 }
+
+                return CachedValueProvider.Result.create(coreAliasMap, PsiModificationTracker.MODIFICATION_COUNT);
             }, false);
 
             project.putUserData(DIC_CACHE, cache);
@@ -60,7 +54,7 @@ public class LaravelDicUtil {
             return Collections.emptyList();
         }
 
-        Collection<PsiElement> targets = new ArrayList<PsiElement>();
+        Collection<PsiElement> targets = new ArrayList<>();
         for (String s : dicMap.get(dicName)) {
             targets.addAll(PhpElementsUtil.getClassesOrInterfaces(project, s));
         }
@@ -69,44 +63,34 @@ public class LaravelDicUtil {
     }
 
     public static Map<String, Collection<String>> getCoreAliasMap(@NotNull Project project) {
-        final Map<String, Collection<String>> map = new HashMap<String, Collection<String>>();
+        final Map<String, Collection<String>> map = new HashMap<>();
 
-        visitRegisterCoreContainerAliases(project, new DicAliasVisitor() {
-            @Override
-            public void visit(@NotNull PsiElement value, @NotNull String keyName) {
+        visitRegisterCoreContainerAliases(project, (value, keyName) -> {
+            Collection<String> values = new ArrayList<>();
 
-                Collection<String> values = new ArrayList<String>();
-
-                if(value instanceof StringLiteralExpression) {
-                    String contents = ((StringLiteralExpression) value).getContents();
-                    if(StringUtils.isNotBlank(contents)) {
-                        values.add(StringUtils.stripStart(contents, "\\"));
-                    }
-                } else if(value instanceof ArrayCreationExpression) {
-                    values.addAll(ContainerUtil.map(PhpElementsUtil.getArrayValuesAsString((ArrayCreationExpression) value), new Function<String, String>() {
-                        @Override
-                        public String fun(String s) {
-                            return StringUtils.stripStart(s, "\\");
-                        }
-                    }));
+            if(value instanceof StringLiteralExpression) {
+                String contents = ((StringLiteralExpression) value).getContents();
+                if(StringUtils.isNotBlank(contents)) {
+                    values.add(StringUtils.stripStart(contents, "\\"));
                 }
-
-                map.put(keyName, values);
+            } else if(value instanceof ArrayCreationExpression) {
+                values.addAll(ContainerUtil.map(PhpElementsUtil.getArrayValuesAsString((ArrayCreationExpression) value), s -> {
+                    return StringUtils.stripStart(s, "\\");
+                }));
             }
+
+            map.put(keyName, values);
         });
 
         return map;
     }
 
     public static Collection<String> getCoreAliases(@NotNull Project project) {
-        final Collection<String> aliases = new HashSet<String>();
+        final Collection<String> aliases = new HashSet<>();
 
-        visitRegisterCoreContainerAliases(project, new DicAliasVisitor() {
-            @Override
-            public void visit(@NotNull PsiElement value, @NotNull String keyName) {
-                aliases.add(keyName);
-            }
-        });
+        visitRegisterCoreContainerAliases(project, (value, keyName) ->
+            aliases.add(keyName)
+        );
 
         return aliases;
     }
@@ -118,7 +102,7 @@ public class LaravelDicUtil {
                 continue;
             }
 
-            final Collection<Variable> aliases = new HashSet<Variable>();
+            final Collection<Variable> aliases = new HashSet<>();
             registerMethod.acceptChildren(new PsiRecursiveElementVisitor() {
                 @Override
                 public void visitElement(PsiElement element) {
@@ -152,11 +136,11 @@ public class LaravelDicUtil {
 
     public static Map<String, Collection<String>> getServiceProviderMap(@NotNull Project project) {
 
-        Map<String, Collection<String>> map = new HashMap<String, Collection<String>>();
+        Map<String, Collection<String>> map = new HashMap<>();
 
         for (PhpClass phpClass : PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Support\\ServiceProvider")) {
 
-            Collection<MethodReference> methodReferences = new ArrayList<MethodReference>();
+            Collection<MethodReference> methodReferences = new ArrayList<>();
 
             for (Method method : phpClass.getMethods()) {
                 method.acceptChildren(new AppDicRecursiveElementVisitor(methodReferences));
@@ -178,7 +162,7 @@ public class LaravelDicUtil {
                     continue;
                 }
 
-                final Set<String> types = new HashSet<String>();
+                final Set<String> types = new HashSet<>();
 
                 parameters[1].acceptChildren(new PsiRecursiveElementVisitor() {
                     @Override

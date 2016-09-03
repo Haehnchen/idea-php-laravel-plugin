@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.intellij.codeInsight.completion.PrioritizedLookupElement;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.util.Condition;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -66,23 +65,18 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
-        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
-            @Nullable
-            @Override
-            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
-
-                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
-                    return null;
-                }
-
-                PsiElement parent = psiElement.getParent();
-                if(parent != null && MethodMatcher.getMatchedSignatureWithDepth(parent, ROUTE_RESOURCE, 1) != null) {
-                    return createResourceCompletion(parent);
-                }
-
+        registrar.register(PlatformPatterns.psiElement(), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
-
             }
+
+            PsiElement parent = psiElement.getParent();
+            if(parent != null && MethodMatcher.getMatchedSignatureWithDepth(parent, ROUTE_RESOURCE, 1) != null) {
+                return createResourceCompletion(parent);
+            }
+
+            return null;
+
         });
 
         registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
@@ -211,27 +205,21 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         /**
          * Route::controller('users', 'UserController');
          */
-        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
-            @Nullable
-            @Override
-            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
-
-                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
-                    return null;
-                }
-
-                PsiElement parent = psiElement.getParent();
-                if(parent == null) {
-                    return null;
-                }
-                MethodMatcher.MethodMatchParameter matchedSignatureWithDepth = MethodMatcher.getMatchedSignatureWithDepth(parent, CONTROLLER, 1);
-                if(matchedSignatureWithDepth == null) {
-                    return null;
-                }
-
-                return createResourceCompletion(parent);
+        registrar.register(PlatformPatterns.psiElement(), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                return null;
             }
 
+            PsiElement parent = psiElement.getParent();
+            if(parent == null) {
+                return null;
+            }
+            MethodMatcher.MethodMatchParameter matchedSignatureWithDepth = MethodMatcher.getMatchedSignatureWithDepth(parent, CONTROLLER, 1);
+            if(matchedSignatureWithDepth == null) {
+                return null;
+            }
+
+            return createResourceCompletion(parent);
         });
 
     }
@@ -247,14 +235,11 @@ public class ControllerReferences implements GotoCompletionRegistrar {
     @Nullable
     private String getControllerGroupPrefix(@NotNull PsiElement element) {
 
-        List<String> groupNamespaces = new ArrayList<String>();
+        List<String> groupNamespaces = new ArrayList<>();
 
-        PsiElement routeGroup = PsiTreeUtil.findFirstParent(element, true, new Condition<PsiElement>() {
-            @Override
-            public boolean value(PsiElement psiElement) {
-                return MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null;
-            }
-        });
+        PsiElement routeGroup = PsiTreeUtil.findFirstParent(element, true, psiElement ->
+            MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null
+        );
 
         while (routeGroup != null) {
             ArrayCreationExpression arrayCreation = PsiTreeUtil.getChildOfType(routeGroup.getParent(), ArrayCreationExpression.class);
@@ -272,13 +257,9 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 }
             }
 
-
-            routeGroup = PsiTreeUtil.findFirstParent(routeGroup, true, new Condition<PsiElement>() {
-                @Override
-                public boolean value(PsiElement psiElement) {
-                    return MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null;
-                }
-            });
+            routeGroup = PsiTreeUtil.findFirstParent(routeGroup, true, psiElement ->
+                MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null
+            );
         }
 
         if(groupNamespaces.size() > 0) {
@@ -305,27 +286,24 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         @NotNull
         @Override
         public Collection<LookupElement> getLookupElements() {
-            final Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
+            final Collection<LookupElement> lookupElements = new ArrayList<>();
 
-            ControllerCollector.visitControllerActions(getProject(), new ControllerCollector.ControllerActionVisitor() {
-                @Override
-                public void visit(@NotNull PhpClass phpClass, @NotNull Method method, @NotNull String name, boolean prioritised) {
-                    LookupElementBuilder lookupElementBuilder = LookupElementBuilder.create(name)
-                        .withIcon(LaravelIcons.ROUTE)
-                        .withTypeText(phpClass.getPresentableFQN(), true);
+            ControllerCollector.visitControllerActions(getProject(), (phpClass, method, name, prioritised) -> {
+                LookupElementBuilder lookupElementBuilder = LookupElementBuilder.create(name)
+                    .withIcon(LaravelIcons.ROUTE)
+                    .withTypeText(phpClass.getPresentableFQN(), true);
 
-                    Parameter[] parameters = method.getParameters();
-                    if(parameters.length > 0) {
-                        lookupElementBuilder = lookupElementBuilder.withTailText(PhpPresentationUtil.formatParameters(null, parameters).toString());
-                    }
-
-                    LookupElement lookupElement = lookupElementBuilder;
-                    if(prioritised) {
-                        lookupElement = PrioritizedLookupElement.withPriority(lookupElementBuilder, 10);
-                    }
-
-                    lookupElements.add(lookupElement);
+                Parameter[] parameters = method.getParameters();
+                if(parameters.length > 0) {
+                    lookupElementBuilder = lookupElementBuilder.withTailText(PhpPresentationUtil.formatParameters(null, parameters).toString());
                 }
+
+                LookupElement lookupElement = lookupElementBuilder;
+                if(prioritised) {
+                    lookupElement = PrioritizedLookupElement.withPriority(lookupElementBuilder, 10);
+                }
+
+                lookupElements.add(lookupElement);
             }, prefix);
 
             return lookupElements;
@@ -340,16 +318,13 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 return Collections.EMPTY_LIST;
             }
 
-            final Collection<PsiElement> targets = new ArrayList<PsiElement>();
+            final Collection<PsiElement> targets = new ArrayList<>();
 
-            ControllerCollector.visitControllerActions(getProject(), new ControllerCollector.ControllerActionVisitor() {
-                @Override
-                public void visit(@NotNull PhpClass phpClass, @NotNull Method method, @NotNull String name, boolean prioritised) {
-                    if (content.equalsIgnoreCase(name)) {
-                        targets.add(method);
-                    }
-
+            ControllerCollector.visitControllerActions(getProject(), (phpClass, method, name, prioritised) -> {
+                if (content.equalsIgnoreCase(name)) {
+                    targets.add(method);
                 }
+
             }, prefix);
 
             return targets;
@@ -375,19 +350,16 @@ public class ControllerReferences implements GotoCompletionRegistrar {
         @Override
         public Collection<LookupElement> getLookupElements() {
 
-            final Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
+            final Collection<LookupElement> lookupElements = new ArrayList<>();
 
-            ControllerCollector.visitController(getProject(), new ControllerCollector.ControllerVisitor() {
-                @Override
-                public void visit(@NotNull PhpClass method, @NotNull String name, boolean prioritised) {
-                    LookupElement lookupElement = LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE);
+            ControllerCollector.visitController(getProject(), (method, name, prioritised) -> {
+                LookupElement lookupElement = LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE);
 
-                    if(prioritised) {
-                        lookupElement = PrioritizedLookupElement.withPriority(lookupElement, 10);
-                    }
-
-                    lookupElements.add(lookupElement);
+                if(prioritised) {
+                    lookupElement = PrioritizedLookupElement.withPriority(lookupElement, 10);
                 }
+
+                lookupElements.add(lookupElement);
             }, prefix);
 
             return lookupElements;
@@ -402,14 +374,11 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 return Collections.emptyList();
             }
 
-            final Collection<PsiElement> targets = new ArrayList<PsiElement>();
+            final Collection<PsiElement> targets = new ArrayList<>();
 
-            ControllerCollector.visitController(getProject(), new ControllerCollector.ControllerVisitor() {
-                @Override
-                public void visit(@NotNull PhpClass phpClass, @NotNull String name, boolean prioritised) {
-                    if(name.equals(content)) {
-                        targets.add(phpClass);
-                    }
+            ControllerCollector.visitController(getProject(), (phpClass, name, prioritised) -> {
+                if(name.equals(content)) {
+                    targets.add(phpClass);
                 }
             }, prefix);
 

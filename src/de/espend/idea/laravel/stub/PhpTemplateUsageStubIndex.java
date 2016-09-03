@@ -49,8 +49,8 @@ public class PhpTemplateUsageStubIndex extends FileBasedIndexExtension<String, V
         return new DataIndexer<String, Void, FileContent>() {
             @NotNull
             @Override
-            public Map<String, Void> map(FileContent inputData) {
-                final Map<String, Void> map = new THashMap<String, Void>();
+            public Map<String, Void> map(@NotNull FileContent inputData) {
+                final Map<String, Void> map = new THashMap<>();
 
                 PsiFile psiFile = inputData.getPsiFile();
                 if(!LaravelProjectComponent.isEnabledForIndex(psiFile.getProject())) {

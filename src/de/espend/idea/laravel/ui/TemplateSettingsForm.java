@@ -1,12 +1,8 @@
 package de.espend.idea.laravel.ui;
 
-import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.project.Project;
-import com.intellij.ui.AnActionButton;
-import com.intellij.ui.AnActionButtonRunnable;
-import com.intellij.ui.AnActionButtonUpdater;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.table.TableView;
 import com.intellij.util.ui.ColumnInfo;
@@ -20,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -45,8 +39,8 @@ public class TemplateSettingsForm implements Configurable {
 
         this.project = project;
 
-        this.tableView = new TableView<TemplatePath>();
-        this.modelList = new ListTableModel<TemplatePath>(
+        this.tableView = new TableView<>();
+        this.modelList = new ListTableModel<>(
             new NamespaceColumn(),
             new PathColumn(project),
             new CustomColumn()
@@ -56,12 +50,7 @@ public class TemplateSettingsForm implements Configurable {
 
         this.tableView.setModelAndUpdateColumns(this.modelList);
 
-        this.modelList.addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                TemplateSettingsForm.this.changed = true;
-            }
-        });
+        this.modelList.addTableModelListener(e -> TemplateSettingsForm.this.changed = true);
 
         resetToDefault.addMouseListener(new MouseAdapter() {
             @Override
@@ -69,9 +58,8 @@ public class TemplateSettingsForm implements Configurable {
                 super.mouseClicked(e);
                 TemplateSettingsForm.this.resetList();
 
-                List<TemplatePath> sortableLookupItems = new ArrayList<TemplatePath>();
-                sortableLookupItems.addAll(new ArrayList<TemplatePath>(ViewCollector.getPaths(TemplateSettingsForm.this.project, true)));
-                //Collections.sort(sortableLookupItems);
+                List<TemplatePath> sortableLookupItems = new ArrayList<>();
+                sortableLookupItems.addAll(new ArrayList<>(ViewCollector.getPaths(TemplateSettingsForm.this.project, true)));
             }
         });
     }
@@ -83,8 +71,8 @@ public class TemplateSettingsForm implements Configurable {
             return;
         }
         
-        List<TemplatePath> sortableLookupItems = new ArrayList<TemplatePath>();
-        sortableLookupItems.addAll(new ArrayList<TemplatePath>(ViewCollector.getPaths(this.project, includeSettings)));
+        List<TemplatePath> sortableLookupItems = new ArrayList<>();
+        sortableLookupItems.addAll(new ArrayList<>(ViewCollector.getPaths(this.project, includeSettings)));
         //Collections.sort(sortableLookupItems);
 
         for (TemplatePath twigPath : sortableLookupItems) {
@@ -121,35 +109,20 @@ public class TemplateSettingsForm implements Configurable {
             }
         });
 
-        tablePanel.setEditAction(new AnActionButtonRunnable() {
-            @Override
-            public void run(AnActionButton anActionButton) {
-                TemplateSettingsForm.this.openTwigPathDialog(TemplateSettingsForm.this.tableView.getSelectedObject());
-            }
+        tablePanel.setEditAction(anActionButton ->
+            TemplateSettingsForm.this.openTwigPathDialog(TemplateSettingsForm.this.tableView.getSelectedObject())
+        );
+
+        tablePanel.setAddAction(anActionButton -> TemplateSettingsForm.this.openTwigPathDialog(null));
+
+        tablePanel.setEditActionUpdater(e -> {
+            TemplatePath twigPath = TemplateSettingsForm.this.tableView.getSelectedObject();
+            return twigPath != null && twigPath.isCustomPath();
         });
 
-
-        tablePanel.setAddAction(new AnActionButtonRunnable() {
-            @Override
-            public void run(AnActionButton anActionButton) {
-               TemplateSettingsForm.this.openTwigPathDialog(null);
-            }
-        });
-
-        tablePanel.setEditActionUpdater(new AnActionButtonUpdater() {
-            @Override
-            public boolean isEnabled(AnActionEvent e) {
-                TemplatePath twigPath = TemplateSettingsForm.this.tableView.getSelectedObject();
-                return twigPath != null && twigPath.isCustomPath();
-            }
-        });
-
-        tablePanel.setRemoveActionUpdater(new AnActionButtonUpdater() {
-            @Override
-            public boolean isEnabled(AnActionEvent e) {
-                TemplatePath twigPath = TemplateSettingsForm.this.tableView.getSelectedObject();
-                return twigPath != null && twigPath.isCustomPath();
-            }
+        tablePanel.setRemoveActionUpdater(e -> {
+            TemplatePath twigPath = TemplateSettingsForm.this.tableView.getSelectedObject();
+            return twigPath != null && twigPath.isCustomPath();
         });
 
         tablePanel.disableUpAction();
@@ -167,7 +140,7 @@ public class TemplateSettingsForm implements Configurable {
 
     @Override
     public void apply() throws ConfigurationException {
-        List<TemplatePath> twigPaths = new ArrayList<TemplatePath>();
+        List<TemplatePath> twigPaths = new ArrayList<>();
 
         for(TemplatePath twigPath :this.tableView.getListTableModel().getItems()) {
             if(twigPath.isCustomPath()) {

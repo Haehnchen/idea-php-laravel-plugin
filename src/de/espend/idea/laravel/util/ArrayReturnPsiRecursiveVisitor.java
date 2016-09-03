@@ -7,12 +7,12 @@ import com.jetbrains.php.lang.psi.elements.ArrayCreationExpression;
 import com.jetbrains.php.lang.psi.elements.ArrayHashElement;
 import com.jetbrains.php.lang.psi.elements.PhpReturn;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
-import de.espend.idea.laravel.config.AppConfigReferences;
 import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ArrayReturnPsiRecursiveVisitor extends PsiRecursiveElementWalkingVisitor {
@@ -44,7 +44,7 @@ public class ArrayReturnPsiRecursiveVisitor extends PsiRecursiveElementWalkingVi
 
 
     public static void collectConfigKeys(ArrayCreationExpression creationExpression, ArrayKeyVisitor arrayKeyVisitor, String configName) {
-        collectConfigKeys(creationExpression, arrayKeyVisitor, Arrays.asList(configName));
+        collectConfigKeys(creationExpression, arrayKeyVisitor, Collections.singletonList(configName));
     }
 
     public static void collectConfigKeys(ArrayCreationExpression creationExpression, ArrayKeyVisitor arrayKeyVisitor, List<String> context) {
@@ -56,7 +56,7 @@ public class ArrayReturnPsiRecursiveVisitor extends PsiRecursiveElementWalkingVi
 
             if(arrayKey instanceof StringLiteralExpression) {
 
-                List<String> myContext = new ArrayList<String>(context);
+                List<String> myContext = new ArrayList<>(context);
                 myContext.add(((StringLiteralExpression) arrayKey).getContents());
                 String keyName = StringUtils.join(myContext, ".");
 

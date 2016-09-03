@@ -3,15 +3,12 @@ package de.espend.idea.laravel.util;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.php.lang.psi.elements.FunctionReference;
 import com.jetbrains.php.lang.psi.elements.ParameterList;
-import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import fr.adrienbrault.idea.symfony2plugin.util.ParameterBag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class PsiElementUtils {
@@ -20,7 +17,7 @@ public class PsiElementUtils {
      * getChildren fixed helper
      */
     static public PsiElement[] getChildrenFix(PsiElement psiElement) {
-        List<PsiElement> psiElements = new ArrayList<PsiElement>();
+        List<PsiElement> psiElements = new ArrayList<>();
 
         PsiElement startElement = psiElement.getFirstChild();
         if(startElement == null) {

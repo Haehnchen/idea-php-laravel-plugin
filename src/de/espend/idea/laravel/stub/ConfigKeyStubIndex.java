@@ -1,6 +1,5 @@
 package de.espend.idea.laravel.stub;
 
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.indexing.*;
@@ -9,7 +8,6 @@ import com.intellij.util.io.EnumeratorStringDescriptor;
 import com.intellij.util.io.KeyDescriptor;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.psi.PhpFile;
-import de.espend.idea.laravel.config.AppConfigReferences;
 import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
 import de.espend.idea.laravel.util.ArrayReturnPsiRecursiveVisitor;
 import gnu.trove.THashMap;
@@ -34,35 +32,27 @@ public class ConfigKeyStubIndex extends FileBasedIndexExtension<String, Void> {
     @NotNull
     @Override
     public DataIndexer<String, Void, FileContent> getIndexer() {
-        return new DataIndexer<String, Void, FileContent>() {
-            @NotNull
-            @Override
-            public Map<String, Void> map(@NotNull FileContent fileContent) {
+        return fileContent -> {
+            final Map<String, Void> map = new THashMap<>();
 
-                final Map<String, Void> map = new THashMap<String, Void>();
-
-                PsiFile psiFile = fileContent.getPsiFile();
-                if(!(psiFile instanceof PhpFile)) {
-                    return map;
-                }
-
-                String path = fileContent.getFile().getPath();
-
-                // config/app.php
-                // config/testing/app.php
-                if(path.matches(".*/config/\\w+.php$") || path.matches(".*/config/\\w+/\\w+.php$")) {
-                    psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(fileContent.getFile().getNameWithoutExtension(), new ArrayKeyVisitor() {
-                        @Override
-                        public void visit(String key, PsiElement psiKey, boolean isRootElement) {
-                            if (!isRootElement) {
-                                map.put(key, null);
-                            }
-                        }
-                    }));
-                }
-
+            PsiFile psiFile = fileContent.getPsiFile();
+            if(!(psiFile instanceof PhpFile)) {
                 return map;
             }
+
+            String path = fileContent.getFile().getPath();
+
+            // config/app.php
+            // config/testing/app.php
+            if(path.matches(".*/config/\\w+.php$") || path.matches(".*/config/\\w+/\\w+.php$")) {
+                psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(fileContent.getFile().getNameWithoutExtension(), (key, psiKey, isRootElement) -> {
+                    if (!isRootElement) {
+                        map.put(key, null);
+                    }
+                }));
+            }
+
+            return map;
         };
     }
 
@@ -81,12 +71,7 @@ public class ConfigKeyStubIndex extends FileBasedIndexExtension<String, Void> {
     @NotNull
     @Override
     public FileBasedIndex.InputFilter getInputFilter() {
-        return new FileBasedIndex.InputFilter() {
-            @Override
-            public boolean acceptInput(@NotNull VirtualFile file) {
-                return file.getFileType() == PhpFileType.INSTANCE;
-            }
-        };
+        return file -> file.getFileType() == PhpFileType.INSTANCE;
     }
 
     @Override

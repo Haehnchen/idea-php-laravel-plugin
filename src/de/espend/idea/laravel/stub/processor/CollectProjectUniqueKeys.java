@@ -40,7 +40,7 @@ public class CollectProjectUniqueKeys implements Processor<String> {
     }
 
     public Set<String> getResult() {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
 
         for (String key : stringSet) {
             Collection fileCollection = FileBasedIndex.getInstance().getContainingFiles(id, key, GlobalSearchScope.allScope(project));

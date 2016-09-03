@@ -19,7 +19,6 @@ import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
-import de.espend.idea.laravel.blade.dict.DirectiveParameterVisitorParameter;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
@@ -93,7 +92,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
      */
     private void collectOverwrittenSection(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
 
-        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
+        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
         for(PsiElement psiElement1 : psiElement.getContainingFile().getChildren()) {
             PsiElement extendDirective = psiElement1.getFirstChild();
@@ -142,7 +141,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
             .collect(Collectors.toList())
         );
 
-        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
+        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
         for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY)) {
             for(String templateName: templateNames) {
@@ -200,7 +199,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
             }
         }
 
-        return new LineMarkerInfo<PsiElement>(lineMarkerTarget, lineMarkerTarget.getTextOffset(), icon, 6, new ConstantFunction<PsiElement, String>(title), new RelatedPopupGotoLineMarker.NavigationHandler(gotoRelatedItems));
+        return new LineMarkerInfo<>(lineMarkerTarget, lineMarkerTarget.getTextOffset(), icon, 6, new ConstantFunction<>(title), new RelatedPopupGotoLineMarker.NavigationHandler(gotoRelatedItems));
     }
 
     private void visitOverwrittenTemplateFile(final PsiFile psiFile, final List<GotoRelatedItem> gotoRelatedItems, final String sectionName) {
@@ -208,18 +207,14 @@ public class TemplateLineMarker implements LineMarkerProvider {
     }
 
     private void visitOverwrittenTemplateFile(final PsiFile psiFile, final List<GotoRelatedItem> gotoRelatedItems, final String sectionName, int depth) {
-
         // simple secure recursive calls
         if(depth-- <= 0) {
             return;
         }
 
-        BladeTemplateUtil.DirectiveParameterVisitor visitor = new BladeTemplateUtil.DirectiveParameterVisitor() {
-            @Override
-            public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
-                if (sectionName.equalsIgnoreCase(parameter.getContent())) {
-                    gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
-                }
+        BladeTemplateUtil.DirectiveParameterVisitor visitor = parameter -> {
+            if (sectionName.equalsIgnoreCase(parameter.getContent())) {
+                gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
             }
         };
 
@@ -227,15 +222,12 @@ public class TemplateLineMarker implements LineMarkerProvider {
         BladeTemplateUtil.visitYield(psiFile, visitor);
 
         final int finalDepth = depth;
-        BladeTemplateUtil.visitExtends(psiFile, new BladeTemplateUtil.DirectiveParameterVisitor() {
-            @Override
-            public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
-                Set<VirtualFile> virtualFiles = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), parameter.getContent());
-                for (VirtualFile virtualFile : virtualFiles) {
-                    PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
-                    if (templatePsiFile != null) {
-                        visitOverwrittenTemplateFile(templatePsiFile, gotoRelatedItems, sectionName, finalDepth);
-                    }
+        BladeTemplateUtil.visitExtends(psiFile, parameter -> {
+            Set<VirtualFile> virtualFiles = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), parameter.getContent());
+            for (VirtualFile virtualFile : virtualFiles) {
+                PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
+                if (templatePsiFile != null) {
+                    visitOverwrittenTemplateFile(templatePsiFile, gotoRelatedItems, sectionName, finalDepth);
                 }
             }
         });
@@ -254,7 +246,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
             return;
         }
 
-        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
+        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
         Set<VirtualFile> virtualFiles = BladeTemplateUtil.getExtendsImplementations(psiElement.getProject(), templateNames);
         if(virtualFiles.size() == 0) {
@@ -264,12 +256,9 @@ public class TemplateLineMarker implements LineMarkerProvider {
         for(VirtualFile virtualFile: virtualFiles) {
             PsiFile psiFile = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
             if(psiFile != null) {
-                BladeTemplateUtil.visitSection(psiFile, new BladeTemplateUtil.DirectiveParameterVisitor() {
-                    @Override
-                    public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
-                        if (sectionName.equalsIgnoreCase(parameter.getContent())) {
-                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
-                        }
+                BladeTemplateUtil.visitSection(psiFile, parameter -> {
+                    if (sectionName.equalsIgnoreCase(parameter.getContent())) {
+                        gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
                     }
                 });
             }
@@ -290,7 +279,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
             return;
         }
 
-        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<GotoRelatedItem>();
+        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
         Set<VirtualFile> virtualFiles = BladeTemplateUtil.getExtendsImplementations(psiElement.getProject(), templateNames);
         if(virtualFiles.size() == 0) {
@@ -300,12 +289,9 @@ public class TemplateLineMarker implements LineMarkerProvider {
         for(VirtualFile virtualFile: virtualFiles) {
             PsiFile psiFile = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
             if(psiFile != null) {
-                BladeTemplateUtil.visitYield(psiFile, new BladeTemplateUtil.DirectiveParameterVisitor() {
-                    @Override
-                    public void visit(@NotNull DirectiveParameterVisitorParameter parameter) {
-                        if (sectionName.equalsIgnoreCase(parameter.getContent())) {
-                            gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
-                        }
+                BladeTemplateUtil.visitYield(psiFile, parameter -> {
+                    if (sectionName.equalsIgnoreCase(parameter.getContent())) {
+                        gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
                     }
                 });
             }

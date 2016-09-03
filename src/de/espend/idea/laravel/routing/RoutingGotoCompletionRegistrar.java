@@ -8,7 +8,6 @@ import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.routing.utils.RoutingUtil;
-import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
@@ -16,7 +15,6 @@ import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,29 +34,21 @@ public class RoutingGotoCompletionRegistrar implements GotoCompletionRegistrar {
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
-        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
-
-            @Nullable
-            @Override
-            public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
-
-                if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
-                    return null;
-                }
-
-                PsiElement parent = psiElement.getParent();
-                if(parent != null && (
-                    MethodMatcher.getMatchedSignatureWithDepth(parent, URL_GENERATOR) != null ||
-                    PhpElementsUtil.isFunctionReference(parent, 0, "route") ||
-                    PhpElementsUtil.isFunctionReference(parent, 0, "link_to_route")
-                )) {
-                    return new RouteNameGotoCompletionProvider(parent);
-                }
-
+        registrar.register(PlatformPatterns.psiElement(), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
-
             }
 
+            PsiElement parent = psiElement.getParent();
+            if(parent != null && (
+                MethodMatcher.getMatchedSignatureWithDepth(parent, URL_GENERATOR) != null ||
+                PhpElementsUtil.isFunctionReference(parent, 0, "route") ||
+                PhpElementsUtil.isFunctionReference(parent, 0, "link_to_route")
+            )) {
+                return new RouteNameGotoCompletionProvider(parent);
+            }
+
+            return null;
         });
     }
 
@@ -71,7 +61,7 @@ public class RoutingGotoCompletionRegistrar implements GotoCompletionRegistrar {
         @NotNull
         @Override
         public Collection<LookupElement> getLookupElements() {
-            Collection<LookupElement> lookupElements = new ArrayList<LookupElement>();
+            Collection<LookupElement> lookupElements = new ArrayList<>();
             for (String s : RoutingUtil.getRoutesAsNames(getElement().getProject())) {
                 lookupElements.add(LookupElementBuilder.create(s).withIcon(LaravelIcons.ROUTE));
             }
