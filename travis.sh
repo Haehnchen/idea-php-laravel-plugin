@@ -1,8 +1,8 @@
 #!/bin/bash
 
-ideaVersion="2016.1.3"
-if [ "$PHPSTORM_ENV" == "2016.1.3" ]; then
-    ideaVersion="2016.1.3"
+ideaVersion="2016.1.2"
+if [ "$PHPSTORM_ENV" == "2016.1.2" ]; then
+    ideaVersion="2016.1.4"
 elif [ "$PHPSTORM_ENV" == "2016.2.1" ]; then
     ideaVersion="2016.2.1"
 elif [ "$PHPSTORM_ENV" == "eap" ]; then
