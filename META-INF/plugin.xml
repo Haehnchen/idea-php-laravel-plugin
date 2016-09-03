@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.10.1</version>
+  <version>0.11</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -47,7 +47,17 @@
 
   <change-notes><![CDATA[
 
-    <h2>0.10.1</h2>
+    <h2>0.11</h2>
+    <ul>
+        <li>Move settings form into PHP related menu <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/63">#63</a></li>
+        <li>Support route file structure of Laravel 5.3 and include route name index instead in of live extract "as" routes <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/69">#69</a></li>
+        <li>Drop project usage for LaravelSettings and make it stateless to prevent memory leaks; cleanup unused code of LaravelProjectSettingsForm</li>
+        <li>Fix npe in ControllerReferences <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/66">#66</a></li>
+        <li>Fix locating translations doesn't seem to work when using a locale which is not an official locale; support "fr-FR" <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/58">#58</a></li>
+        <li>Travis testing environment update for PhpStorm 2016.2.1</li>
+    </ul>
+
+    <h2>0.11</h2>
     <ul>
         <li>Fix Plugin throws java.util.ConcurrentModificationException <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/64">#64</a></li>
     </ul>
@@ -82,77 +92,6 @@
         <li>Add blade @lang directive support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/19">#19</a></li>
         <li>Add service dic support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/42">#42</a></li>
    </ul>
-
-    <h2>0.8</h2>
-    <ul>
-        <li>Fix handling of namespace controller classes <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/31">#31</a></li>
-        <li>Add "uses" route references</li>
-        <li>Add references for "Route::controller" controller names</li>
-   </ul>
-
-    <h2>0.7.2</h2>
-    <ul>
-        <li>Template navigation improvements, also twig support for view render in php</li>
-   </ul>
-
-    <h2>0.7.1</h2>
-    <ul>
-        <li>Fix multiple class resolve</li>
-        <li>Fix non namespaces action completion <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/11">#11</a></li>
-        <li>Add new Laravel5 view resources path</li>
-   </ul>
-
-    <h2>0.7</h2>
-    <ul>
-        <li>Add template namespace support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/9">#9</a></li>
-        <li>Add support views() and config() of Laravel5</li>
-        <li>Allow multiple template path and add Laravel4 and 5 default paths</li>
-        <li>Add index for templates in php files and provide linemarker <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/15">#15</a></li>
-        <li>Enable better @include and @extends template navigation handling for the new features</li>
-   </ul>
-
-    <h2>0.6</h2>
-    <ul>
-        <li>Fix "SqlStringLiteralExpression" import for popovers</li>
-        <li>Add blade yield index and refactoring all other index element walkers</li>
-        <li>Support blade yield directive in linemarker</li>
-   </ul>
-
-    <h2>0.5</h2>
-    <ul>
-        <li>Add translation indexer and provider references "Lang" class alias</li>
-        <li>Add config indexer and migrate references</li>
-        <li>Porting completion autopopup Confidence from symfony2 plugin</li>
-        <li>Fix route completion fired on every function</li>
-   </ul>
-
-    <h2>0.4</h2>
-    <ul>
-        <li>Add blade sections implements linemarker</li>
-        <li>Add blade sections references</li>
-        <li>Provide some better blade file template completion</li>
-        <li>Add linkAction references</li>
-    </ul>
-
-    <h2>0.3</h2>
-    <ul>
-        <li>Add stub indexes for blade section, include and extends tags</li>
-        <li>Add blade overwritten linemarker for sections</li>
-        <li>Add file context include and extends linemarker</li>
-        <li>Add textfield to configure default view namespace</li>
-        <li>Only allow PhpStorm8 builds, for Blade support</li>
-    </ul>
-
-    <h2>0.2</h2>
-    <ul>
-        <li>Add app config references</li>
-        <li>Add Router::resource references</li>
-    </ul>
-
-    <h2>0.1</h2>
-    <ul>
-        <li>initial release</li>
-    </ul>
     ]]>
   </change-notes>
 

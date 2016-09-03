@@ -69,8 +69,8 @@ if [ "$PHPSTORM_ENV" == "2016.1.2" ]; then
 elif [ "$PHPSTORM_ENV" == "2016.2.1" ]; then
 
     #php
-    download "https://plugins.jetbrains.com/files/6610/27859/php-162.1628.23.zip"
-    unzip -qo $travisCache/php-162.1628.23.zip -d ./plugins
+    download "https://plugins.jetbrains.com/files/6610/27035/php-162.1121.34.zip"
+    unzip -qo $travisCache/php-162.1121.34.zip -d ./plugins
 
     #blade
     download "https://plugins.jetbrains.com/files/7569/27033/blade-162.1121.34.zip"
