@@ -8,17 +8,19 @@ IntelliJ IDEA / PhpStorm Laravel Plugin
 
 Based on [Symfony Plugin](https://github.com/Haehnchen/idea-php-symfony2-plugin)
 
-## Links
- * Plugin url: http://plugins.jetbrains.com/plugin/7532
- * [Changelog](CHANGELOG.md)
+Key         | Value
+----------- | -----------
+Plugin url  | https://plugins.jetbrains.com/plugin/7532
+Id          | de.espend.idea.laravel
+Changelog   | [CHANGELOG](CHANGELOG.md)
 
 ## Installation
 
 To install,  go to `Settings > Plugins` and search for "Laravel Plugin".
 
-Once installed, you must activate per-project by going to `Settings > Laravel Plugin` and clicking "Enable for this project".
+Once installed, you must activate per-project by going to `Settings > Languages & Frameworks > PHP > Laravel` and clicking "Enable for this project".
 
-*Note* Currently, you must install and use the [Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) in order for PhpStorm to know how to find the Laravel classes.
+*Note* You must install and use the [Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) in order for PhpStorm to know how to find the Laravel classes.
 
 ## Documentation and tutorials
  * JetBrains: [Laravel Development using PhpStorm](https://confluence.jetbrains.com/display/PhpStorm/Laravel+Development+using+PhpStorm)
