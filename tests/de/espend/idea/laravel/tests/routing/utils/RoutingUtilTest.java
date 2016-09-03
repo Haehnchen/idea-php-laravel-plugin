@@ -22,6 +22,7 @@ public class RoutingUtilTest extends LaravelLightCodeInsightFixtureTestCase {
         super.setUp();
 
         myFixture.copyFileToProject("routes.php");
+        myFixture.copyFileToProject("routes_api.php", "routes/api.php");
         this.psiFile = myFixture.configureFromTempProjectFile("routes.php");
     }
 
@@ -46,6 +47,10 @@ public class RoutingUtilTest extends LaravelLightCodeInsightFixtureTestCase {
         for (String s : Arrays.asList("profile1", "profile2", "profile3", "profile4")) {
             assertSize(1, RoutingUtil.getRoutesAsTargets(this.psiFile, s));
         }
+    }
+
+    public void testGetRoutesAsTargetsForProjectOfLaravel53() {
+        assertSize(1, RoutingUtil.getRoutesAsTargets(getProject(), "profile_api"));
     }
 
     public void testRoutesCollectionOnProjectScope() {

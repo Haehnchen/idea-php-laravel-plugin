@@ -2,13 +2,18 @@ package de.espend.idea.laravel.routing.utils;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiRecursiveElementVisitor;
-import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.*;
+import com.intellij.util.indexing.FileBasedIndexImpl;
+import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.psi.elements.*;
+import de.espend.idea.laravel.stub.RouteIndexExtension;
+import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,12 +51,27 @@ public class RoutingUtil {
 
     public static Collection<PsiElement> getRoutesAsTargets(@NotNull Project project, @NotNull String routeName) {
         Set<PsiElement> targets = new HashSet<PsiElement>();
-        for (PsiFile psiFile : FilenameIndex.getFilesByName(project, "routes.php", GlobalSearchScope.allScope(project))) {
-            targets.addAll(getRoutesAsTargets(psiFile, routeName));
+
+        Set<VirtualFile> virtualFiles = new HashSet<>();
+
+        // find files with route name
+        FileBasedIndexImpl.getInstance().getFilesWithKey(RouteIndexExtension.KEY, new HashSet<>(Collections.singletonList(routeName)), virtualFile -> {
+            virtualFiles.add(virtualFile);
+            return true;
+        }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(project), PhpFileType.INSTANCE));
+
+        // resolve virtual files and collect
+        for (VirtualFile virtualFile : virtualFiles) {
+            PsiFile file = PsiManager.getInstance(project).findFile(virtualFile);
+            if(file != null) {
+                targets.addAll(getRoutesAsTargets(file, routeName));
+            }
         }
+
         return targets;
     }
 
+    @NotNull
     public static Collection<String> getRoutesAsNames(final @NotNull Project project) {
         CachedValue<Collection<String>> cache = project.getUserData(ROUTE_NAMES);
 
@@ -59,11 +80,9 @@ public class RoutingUtil {
                 @Nullable
                 @Override
                 public Result<Collection<String>> compute() {
-                    Collection<String> names = new HashSet<String>();
-
-                    for (PsiFile psiFile : FilenameIndex.getFilesByName(project, "routes.php", GlobalSearchScope.allScope(project))) {
-                        names.addAll(getRoutesAsNames(psiFile));
-                    }
+                    Collection<String> names = new HashSet<>(
+                        CollectProjectUniqueKeys.collect(project, RouteIndexExtension.KEY)
+                    );
 
                     return Result.create(names, PsiModificationTracker.MODIFICATION_COUNT);
                 }
