@@ -20,6 +20,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -36,7 +37,6 @@ public class TemplateSettingsForm implements Configurable {
     private ListTableModel<TemplatePath> modelList;
 
     public TemplateSettingsForm(@NotNull Project project) {
-
         this.project = project;
 
         this.tableView = new TableView<>();
@@ -58,22 +58,17 @@ public class TemplateSettingsForm implements Configurable {
                 super.mouseClicked(e);
                 TemplateSettingsForm.this.resetList();
 
-                List<TemplatePath> sortableLookupItems = new ArrayList<>();
-                sortableLookupItems.addAll(new ArrayList<>(ViewCollector.getPaths(TemplateSettingsForm.this.project, true)));
+                for (TemplatePath twigPath : ViewCollector.getPaths(TemplateSettingsForm.this.project, true)) {
+                    modelList.addRow(twigPath.clone());
+                }
             }
         });
     }
 
     private void attachItems(boolean includeSettings) {
-
-        // dont load on project less context
-        if(this.project == null) {
-            return;
-        }
-        
-        List<TemplatePath> sortableLookupItems = new ArrayList<>();
-        sortableLookupItems.addAll(new ArrayList<>(ViewCollector.getPaths(this.project, includeSettings)));
-        //Collections.sort(sortableLookupItems);
+        Collection<TemplatePath> sortableLookupItems = new ArrayList<>(
+            new ArrayList<>(ViewCollector.getPaths(this.project, includeSettings))
+        );
 
         for (TemplatePath twigPath : sortableLookupItems) {
             // dont use managed class here

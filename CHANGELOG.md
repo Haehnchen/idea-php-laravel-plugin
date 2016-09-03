@@ -5,6 +5,7 @@
 * Fix npe in ControllerReferences [#66](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/66)
 * Fix locating translations doesn't seem to work when using a locale which is not an official locale; support "fr-FR" [#58](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/58)
 * Travis testing environment update for PhpStorm 2016.2.1
+* Fix settings for template path reset was not filled
 
 ## 0.11
 * Fix Plugin throws java.util.ConcurrentModificationException [#64](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/64)

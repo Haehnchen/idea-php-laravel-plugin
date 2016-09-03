@@ -55,6 +55,7 @@
         <li>Fix npe in ControllerReferences <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/66">#66</a></li>
         <li>Fix locating translations doesn't seem to work when using a locale which is not an official locale; support "fr-FR" <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/58">#58</a></li>
         <li>Travis testing environment update for PhpStorm 2016.2.1</li>
+        <li>Fix settings for template path reset was not filled</li>
     </ul>
 
     <h2>0.11</h2>
