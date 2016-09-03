@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 public class TranslationUtil {
 
     private static final String[] REGEX = new String[]{
-        ".*/lang/(\\w{2}|\\w{2}_\\w{2})/(.*)\\.php$",
-        ".*/lang/packages/(\\w{2}|\\w{2}_\\w{2})/\\w+/(.*)\\.php$"
+        ".*/lang/(\\w{2}|\\w{2}[_|-]\\w{2})/(.*)\\.php$",
+        ".*/lang/packages/(\\w{2}|\\w{2}[_|-]\\w{2})/\\w+/(.*)\\.php$"
     };
 
     /**
