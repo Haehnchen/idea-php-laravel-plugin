@@ -59,8 +59,8 @@ public class RoutingUtilTest extends LaravelLightCodeInsightFixtureTestCase {
         }
 
         assertContainsElements(
-            Arrays.asList("profile1", "profile2", "profile3", "profile4"),
-            RoutingUtil.getRoutesAsNames(getProject())
+            RoutingUtil.getRoutesAsNames(getProject()),
+            "profile1", "profile2", "profile3", "profile4"
         );
     }
 }

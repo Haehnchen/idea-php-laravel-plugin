@@ -6,7 +6,6 @@ import com.intellij.util.Processor;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.FileBasedIndexImpl;
 import com.intellij.util.indexing.ID;
-import de.espend.idea.laravel.stub.TranslationKeyStubIndex;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -53,9 +52,9 @@ public class CollectProjectUniqueKeys implements Processor<String> {
     }
 
     @NotNull
-    public static Set<String> collect(@NotNull Project project, @NotNull ID id) {
+    public static Set<String> collect(@NotNull Project project, @NotNull ID<String, ?> id) {
         CollectProjectUniqueKeys collector = new CollectProjectUniqueKeys(project, id);
-        FileBasedIndexImpl.getInstance().processAllKeys(TranslationKeyStubIndex.KEY, collector, project);
+        FileBasedIndexImpl.getInstance().processAllKeys(id, collector, project);
         return collector.getResult();
     }
 }
