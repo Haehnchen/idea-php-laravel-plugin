@@ -1,12 +1,12 @@
 #!/bin/bash
 
-ideaVersion="2016.1"
-if [ "$PHPSTORM_ENV" == "2016.1" ]; then
-    ideaVersion="2016.1"
-elif [ "$PHPSTORM_ENV" == "2016.1.2" ]; then
+ideaVersion="2016.1.3"
+if [ "$PHPSTORM_ENV" == "2016.1.3" ]; then
     ideaVersion="2016.1.3"
+elif [ "$PHPSTORM_ENV" == "2016.2.1" ]; then
+    ideaVersion="2016.2.1"
 elif [ "$PHPSTORM_ENV" == "eap" ]; then
-    ideaVersion="162.426.1"
+    ideaVersion="163.3512.7"
 fi
 
 travisCache=".cache"
@@ -56,17 +56,7 @@ if [ -d ./plugins ]; then
   echo "created plugin dir"  
 fi
 
-if [ "$PHPSTORM_ENV" == "2016.1" ]; then
-
-    #php
-    download "https://plugins.jetbrains.com/files/6610/24752/php-145.258.2.zip"
-    unzip -qo $travisCache/php-145.258.2.zip -d ./plugins
-
-    #blade
-    download "http://plugins.jetbrains.com/files/7569/24762/blade-145.258.2.zip"
-    unzip -qo $travisCache/blade-145.258.2.zip -d ./plugins
-
-elif [ "$PHPSTORM_ENV" == "2016.1.2" ]; then
+if [ "$PHPSTORM_ENV" == "2016.1.3" ]; then
 
     #php
     download "https://plugins.jetbrains.com/files/6610/25793/php-145.970.40.zip"
@@ -76,15 +66,25 @@ elif [ "$PHPSTORM_ENV" == "2016.1.2" ]; then
     download "http://plugins.jetbrains.com/files/7569/25962/blade-145.970.40.zip"
     unzip -qo $travisCache/blade-145.970.40.zip -d ./plugins
 
+elif [ "$PHPSTORM_ENV" == "2016.2.1" ]; then
+
+    #php
+    download "https://plugins.jetbrains.com/files/6610/27035/php-162.1121.34.zip"
+    unzip -qo $travisCache/php-162.1121.34.zip -d ./plugins
+
+    #blade
+    download "https://plugins.jetbrains.com/files/7569/27033/blade-162.1121.34.zip"
+    unzip -qo $travisCache/blade-162.1121.34.zip -d ./plugins
+
 elif [ "$PHPSTORM_ENV" == "eap" ]; then
 
     #php
-    download "http://phpstorm.espend.de/version-proxy/6610/162.426.10"
-    unzip -qo $travisCache/php-162.426.10.zip -d ./plugins
+    download "https://plugins.jetbrains.com/files/6610/28124/php-163.3512.10.zip"
+    unzip -qo $travisCache/php-163.3512.10.zip -d ./plugins
 
     #blade
-    download "http://plugins.jetbrains.com/files/7569/25962/blade-145.970.40.zip"
-    unzip -qo $travisCache/blade-145.970.40.zip -d ./plugins
+    download "https://plugins.jetbrains.com/files/7569/28096/blade-163.3512.10.zip"
+    unzip -qo $travisCache/blade-163.3512.10.zip -d ./plugins
 
 else
     echo "Unknown PHPSTORM_ENV value: $PHPSTORM_ENV"
