@@ -78,81 +78,9 @@ public class LaravelProjectSettingsForm implements Configurable {
 
     @Override
     public void disposeUIResources() {
-
     }
 
     private LaravelSettings getSettings() {
         return LaravelSettings.getInstance(this.project);
-    }
-
-    private MouseListener createPathButtonMouseListener(final JTextField textField, final FileChooserDescriptor fileChooserDescriptor) {
-        return new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-            }
-
-            @Override
-            public void mousePressed(MouseEvent mouseEvent) {
-                VirtualFile projectDirectory = project.getBaseDir();
-                VirtualFile selectedFile = FileChooser.chooseFile(
-                    fileChooserDescriptor,
-                    project,
-                    VfsUtil.findRelativeFile(textField.getText(), projectDirectory)
-                );
-
-                if (null == selectedFile) {
-                    return; // Ignore but keep the previous path
-                }
-
-                String path = selectedFile.getPath();
-
-                // try to build relative path
-                if(projectDirectory != null) {
-                    String relativePath = VfsUtil.getRelativePath(selectedFile, projectDirectory, '/');
-                    if (relativePath != null) {
-                        path = relativePath;
-                    }
-                }
-
-                textField.setText(path);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent mouseEvent) {
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent mouseEvent) {
-            }
-
-            @Override
-            public void mouseExited(MouseEvent mouseEvent) {
-            }
-        };
-    }
-
-    private MouseListener createResetPathButtonMouseListener(final JTextField textField, final String defaultValue) {
-        return new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-            }
-
-            @Override
-            public void mousePressed(MouseEvent mouseEvent) {
-                textField.setText(defaultValue);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent mouseEvent) {
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent mouseEvent) {
-            }
-
-            @Override
-            public void mouseExited(MouseEvent mouseEvent) {
-            }
-        };
     }
 }

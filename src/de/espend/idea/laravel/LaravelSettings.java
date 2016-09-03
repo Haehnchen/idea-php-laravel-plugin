@@ -25,15 +25,11 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
     public boolean useAutoPopup = false;
     public String routerNamespace;
 
-    protected Project project;
-
     @Nullable
     public List<TemplatePath> templatePaths = new ArrayList<>();
 
     public static LaravelSettings getInstance(Project project) {
-        LaravelSettings settings = ServiceManager.getService(project, LaravelSettings.class);
-        settings.project = project;
-        return settings;
+        return ServiceManager.getService(project, LaravelSettings.class);
     }
 
     @Nullable
