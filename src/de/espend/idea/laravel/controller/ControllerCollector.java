@@ -12,13 +12,14 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
 public class ControllerCollector {
+
+    private static final Set<String> commonControllerTraits = getCommonControllerTraits();
 
     public static void visitControllerActions(@NotNull final Project project, @NotNull ControllerActionVisitor visitor, @Nullable String prefix) {
 
@@ -37,7 +38,7 @@ public class ControllerCollector {
                     String methodName = method.getName();
                     if(!method.isStatic() && method.getAccess().isPublic() && !methodName.startsWith("__")) {
                         PhpClass phpTrait = method.getContainingClass();
-                        if(phpTrait == null || !("ValidatesRequests".equals(phpTrait.getName()) || "DispatchesCommands".equals(phpTrait.getName()) || "Controller".equals(phpTrait.getName()))) {
+                        if(phpTrait == null || !commonControllerTraits.contains(phpTrait.getName())) {
 
                             boolean prioritised = false;
                             if(prefix != null && className.startsWith(prefixedNs)) {
@@ -124,6 +125,18 @@ public class ControllerCollector {
                 visitor.visit(phpClass, className, prioritised);
             }
         }
+    }
+
+    @NotNull
+    private static Set<String> getCommonControllerTraits() {
+        Set<String> traits = new HashSet<String>();
+
+        traits.add("ValidatesRequests");
+        traits.add("DispatchesCommands");
+        traits.add("AuthorizesRequests");
+        traits.add("Controller");
+
+        return traits;
     }
 
     public interface ControllerVisitor {
