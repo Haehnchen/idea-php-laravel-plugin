@@ -56,7 +56,7 @@ if [ -d ./plugins ]; then
   echo "created plugin dir"  
 fi
 
-if [ "$PHPSTORM_ENV" == "2016.1.3" ]; then
+if [ "$PHPSTORM_ENV" == "2016.1.2" ]; then
 
     #php
     download "https://plugins.jetbrains.com/files/6610/25793/php-145.970.40.zip"
