@@ -1,12 +1,18 @@
 #!/bin/bash
 
-ideaVersion="2016.1.2"
+ideaVersion="2016.1"
 if [ "$PHPSTORM_ENV" == "2016.1.2" ]; then
     ideaVersion="2016.1.4"
 elif [ "$PHPSTORM_ENV" == "2016.2.1" ]; then
-    ideaVersion="2016.2.1"
+    ideaVersion="2016.2.5"
+elif [ "$PHPSTORM_ENV" == "2016.3" ]; then
+    ideaVersion="2016.3"
+elif [ "$PHPSTORM_ENV" == "2016.3.1" ]; then
+    ideaVersion="2016.3.1"
+elif [ "$PHPSTORM_ENV" == "2016.3.2" ]; then
+    ideaVersion="2016.3.2"
 elif [ "$PHPSTORM_ENV" == "eap" ]; then
-    ideaVersion="163.3512.7"
+    ideaVersion="163.5644.15"
 fi
 
 travisCache=".cache"
@@ -75,6 +81,34 @@ elif [ "$PHPSTORM_ENV" == "2016.2.1" ]; then
     #blade
     download "https://plugins.jetbrains.com/files/7569/27033/blade-162.1121.34.zip"
     unzip -qo $travisCache/blade-162.1121.34.zip -d ./plugins
+
+elif [ "$PHPSTORM_ENV" == "2016.3" ]; then
+
+    #php
+    download "http://phpstorm.espend.de/files/proxy/phpstorm-2016.3-php.zip"
+    unzip -qo $travisCache/phpstorm-2016.3-php.zip -d ./plugins
+
+    #blade
+    download "http://phpstorm.espend.de/files/proxy/phpstorm-2016.3-blade.zip"
+    unzip -qo $travisCache/phpstorm-2016.3-blade.zip -d ./plugins
+
+elif [ "$PHPSTORM_ENV" == "2016.3.1" ]; then
+
+    #php
+    download "http://phpstorm.espend.de/files/proxy/phpstorm-2016.3.1-php.zip"
+    unzip -qo $travisCache/phpstorm-2016.3.1-php.zip -d ./plugins
+
+    #blade
+    download "http://phpstorm.espend.de/files/proxy/phpstorm-2016.3.1-blade.zip"
+    unzip -qo $travisCache/phpstorm-2016.3.1-blade.zip -d ./plugins
+
+elif [ "$PHPSTORM_ENV" == "2016.3.2" ]; then
+    download "http://phpstorm.espend.de/files/proxy/phpstorm-2016.3.2-php.zip"
+    unzip -qo $travisCache/phpstorm-2016.3.2-php.zip -d ./plugins
+
+    #blade
+    download "http://phpstorm.espend.de/files/proxy/phpstorm-2016.3.2-blade.zip"
+    unzip -qo $travisCache/phpstorm-2016.3.2-blade.zip -d ./plugins
 
 elif [ "$PHPSTORM_ENV" == "eap" ]; then
 
