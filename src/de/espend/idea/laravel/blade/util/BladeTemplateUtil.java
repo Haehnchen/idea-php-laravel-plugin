@@ -127,8 +127,12 @@ public class BladeTemplateUtil {
         psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(BladeTokenTypes.YIELD_DIRECTIVE, visitor));
     }
 
-    public static void visitSectionOrYield(@NotNull final PsiFile psiFile, final DirectiveParameterVisitor visitor) {
-        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, BladeTokenTypes.SECTION_DIRECTIVE, BladeTokenTypes.YIELD_DIRECTIVE));
+    public static void visit(@NotNull final PsiFile psiFile, @NotNull BladeDirectiveElementType elementType, DirectiveParameterVisitor visitor) {
+        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(elementType, visitor));
+    }
+
+    public static void visitSectionOrYield(@NotNull final PsiFile psiFile, final DirectiveParameterVisitor visitor, @NotNull BladeDirectiveElementType... elementTypes) {
+        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, elementTypes));
     }
 
     public static Set<String> getFileTemplateName(Project project, final VirtualFile currentVirtualFile) {
@@ -178,8 +182,7 @@ public class BladeTemplateUtil {
         }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(project), BladeFileType.INSTANCE));
     }
 
-    public static void visitUpPathSections(final PsiFile psiFile, int depth, final DirectiveParameterVisitor visitor) {
-
+    public static void visitUpPath(final PsiFile psiFile, int depth, final DirectiveParameterVisitor visitor, @NotNull BladeDirectiveElementType... elementTypes) {
         // simple secure recursive calls
         if(depth-- <= 0) {
             return;
@@ -191,8 +194,8 @@ public class BladeTemplateUtil {
             for(VirtualFile virtualFile : virtualFiles) {
                 PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
                 if (templatePsiFile != null) {
-                    BladeTemplateUtil.visitSectionOrYield(templatePsiFile, visitor);
-                    visitUpPathSections(templatePsiFile, finalDepth, visitor);
+                    BladeTemplateUtil.visitSectionOrYield(templatePsiFile, visitor, elementTypes);
+                    visitUpPath(templatePsiFile, finalDepth, visitor, elementTypes);
                 }
             }
         });

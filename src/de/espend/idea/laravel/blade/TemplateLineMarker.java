@@ -25,6 +25,7 @@ import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
 import de.espend.idea.laravel.stub.BladeIncludeStubIndex;
 import de.espend.idea.laravel.stub.BladeSectionStubIndex;
 import de.espend.idea.laravel.stub.PhpTemplateUsageStubIndex;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,34 +58,48 @@ public class TemplateLineMarker implements LineMarkerProvider {
         }
 
         for(PsiElement psiElement: psiElements) {
-
             if(psiElement instanceof PsiFile) {
                 collectTemplateFileRelatedFiles((PsiFile) psiElement, collection);
-            }
-
-            if(psiElement.getNode().getElementType() == BladeTokenTypes.SECTION_DIRECTIVE) {
-                PsiElement nextSibling = psiElement.getNextSibling();
-                if(nextSibling instanceof BladePsiDirectiveParameter) {
-                    String sectionName = BladePsiUtil.getSection(nextSibling);
-                    if(sectionName != null) {
-                        collectOverwrittenSection(nextSibling, collection, sectionName);
-                        collectImplementsSection(nextSibling, collection, sectionName);
-                    }
+            } else if(psiElement.getNode().getElementType() == BladeTokenTypes.SECTION_DIRECTIVE) {
+                Pair<PsiElement, String> section = extractSectionParameter(psiElement);
+                if(section != null) {
+                    collectOverwrittenSection(section.getFirst(), collection, section.getSecond());
+                    collectImplementsSection(section.getFirst(), collection, section.getSecond());
+                }
+            } else if(psiElement.getNode().getElementType() == BladeTokenTypes.YIELD_DIRECTIVE) {
+                Pair<PsiElement, String> section = extractSectionParameter(psiElement);
+                if(section != null) {
+                    collectImplementsSection(section.getFirst(), collection, section.getSecond());
+                }
+            } else if(psiElement.getNode().getElementType() == BladeTokenTypes.STACK_DIRECTIVE) {
+                Pair<PsiElement, String> section = extractSectionParameter(psiElement);
+                if(section != null) {
+                    collectStackImplements(section.getFirst(), collection, section.getSecond());
+                }
+            } else if(psiElement.getNode().getElementType() == BladeTokenTypes.PUSH_DIRECTIVE) {
+                Pair<PsiElement, String> section = extractSectionParameter(psiElement);
+                if(section != null) {
+                    collectPushOverwrites(section.getFirst(), collection, section.getSecond());
                 }
             }
+        }
+    }
 
-            if(psiElement.getNode().getElementType() == BladeTokenTypes.YIELD_DIRECTIVE) {
-                PsiElement nextSibling = psiElement.getNextSibling();
-                if(nextSibling instanceof BladePsiDirectiveParameter) {
-                    String sectionName = BladePsiUtil.getSection(nextSibling);
-                    if(sectionName != null) {
-                        collectImplementsSection(nextSibling, collection, sectionName);
-                    }
-                }
+    /**
+     * Extract parameter: @foobar('my_value')
+     */
+    @Nullable
+    private Pair<PsiElement, String> extractSectionParameter(@NotNull PsiElement psiElement) {
+        PsiElement nextSibling = psiElement.getNextSibling();
+
+        if(nextSibling instanceof BladePsiDirectiveParameter) {
+            String sectionName = BladePsiUtil.getSection(nextSibling);
+            if (sectionName != null && StringUtils.isNotBlank(sectionName)) {
+                return Pair.create(nextSibling, sectionName);
             }
-
         }
 
+        return null;
     }
 
     /**
@@ -234,7 +249,6 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
     }
 
-
     /**
      * Find all sub implementations of a section that are overwritten by an extends tag
      * Possible targets are: @section('sidebar')
@@ -272,8 +286,10 @@ public class TemplateLineMarker implements LineMarkerProvider {
         collection.add(getRelatedPopover("Template", "Blade File", psiElement, gotoRelatedItems, PhpIcons.IMPLEMENTED));
     }
 
-    private void collectYieldImplementsSection(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
-
+    /**
+     * Support: @stack('foobar')
+     */
+    private void collectStackImplements(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
         Set<String> templateNames = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
         if(templateNames.size() == 0) {
             return;
@@ -289,20 +305,37 @@ public class TemplateLineMarker implements LineMarkerProvider {
         for(VirtualFile virtualFile: virtualFiles) {
             PsiFile psiFile = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
             if(psiFile != null) {
-                BladeTemplateUtil.visitYield(psiFile, parameter -> {
+                BladeTemplateUtil.visit(psiFile, BladeTokenTypes.PUSH_DIRECTIVE, parameter -> {
                     if (sectionName.equalsIgnoreCase(parameter.getContent())) {
                         gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
                     }
                 });
             }
-
         }
 
         if(gotoRelatedItems.size() == 0) {
             return;
         }
 
-        collection.add(getRelatedPopover("Template", "Blade File", psiElement, gotoRelatedItems, PhpIcons.IMPLEMENTED));
+        collection.add(getRelatedPopover("Push Implementation", "Push Implementation", psiElement, gotoRelatedItems, PhpIcons.IMPLEMENTED));
     }
 
+    /**
+     * Support: @push('foobar')
+     */
+    private void collectPushOverwrites(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
+        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
+
+        BladeTemplateUtil.visitUpPath(psiElement.getContainingFile(), 10, parameter -> {
+            if(sectionName.equalsIgnoreCase(parameter.getContent())) {
+                gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(parameter.getPsiElement()).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
+            }
+        }, BladeTokenTypes.STACK_DIRECTIVE);
+
+        if(gotoRelatedItems.size() == 0) {
+            return;
+        }
+
+        collection.add(getRelatedPopover("Stack Section", "Stack Overwrites", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES));
+    }
 }

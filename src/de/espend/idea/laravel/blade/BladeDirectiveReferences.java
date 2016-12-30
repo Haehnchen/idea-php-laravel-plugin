@@ -8,7 +8,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.tree.IElementType;
 import com.jetbrains.php.blade.BladeFileType;
+import com.jetbrains.php.blade.psi.BladeDirectiveElementType;
+import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladePsiLanguageInjectionHost;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import com.jetbrains.php.lang.psi.elements.MethodReference;
@@ -41,8 +44,8 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
                 return null;
             }
 
-            if(isDirectiveWithName(psiElement, "startSection")) {
-                return new BladeSectionGotoCompletionProvider(psiElement);
+            if(isDirective(psiElement, BladeTokenTypes.SECTION_DIRECTIVE)) {
+                return new BladeSectionGotoCompletionProvider(psiElement, BladeTokenTypes.SECTION_DIRECTIVE, BladeTokenTypes.YIELD_DIRECTIVE);
             }
 
             return null;
@@ -77,6 +80,19 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
             return null;
 
         });
+
+        // @push('my_stack')
+        registrar.register(PlatformPatterns.psiElement().inVirtualFile(PlatformPatterns.virtualFile().withName(PlatformPatterns.string().endsWith("blade.php"))), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                return null;
+            }
+
+            if(isDirective(psiElement, BladeTokenTypes.PUSH_DIRECTIVE)) {
+                return new BladeSectionGotoCompletionProvider(psiElement, BladeTokenTypes.STACK_DIRECTIVE);
+            }
+
+            return null;
+        });
     }
 
     private boolean isDirectiveWithName(PsiElement psiElement, String directiveName) {
@@ -95,6 +111,13 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
         }
 
         return false;
+    }
+
+    private boolean isDirective(@NotNull PsiElement psiElement, @NotNull IElementType elementType) {
+        PsiLanguageInjectionHost host = InjectedLanguageManager.getInstance(psiElement.getProject()).getInjectionHost(psiElement);
+
+        return host instanceof BladePsiDirectiveParameter &&
+            ((BladePsiDirectiveParameter) host).getDirectiveElementType() == elementType;
     }
 
     private static class BladeExtendGotoProvider extends GotoCompletionProvider {
@@ -153,8 +176,12 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
     private static class BladeSectionGotoCompletionProvider extends GotoCompletionProvider {
 
-        public BladeSectionGotoCompletionProvider(PsiElement element) {
+        @NotNull
+        private final BladeDirectiveElementType[] visitElements;
+
+        public BladeSectionGotoCompletionProvider(@NotNull PsiElement element, @NotNull BladeDirectiveElementType... visitElements) {
             super(element);
+            this.visitElements = visitElements;
         }
 
         @NotNull
@@ -169,7 +196,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
             }
 
             final Set<String> uniqueSet = new HashSet<>();
-            BladeTemplateUtil.visitUpPathSections(host.getContainingFile(), 10, parameter -> {
+            BladeTemplateUtil.visitUpPath(host.getContainingFile(), 10, parameter -> {
                 if (!uniqueSet.contains(parameter.getContent())) {
                     uniqueSet.add(parameter.getContent());
 
@@ -184,12 +211,14 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
                             lookupElement = lookupElement.withTailText("(section)", true);
                         } else if(parameter.getElementType() == BladeTokenTypes.YIELD_DIRECTIVE) {
                             lookupElement = lookupElement.withTailText("(yield)", true);
+                        } else if(parameter.getElementType() == BladeTokenTypes.STACK_DIRECTIVE) {
+                            lookupElement = lookupElement.withTailText("(stack)", true);
                         }
 
                         lookupElementList.add(lookupElement);
                     }
                 }
-            });
+            }, this.visitElements);
 
             return lookupElementList;
         }
@@ -209,14 +238,13 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
             }
 
             final Set<PsiElement> uniqueSet = new HashSet<>();
-            BladeTemplateUtil.visitUpPathSections(host.getContainingFile(), 10, parameter -> {
+            BladeTemplateUtil.visitUpPath(host.getContainingFile(), 10, parameter -> {
                 if(sectionNameSource.equalsIgnoreCase(parameter.getContent())) {
                     uniqueSet.add(parameter.getPsiElement());
                 }
-            });
+            }, this.visitElements);
 
             return uniqueSet;
-
         }
     }
 
