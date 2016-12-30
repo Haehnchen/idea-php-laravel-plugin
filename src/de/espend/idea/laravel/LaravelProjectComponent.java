@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import de.espend.idea.laravel.util.IdeHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,9 +13,15 @@ import org.jetbrains.annotations.Nullable;
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
 public class LaravelProjectComponent implements ProjectComponent {
+    private Project project;
+
+    public LaravelProjectComponent(Project project) {
+        this.project = project;
+    }
+
     @Override
     public void projectOpened() {
-
+        notifyPluginEnableDialog();
     }
 
     @Override
@@ -57,7 +64,16 @@ public class LaravelProjectComponent implements ProjectComponent {
 
         VirtualFile baseDir = project.getBaseDir();
         return VfsUtil.findRelativeFile(baseDir, "vendor", "laravel") != null;
-
     }
 
+    private void notifyPluginEnableDialog() {
+        // Enable Project dialog
+        if(!isEnabled(this.project) && !LaravelSettings.getInstance(this.project).dismissEnableNotification) {
+            if(VfsUtil.findRelativeFile(this.project.getBaseDir(), "app") != null
+                && VfsUtil.findRelativeFile(this.project.getBaseDir(), "vendor", "laravel") != null
+                ) {
+                IdeHelper.notifyEnableMessage(project);
+            }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package de.espend.idea.laravel.ui;
 
+import com.intellij.ide.actions.ShowSettingsUtilImpl;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.options.Configurable;
@@ -82,5 +83,9 @@ public class LaravelProjectSettingsForm implements Configurable {
 
     private LaravelSettings getSettings() {
         return LaravelSettings.getInstance(this.project);
+    }
+
+    public static void show(@NotNull Project project) {
+        ShowSettingsUtilImpl.showSettingsDialog(project, "Laravel.SettingsForm", null);
     }
 }

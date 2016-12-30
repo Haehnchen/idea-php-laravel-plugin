@@ -28,6 +28,8 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
     @Nullable
     public List<TemplatePath> templatePaths = new ArrayList<>();
 
+    public boolean dismissEnableNotification = false;
+
     public static LaravelSettings getInstance(Project project) {
         return ServiceManager.getService(project, LaravelSettings.class);
     }
