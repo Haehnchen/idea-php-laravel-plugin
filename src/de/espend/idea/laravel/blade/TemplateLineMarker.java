@@ -21,10 +21,7 @@ import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
-import de.espend.idea.laravel.stub.BladeExtendsStubIndex;
-import de.espend.idea.laravel.stub.BladeIncludeStubIndex;
-import de.espend.idea.laravel.stub.BladeSectionStubIndex;
-import de.espend.idea.laravel.stub.PhpTemplateUsageStubIndex;
+import de.espend.idea.laravel.stub.*;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -158,7 +155,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
-        for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY)) {
+        for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY, BladeEachStubIndex.KEY)) {
             for(String templateName: templateNames) {
                 FileBasedIndexImpl.getInstance().getFilesWithKey(key, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
                     PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);

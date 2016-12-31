@@ -8,10 +8,8 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiManager;
-import com.intellij.psi.tree.IElementType;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.psi.BladeDirectiveElementType;
-import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladePsiLanguageInjectionHost;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import com.jetbrains.php.lang.psi.elements.MethodReference;
@@ -44,7 +42,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
                 return null;
             }
 
-            if(isDirective(psiElement, BladeTokenTypes.SECTION_DIRECTIVE)) {
+            if(BladePsiUtil.isDirective(psiElement, BladeTokenTypes.SECTION_DIRECTIVE)) {
                 return new BladeSectionGotoCompletionProvider(psiElement, BladeTokenTypes.SECTION_DIRECTIVE, BladeTokenTypes.YIELD_DIRECTIVE);
             }
 
@@ -87,7 +85,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
                 return null;
             }
 
-            if(isDirective(psiElement, BladeTokenTypes.PUSH_DIRECTIVE)) {
+            if(BladePsiUtil.isDirective(psiElement, BladeTokenTypes.PUSH_DIRECTIVE)) {
                 return new BladeSectionGotoCompletionProvider(psiElement, BladeTokenTypes.STACK_DIRECTIVE);
             }
 
@@ -111,13 +109,6 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
         }
 
         return false;
-    }
-
-    private boolean isDirective(@NotNull PsiElement psiElement, @NotNull IElementType elementType) {
-        PsiLanguageInjectionHost host = InjectedLanguageManager.getInstance(psiElement.getProject()).getInjectionHost(psiElement);
-
-        return host instanceof BladePsiDirectiveParameter &&
-            ((BladePsiDirectiveParameter) host).getDirectiveElementType() == elementType;
     }
 
     private static class BladeExtendGotoProvider extends GotoCompletionProvider {

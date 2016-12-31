@@ -7,14 +7,19 @@ import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
+import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
+import fr.adrienbrault.idea.symfony2plugin.util.ParameterBag;
+import fr.adrienbrault.idea.symfony2plugin.util.PsiElementUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,6 +73,32 @@ public class ViewReferences implements GotoCompletionRegistrar {
             }
 
             if(!de.espend.idea.laravel.util.PsiElementUtils.isFunctionReference(stringLiteral, "view", 0)) {
+                return null;
+            }
+
+            return new ViewProvider(stringLiteral);
+        });
+
+        /*
+         * @each('view.name', $jobs, 'job')
+         * @each('view.name', $jobs, 'job', 'view.empty')
+         */
+        registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class).withLanguage(PhpLanguage.INSTANCE), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                return null;
+            }
+
+            if(!BladePsiUtil.isDirective(psiElement, BladeTokenTypes.EACH_DIRECTIVE)) {
+                return null;
+            }
+
+            PsiElement stringLiteral = psiElement.getParent();
+            if(!(stringLiteral instanceof StringLiteralExpression)) {
+                return null;
+            }
+
+            ParameterBag parameterBag = PhpElementsUtil.getCurrentParameterIndex(stringLiteral);
+            if(parameterBag == null || (parameterBag.getIndex() != 0 && parameterBag.getIndex() != 3)) {
                 return null;
             }
 

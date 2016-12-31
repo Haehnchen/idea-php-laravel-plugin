@@ -138,12 +138,14 @@
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeSectionStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeExtendsStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeIncludeStubIndex"/>
+      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeStackStubIndex"/>
+      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeEachStubIndex"/>
+      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeYieldStubIndex"/>
+
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.TranslationKeyStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.ConfigKeyStubIndex"/>
-      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeYieldStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.PhpTemplateUsageStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.RouteIndexExtension"/>
-      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeStackStubIndex"/>
 
       <codeInsight.lineMarkerProvider language="Blade" implementationClass="de.espend.idea.laravel.blade.TemplateLineMarker"/>
 
