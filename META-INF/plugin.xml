@@ -13,6 +13,7 @@
       <h2>Install</h2>
       <ul>
         <li>Install plugin and active it per Project under "Settings > Languages & Frameworks > PHP > Laravel"</li>
+        <li>Configure Directive: "Languages & Frameworks > PHP > Blade > Directives" -> @inject: Prefix: <code><?php foobar("</code> Suffix: <code>); ?></code></li>
         <li>Use "<a href="https://github.com/barryvdh/laravel-ide-helper">Laravel IDE Helper Generator</a>" to generate ide classes</li>
         <li>Configure root Views directory, if not using default file structure</li>
         <li>(Enable autopopup for completion in plugin setting)</li>
