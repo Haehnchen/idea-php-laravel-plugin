@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.11</version>
+  <version>0.12</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -46,6 +46,14 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.12</h2>
+    <ul>
+        <li>Remove AuthorizesRequests trait methods <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/52">#52</a></li>
+        <li>Add references for Blade @push @stack directives <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/73">#73</a></li>
+        <li>Add PhpStorm environments up to 2016.3.2 for travis testing</li>
+        <li>Add dialog for automatically detect the need to enable plugin <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/80">#80</a></li>
+    </ul>
 
     <h2>0.11</h2>
     <ul>

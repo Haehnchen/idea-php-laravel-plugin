@@ -1,3 +1,9 @@
+## 0.12
+* Remove AuthorizesRequests trait methods [#52](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/52)
+* Add references for Blade @push @stack directives [#73](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/73)
+* Add PhpStorm environments up to 2016.3.2 for travis testing
+* Add dialog for automatically detect the need to enable plugin [#80](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/80)
+
 ## 0.11
 * Move settings form into PHP related menu [#63](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/63)
 * Support route file structure of Laravel 5.3 and include route name index instead in of live extract "as" routes [#69](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/69)
