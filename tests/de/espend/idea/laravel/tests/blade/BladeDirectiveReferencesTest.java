@@ -2,6 +2,7 @@ package de.espend.idea.laravel.tests.blade;
 
 import com.intellij.patterns.PlatformPatterns;
 import com.jetbrains.php.blade.BladeFileType;
+import com.jetbrains.php.lang.psi.elements.PhpClass;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.tests.LaravelLightCodeInsightFixtureTestCase;
 
@@ -16,7 +17,8 @@ public class BladeDirectiveReferencesTest extends LaravelLightCodeInsightFixture
 
     public void setUp() throws Exception {
         super.setUp();
-        myFixture.configureFromExistingVirtualFile(myFixture.copyFileToProject("lang.php", "app/lang/fr/foo.php"));
+        myFixture.copyFileToProject("lang.php", "app/lang/fr/foo.php");
+        myFixture.copyFileToProject("classes.php");
     }
 
     protected String getTestDataPath() {
@@ -34,6 +36,14 @@ public class BladeDirectiveReferencesTest extends LaravelLightCodeInsightFixture
             BladeFileType.INSTANCE,
             "@lang('foo.between.numeric<caret>')",
             PlatformPatterns.psiElement(StringLiteralExpression.class).inFile(PlatformPatterns.psiFile().withName("foo.php"))
+        );
+    }
+
+    public void testInjectProvidesNavigation() {
+        assertNavigationMatch(
+            BladeFileType.INSTANCE,
+            "@inject('foobar', 'Foobar<caret>\\Bar')",
+            PlatformPatterns.psiElement(PhpClass.class).withName("Bar")
         );
     }
 }

@@ -2,6 +2,7 @@ package fr.adrienbrault.idea.symfony2plugin.codeInsight;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.completion.CompletionContributorParameter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -27,4 +28,6 @@ public abstract class GotoCompletionProvider implements GotoCompletionProviderIn
     public Collection<PsiElement> getPsiTargets(PsiElement element) {
         return Collections.emptyList();
     }
+
+    public void getLookupElements(CompletionContributorParameter parameter) {}
 }

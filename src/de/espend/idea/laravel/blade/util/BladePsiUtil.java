@@ -108,7 +108,7 @@ public class BladePsiUtil {
      * @param text "foo", "foobar"
      */
     @NotNull
-    private static List<String> extractParameters(@NotNull String text) {
+    public static List<String> extractParameters(@NotNull String text) {
         String content = StringUtils.stripStart(StringUtils.stripEnd(text, ")"), "(");
 
         Matcher matcher = Pattern.compile("([^,]+\\(.+?\\))|([^,]+)").matcher(content);

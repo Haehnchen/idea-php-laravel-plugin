@@ -8,7 +8,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiManager;
-import com.intellij.util.containers.ContainerUtil;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.psi.BladeDirectiveElementType;
 import com.jetbrains.php.blade.psi.BladePsiLanguageInjectionHost;
@@ -26,8 +25,6 @@ import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
-import fr.adrienbrault.idea.symfony2plugin.util.ParameterBag;
-import fr.adrienbrault.idea.symfony2plugin.util.PsiElementUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -97,26 +94,12 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
         });
 
         // @inject('metrics', 'App\Services\MetricsService')
-        registrar.register(PlatformPatterns.psiElement().inVirtualFile(PlatformPatterns.virtualFile().withName(PlatformPatterns.string().endsWith("blade.php"))), psiElement -> {
+        registrar.register(BladePattern.getDirectiveParameterPattern("inject"), psiElement -> {
             if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
 
-            if(!BladePsiUtil.isDirective(psiElement, BladeTokenTypes.INJECT_DIRECTIVE)) {
-                return null;
-            }
-
-            PsiElement stringLiteral = psiElement.getParent();
-            if(!(stringLiteral instanceof StringLiteralExpression)) {
-                return null;
-            }
-
-            ParameterBag parameterBag = PhpElementsUtil.getCurrentParameterIndex(stringLiteral);
-            if(parameterBag == null || (parameterBag.getIndex() != 1)) {
-                return null;
-            }
-
-            return new MyInjectedClassGotoCompletionProvider(stringLiteral);
+            return new MyInjectedClassGotoCompletionProvider(psiElement);
         });
     }
 
@@ -280,14 +263,25 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
         @NotNull
         @Override
         public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
-            String contents = element.getContents();
+            return Collections.emptyList();
+        }
+
+        @NotNull
+        @Override
+        public Collection<PsiElement> getPsiTargets(PsiElement element) {
+            List<String> strings = BladePsiUtil.extractParameters(element.getText());
+            if(strings.size() < 2) {
+                return Collections.emptyList();
+            }
+
+            String contents = de.espend.idea.laravel.util.PsiElementUtils.trimQuote(strings.get(1));
             if(StringUtils.isBlank(contents)) {
                 return Collections.emptyList();
             }
 
-            Collection<PsiElement> elements = new ArrayList<>();
-            ContainerUtil.addIfNotNull(elements, PhpElementsUtil.getClassInterface(getProject(), contents));
-            return elements;
+            return new ArrayList<>(
+                PhpElementsUtil.getClassesOrInterfaces(getProject(), contents)
+            );
         }
     }
 }

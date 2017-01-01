@@ -25,12 +25,20 @@ public class CompletionContributor extends com.intellij.codeInsight.completion.C
                     return;
                 }
 
+                CompletionContributorParameter parameter = null;
+
                 for(GotoCompletionContributor contributor: GotoCompletionUtil.getContributors(psiElement)) {
                     GotoCompletionProviderInterface formReferenceCompletionContributor = contributor.getProvider(psiElement);
                     if(formReferenceCompletionContributor != null) {
                         completionResultSet.addAllElements(
                             formReferenceCompletionContributor.getLookupElements()
                         );
+
+                        if(parameter == null) {
+                            parameter = new CompletionContributorParameter(completionParameters, processingContext, completionResultSet);
+                        }
+
+                        formReferenceCompletionContributor.getLookupElements(parameter);
                     }
                 }
 
