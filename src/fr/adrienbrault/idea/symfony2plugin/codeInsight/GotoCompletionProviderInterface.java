@@ -11,9 +11,11 @@ import java.util.Collection;
 public interface GotoCompletionProviderInterface {
 
     @NotNull
-    public Collection<LookupElement> getLookupElements();
+    Collection<LookupElement> getLookupElements();
 
     @NotNull
-    public Collection<PsiElement> getPsiTargets(StringLiteralExpression element);
+    Collection<PsiElement> getPsiTargets(StringLiteralExpression element);
 
+    @NotNull
+    Collection<PsiElement> getPsiTargets(PsiElement element);
 }

@@ -1,0 +1,11 @@
+{
+  "namespaces": [
+    {
+      "namespace": "foo",
+      "path": "res"
+    },
+    {
+      "namespace": "foo"
+    }
+  ]
+}

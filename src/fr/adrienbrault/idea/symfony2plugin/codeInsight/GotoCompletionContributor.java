@@ -5,5 +5,5 @@ import org.jetbrains.annotations.Nullable;
 
 public interface GotoCompletionContributor {
     @Nullable
-    public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement);
+    GotoCompletionProvider getProvider(@Nullable PsiElement psiElement);
 }

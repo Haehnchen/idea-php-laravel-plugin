@@ -2,6 +2,10 @@ package fr.adrienbrault.idea.symfony2plugin.codeInsight;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public abstract class GotoCompletionProvider implements GotoCompletionProviderInterface {
 
@@ -19,4 +23,8 @@ public abstract class GotoCompletionProvider implements GotoCompletionProviderIn
         return this.element;
     }
 
+    @NotNull
+    public Collection<PsiElement> getPsiTargets(PsiElement element) {
+        return Collections.emptyList();
+    }
 }

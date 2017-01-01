@@ -133,7 +133,7 @@
 
       <projectService serviceImplementation="de.espend.idea.laravel.LaravelSettings"/>
 
-      <completion.contributor language="PHP" implementationClass="fr.adrienbrault.idea.symfony2plugin.codeInsight.completion.CompletionContributor"/>
+      <completion.contributor language="any" implementationClass="fr.adrienbrault.idea.symfony2plugin.codeInsight.completion.CompletionContributor"/>
       <gotoDeclarationHandler implementation="fr.adrienbrault.idea.symfony2plugin.codeInsight.navigation.GotoHandler"/>
 
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeSectionStubIndex"/>

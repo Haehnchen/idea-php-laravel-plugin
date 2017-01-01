@@ -23,7 +23,27 @@ Once installed, you must activate per-project by going to `Settings > Languages 
 *Note* You must install and use the [Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) in order for PhpStorm to know how to find the Laravel classes.
 
 ## Documentation and tutorials
+
  * JetBrains: [Laravel Development using PhpStorm](https://confluence.jetbrains.com/display/PhpStorm/Laravel+Development+using+PhpStorm)
+
+### Blade Template Namespace
+
+To register custom Blade template paths use `ide-blade.json` files in directories which template related.
+`Path` need to be relative to its file position  
+
+```json
+{
+  "namespaces": [
+    {
+      "namespace": "foo",
+      "path": "res"
+    },
+    {
+      "namespace": "foo"
+    }
+  ]
+}
+```
 
 ## Screenshots
 

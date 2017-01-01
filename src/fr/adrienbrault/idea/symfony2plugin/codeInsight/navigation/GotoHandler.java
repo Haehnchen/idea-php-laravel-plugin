@@ -14,10 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-
 public class GotoHandler implements GotoDeclarationHandler {
-
-
     @Nullable
     @Override
     public PsiElement[] getGotoDeclarationTargets(PsiElement psiElement, int i, Editor editor) {
@@ -26,16 +23,19 @@ public class GotoHandler implements GotoDeclarationHandler {
             return new PsiElement[0];
         }
 
-        PsiElement parent = psiElement.getParent();
-        if(!(parent instanceof StringLiteralExpression)) {
-            return new PsiElement[0];
-        }
-
         Collection<PsiElement> psiTargets = new ArrayList<PsiElement>();
+
+        PsiElement parent = psiElement.getParent();
+
         for(GotoCompletionContributor contributor: GotoCompletionUtil.getContributors(psiElement)) {
             GotoCompletionProviderInterface formReferenceCompletionContributor = contributor.getProvider(psiElement);
             if(formReferenceCompletionContributor != null) {
-                psiTargets.addAll(formReferenceCompletionContributor.getPsiTargets((StringLiteralExpression) parent));
+                // @TODO: replace this: just valid PHP files
+                if(parent instanceof StringLiteralExpression) {
+                    psiTargets.addAll(formReferenceCompletionContributor.getPsiTargets((StringLiteralExpression) parent));
+                } else {
+                    psiTargets.addAll(formReferenceCompletionContributor.getPsiTargets(psiElement));
+                }
             }
         }
 
