@@ -90,7 +90,8 @@
                 <include name="**/*.png"/>
                 <include name="**/*.xml"/>
                 <include name="**/*.yml"/>
-                <include name="**/*.xlf"/>                
+                <include name="**/*.xlf"/>
+                <include name="**/*.json"/>
             </patternset>            
 
             <copy toDir="@{dest}">
