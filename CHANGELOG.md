@@ -1,3 +1,7 @@
+## 9.13
+
+* Support template "each" Directive #86
+
 ## 0.12
 * Remove AuthorizesRequests trait methods [#52](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/52)
 * Add references for Blade @push @stack directives [#73](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/73)
