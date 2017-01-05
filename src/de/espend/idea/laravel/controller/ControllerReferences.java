@@ -127,7 +127,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
             private PsiElement getUsesArrayMethodParameter(@NotNull PsiElement psiElement) {
 
                 PsiElement arrayValue = psiElement.getParent();
-                if(arrayValue != null && arrayValue.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE) {
+                if(arrayValue != null && arrayValue.getNode() != null && arrayValue.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE) {
                     PsiElement arrayHashElement = arrayValue.getParent();
                     if(arrayHashElement instanceof ArrayHashElement) {
                         PhpPsiElement key = ((ArrayHashElement) arrayHashElement).getKey();
