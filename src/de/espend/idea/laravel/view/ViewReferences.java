@@ -8,15 +8,15 @@ import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
-import com.jetbrains.php.blade.psi.BladePsiDirective;
-import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
+import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.blade.BladePattern;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
+import de.espend.idea.laravel.util.PsiElementUtils;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
@@ -26,9 +26,9 @@ import fr.adrienbrault.idea.symfony2plugin.util.ParameterBag;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
@@ -108,20 +108,27 @@ public class ViewReferences implements GotoCompletionRegistrar {
             return new ViewProvider(stringLiteral);
         });
 
-         /*
+        /*
          * @includeIf('view.name')
+         * @component('view.name')
          */
-        registrar.register(BladePattern.getDirectiveParameterPattern("includeIf"), psiElement -> {
+        registrar.register(BladePattern.getDirectiveParameterPattern("includeIf", "component"), psiElement -> {
             if (psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
 
-            String replace = psiElement.getText().replace("\"", "'");
-            if (!replace.startsWith("'") || !replace.endsWith("'")) {
+            return new BladeViewProvider(psiElement);
+        });
+
+        /*
+         * @slot('title')
+         */
+        registrar.register(BladePattern.getDirectiveParameterPattern("slot"), psiElement -> {
+            if (psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
 
-            return new BladeViewProvider(psiElement);
+            return new MyBladeSlotDirectiveCompletionProvider(psiElement);
         });
     }
 
@@ -190,6 +197,80 @@ public class ViewReferences implements GotoCompletionRegistrar {
             }
 
             return targets;
+        }
+    }
+
+    /**
+     * Navigation and completion
+     *
+     * "@slot('title')"
+     */
+    private static class MyBladeSlotDirectiveCompletionProvider extends GotoCompletionProvider {
+        private final PsiElement psiElement;
+
+        MyBladeSlotDirectiveCompletionProvider(PsiElement psiElement) {
+            super(psiElement);
+            this.psiElement = psiElement;
+        }
+
+        @NotNull
+        @Override
+        public Collection<LookupElement> getLookupElements() {
+            String component = BladePsiUtil.findComponentForSlotScope(psiElement);
+            if(component == null) {
+                return Collections.emptyList();
+            }
+
+            Collection<String> slots = new HashSet<>();
+
+            for (VirtualFile virtualFile : BladeTemplateUtil.resolveTemplateName(getProject(), component)) {
+                PsiFile file = PsiManager.getInstance(getProject()).findFile(virtualFile);
+                if(file != null) {
+                    slots.addAll(BladePsiUtil.collectPrintBlockVariables(file));
+                }
+            }
+
+            return slots.stream()
+                .map((Function<String, LookupElement>) s ->
+                    LookupElementBuilder.create(s).withIcon(LaravelIcons.LARAVEL).withTypeText(component, true)
+                )
+                .collect(Collectors.toList());
+        }
+
+        @NotNull
+        @Override
+        public Collection<PsiElement> getPsiTargets(PsiElement element) {
+            List<String> strings = BladePsiUtil.extractParameters(element.getText());
+            if(strings.size() < 1) {
+                return Collections.emptyList();
+            }
+
+            String variable = PsiElementUtils.trimQuote(strings.get(0));
+            if(StringUtils.isBlank(variable)) {
+                return Collections.emptyList();
+            }
+
+            String component = BladePsiUtil.findComponentForSlotScope(psiElement);
+            if(component == null) {
+                return Collections.emptyList();
+            }
+
+            Collection<PsiElement> psiElements = new ArrayList<>();
+
+            for (VirtualFile virtualFile : BladeTemplateUtil.resolveTemplateName(getProject(), component)) {
+                PsiFile file = PsiManager.getInstance(getProject()).findFile(virtualFile);
+                if(file != null) {
+                    psiElements.addAll(BladePsiUtil.collectPrintBlockVariableTargets(file, variable));
+                }
+            }
+
+            return psiElements;
+        }
+
+        @NotNull
+        @Override
+        public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
+            return Collections.emptyList();
         }
     }
 }

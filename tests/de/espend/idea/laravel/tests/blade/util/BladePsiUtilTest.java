@@ -1,10 +1,14 @@
 package de.espend.idea.laravel.tests.blade.util;
 
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import de.espend.idea.laravel.blade.BladePsiElementFactory;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.tests.LaravelLightCodeInsightFixtureTestCase;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -12,6 +16,10 @@ import java.util.List;
  * @see de.espend.idea.laravel.blade.util.BladePsiUtil
  */
 public class BladePsiUtilTest extends LaravelLightCodeInsightFixtureTestCase {
+    protected String getTestDataPath() {
+        return new File(this.getClass().getResource("fixtures").getFile()).getAbsolutePath();
+    }
+
     public void testGetEachDirectiveTemplateParameter() {
         BladePsiDirectiveParameter parameter = BladePsiElementFactory.createFromText(getProject(), BladePsiDirectiveParameter.class, "@each('auth.password', [], '', 'auth.login')");
 
@@ -27,5 +35,24 @@ public class BladePsiUtilTest extends LaravelLightCodeInsightFixtureTestCase {
         List<String> templates = BladePsiUtil.getEachDirectiveTemplateParameter(parameter);
 
         assertEquals("auth.password", templates.get(0));
+    }
+
+    public void testCollectPrintBlockVariables() {
+        PsiFile psiFile = myFixture.configureByFile("component.blade.php");
+
+        assertContainsElements(BladePsiUtil.collectPrintBlockVariables(psiFile), "ti_t-le", "slot");
+    }
+
+    public void testFindComponentForSlotScope() {
+        myFixture.configureByText(BladeFileType.INSTANCE, "" +
+            "@component('layouts.app')\n" +
+            "   @slot('ti<caret>tle')\n" +
+            "       Home Page\n" +
+            "   @endslot\n" +
+            "@endcomponent");
+
+        PsiElement psiElement = myFixture.getFile().findElementAt(myFixture.getCaretOffset());
+
+        assertEquals("layouts.app", BladePsiUtil.findComponentForSlotScope(psiElement));
     }
 }

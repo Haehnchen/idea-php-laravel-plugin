@@ -5,6 +5,7 @@ import com.intellij.patterns.PlatformPatterns;
 import com.intellij.patterns.PsiElementPattern;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.ProcessingContext;
+import com.jetbrains.php.blade.parser.BladeElementTypes;
 import com.jetbrains.php.blade.psi.BladePsiDirective;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
@@ -16,10 +17,10 @@ import org.jetbrains.annotations.NotNull;
 public class BladePattern {
     /**
      * Pattern for @includeIf('auth.<caret>') or @includeIf("auth.<caret>")
-     * @param directive "includeIf" without "@"
+     * @param directives "includeIf" without "@"
      */
     @NotNull
-    public static PsiElementPattern.Capture<PsiElement> getDirectiveParameterPattern(@NotNull String directive) {
+    public static PsiElementPattern.Capture<PsiElement> getDirectiveParameterPattern(@NotNull String... directives) {
         return PlatformPatterns.psiElement().withElementType(BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT)
             .withText(PlatformPatterns.string().with(new PatternCondition<String>("Directive Quoted Content") {
                 @Override
@@ -32,10 +33,26 @@ public class BladePattern {
                     PlatformPatterns.psiElement(BladePsiDirective.class).with(new PatternCondition<BladePsiDirective>("Directive Name") {
                         @Override
                         public boolean accepts(@NotNull BladePsiDirective bladePsiDirective, ProcessingContext processingContext) {
-                            return ("@" + directive).equals(bladePsiDirective.getName());
+                            for (String directive : directives) {
+                                if(("@" + directive).equals(bladePsiDirective.getName())) {
+                                    return true;
+                                }
+                            }
+
+                            return false;
                         }
                     })
                 )
             );
+    }
+
+    /**
+     * {{ $slot }}
+     * {{ $title or 'Laravel News' }}
+     */
+    public static PsiElementPattern.Capture<PsiElement> getTextBlockContentVariablePattern() {
+        return PlatformPatterns.psiElement(BladeTokenTypes.TEXT_BLOCK_CONTENT).withParent(
+            PlatformPatterns.psiElement(BladeElementTypes.TEXT_BLOCK)
+        );
     }
 }
