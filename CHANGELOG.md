@@ -1,6 +1,11 @@
-## 9.13
+## 0.12.2
+* Fix npe in ControllerReferences [#92](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/92) [#90](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/90) [#93](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/93) @adelf
+* Support Laravel 5.4 blade component directive [#91](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/91)
 
-* Support template "each" Directive #86
+## 0.12.1
+* Support template "each" directive [#86](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/86)
+* Add Blade "inject" directive for service injection [#87](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/87)
+* Add Blade "includeIf" directive template references [#89](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/89)
 
 ## 0.12
 * Remove AuthorizesRequests trait methods [#52](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/52)

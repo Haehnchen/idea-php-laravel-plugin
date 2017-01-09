@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.12.1</version>
+  <version>0.12.2</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -46,6 +46,12 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.12.2</h2>
+    <ul>
+        <li>Fix npe in ControllerReferences <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/92">#92</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/90">#90</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/93">#93</a> @adelf</li>
+        <li>Support Laravel 5.4 blade component directive <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/91">#91</a></li>
+    </ul>
 
     <h2>0.12.1</h2>
     <ul>
