@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.12.2</version>
+  <version>0.12.3</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -46,6 +46,11 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.12.3</h2>
+    <ul>
+        <li>Add more pattern and language validation for completion; fix npe <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/96">#96</a</li>
+    </ul>
 
     <h2>0.12.2</h2>
     <ul>

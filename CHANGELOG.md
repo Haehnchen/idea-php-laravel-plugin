@@ -1,3 +1,6 @@
+## 0.12.3
+* Add more pattern and language validation for completion; fix npe [#96](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/96)
+
 ## 0.12.2
 * Fix npe in ControllerReferences [#92](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/92) [#90](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/90) [#93](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/93) @adelf
 * Support Laravel 5.4 blade component directive [#91](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/91)
