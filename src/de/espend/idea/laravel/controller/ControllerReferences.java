@@ -4,18 +4,17 @@ import com.google.common.collect.Lists;
 import com.intellij.codeInsight.completion.PrioritizedLookupElement;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.lang.Language;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.php.PhpPresentationUtil;
+import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.psi.elements.*;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
-import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionContributor;
-import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
-import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
-import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
 import org.apache.commons.lang.StringUtils;
@@ -30,7 +29,7 @@ import java.util.List;
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
-public class ControllerReferences implements GotoCompletionRegistrar {
+public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
     private static MethodMatcher.CallToSignature[] ROUTE = new MethodMatcher.CallToSignature[] {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "get"),
@@ -43,11 +42,11 @@ public class ControllerReferences implements GotoCompletionRegistrar {
     };
 
     private static MethodMatcher.CallToSignature[] CONTROLLERS = new MethodMatcher.CallToSignature[] {
-            new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "controllers"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "controllers"),
     };
 
     private static MethodMatcher.CallToSignature[] CONTROLLER = new MethodMatcher.CallToSignature[] {
-            new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "controller"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "controller"),
     };
 
     private static MethodMatcher.CallToSignature[] ACTIONS = new MethodMatcher.CallToSignature[] {
@@ -60,12 +59,12 @@ public class ControllerReferences implements GotoCompletionRegistrar {
     };
 
     private static MethodMatcher.CallToSignature[] ROUTE_GROUP = new MethodMatcher.CallToSignature[] {
-            new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "group"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "group"),
     };
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
-        registrar.register(PlatformPatterns.psiElement(), psiElement -> {
+        registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class), psiElement -> {
             if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
@@ -79,7 +78,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
         });
 
-        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
+        registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class), new GotoCompletionContributor() {
             @Nullable
             @Override
             public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
@@ -89,7 +88,7 @@ public class ControllerReferences implements GotoCompletionRegistrar {
                 }
 
                 PsiElement parent = psiElement.getParent();
-                if(parent == null) {
+                if(!(parent instanceof StringLiteralExpression)) {
                     return null;
                 }
 
@@ -155,17 +154,16 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 	        'password' => 'Auth\PasswordController',
         ]);
         */
-        registrar.register(PlatformPatterns.psiElement(), new GotoCompletionContributor() {
+        registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class), new GotoCompletionContributor() {
             @Nullable
             @Override
             public GotoCompletionProvider getProvider(@Nullable PsiElement psiElement) {
-
                 if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                     return null;
                 }
 
                 PsiElement parent = psiElement.getParent();
-                if(parent == null) {
+                if(!(parent instanceof StringLiteralExpression)) {
                     return null;
                 }
 
@@ -200,18 +198,19 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
         });
 
-        /**
+        /*
          * Route::controller('users', 'UserController');
          */
-        registrar.register(PlatformPatterns.psiElement(), psiElement -> {
+        registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class), psiElement -> {
             if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
 
             PsiElement parent = psiElement.getParent();
-            if(parent == null) {
+            if(!(parent instanceof StringLiteralExpression)) {
                 return null;
             }
+
             MethodMatcher.MethodMatchParameter matchedSignatureWithDepth = MethodMatcher.getMatchedSignatureWithDepth(parent, CONTROLLER, 1);
             if(matchedSignatureWithDepth == null) {
                 return null;
@@ -219,7 +218,11 @@ public class ControllerReferences implements GotoCompletionRegistrar {
 
             return createResourceCompletion(parent);
         });
+    }
 
+    @Override
+    public boolean support(@NotNull Language language) {
+        return PhpLanguage.INSTANCE == language;
     }
 
     private ControllerResource createResourceCompletion(@NotNull PsiElement element) {

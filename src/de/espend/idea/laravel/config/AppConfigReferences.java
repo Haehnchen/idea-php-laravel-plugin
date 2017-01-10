@@ -2,6 +2,7 @@ package de.espend.idea.laravel.config;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.lang.Language;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -9,6 +10,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.indexing.FileBasedIndexImpl;
 import com.jetbrains.php.lang.PhpFileType;
+import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
@@ -16,6 +18,7 @@ import de.espend.idea.laravel.stub.ConfigKeyStubIndex;
 import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
 import de.espend.idea.laravel.util.ArrayReturnPsiRecursiveVisitor;
 import de.espend.idea.laravel.util.PsiElementUtils;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionLanguageRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrarParameter;
@@ -28,7 +31,7 @@ import java.util.*;
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
-public class AppConfigReferences implements GotoCompletionRegistrar {
+public class AppConfigReferences implements GotoCompletionLanguageRegistrar {
 
     private static MethodMatcher.CallToSignature[] CONFIG = new MethodMatcher.CallToSignature[] {
         new MethodMatcher.CallToSignature("\\Illuminate\\Config\\Repository", "get"),
@@ -51,6 +54,11 @@ public class AppConfigReferences implements GotoCompletionRegistrar {
 
             return null;
         });
+    }
+
+    @Override
+    public boolean support(@NotNull Language language) {
+        return PhpLanguage.INSTANCE == language;
     }
 
     private static class ConfigKeyProvider extends GotoCompletionProvider {

@@ -2,9 +2,11 @@ package de.espend.idea.laravel.config;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.lang.Language;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.php.PhpIndex;
+import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.psi.elements.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
-public class ProviderGotoCompletion implements GotoCompletionRegistrar {
+public class ProviderGotoCompletion implements GotoCompletionLanguageRegistrar {
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
@@ -54,6 +56,11 @@ public class ProviderGotoCompletion implements GotoCompletionRegistrar {
             return null;
         });
 
+    }
+
+    @Override
+    public boolean support(@NotNull Language language) {
+        return PhpLanguage.INSTANCE == language;
     }
 
     private class ProviderName extends GotoCompletionProvider {
