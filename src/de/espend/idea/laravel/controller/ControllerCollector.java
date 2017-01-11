@@ -133,6 +133,7 @@ public class ControllerCollector {
 
         traits.add("ValidatesRequests");
         traits.add("DispatchesCommands");
+        traits.add("DispatchesJobs"); // For laravel >=5.3
         traits.add("AuthorizesRequests");
         traits.add("Controller");
 
