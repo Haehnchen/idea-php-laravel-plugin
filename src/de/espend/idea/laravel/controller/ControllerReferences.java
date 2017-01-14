@@ -14,6 +14,7 @@ import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.psi.elements.*;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.controller.namespace.LaravelControllerNamespaceCutter;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
@@ -61,6 +62,8 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
     private static MethodMatcher.CallToSignature[] ROUTE_GROUP = new MethodMatcher.CallToSignature[] {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "group"),
     };
+
+    private static ControllerCollector controllerCollector = new ControllerCollector(new LaravelControllerNamespaceCutter());
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
@@ -289,7 +292,7 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
         public Collection<LookupElement> getLookupElements() {
             final Collection<LookupElement> lookupElements = new ArrayList<>();
 
-            ControllerCollector.visitControllerActions(getProject(), (phpClass, method, name, prioritised) -> {
+            controllerCollector.visitControllerActions(getProject(), (phpClass, method, name, prioritised) -> {
                 LookupElementBuilder lookupElementBuilder = LookupElementBuilder.create(name)
                     .withIcon(LaravelIcons.ROUTE)
                     .withTypeText(phpClass.getPresentableFQN(), true);
@@ -321,7 +324,7 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
             final Collection<PsiElement> targets = new ArrayList<>();
 
-            ControllerCollector.visitControllerActions(getProject(), (phpClass, method, name, prioritised) -> {
+            controllerCollector.visitControllerActions(getProject(), (phpClass, method, name, prioritised) -> {
                 if (content.equalsIgnoreCase(name)) {
                     targets.add(method);
                 }
@@ -353,7 +356,7 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
             final Collection<LookupElement> lookupElements = new ArrayList<>();
 
-            ControllerCollector.visitController(getProject(), (method, name, prioritised) -> {
+            controllerCollector.visitController(getProject(), (method, name, prioritised) -> {
                 LookupElement lookupElement = LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE);
 
                 if(prioritised) {
@@ -377,7 +380,7 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
             final Collection<PsiElement> targets = new ArrayList<>();
 
-            ControllerCollector.visitController(getProject(), (phpClass, name, prioritised) -> {
+            controllerCollector.visitController(getProject(), (phpClass, name, prioritised) -> {
                 if(name.equals(content)) {
                     targets.add(phpClass);
                 }
