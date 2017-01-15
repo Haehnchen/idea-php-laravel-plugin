@@ -18,20 +18,12 @@ public class ControllerCollector {
 
     private static final Set<String> commonControllerTraits = getCommonControllerTraits();
 
-    private ControllerNamespaceCutter controllerNamespaceCutter;
-
-    public ControllerCollector(ControllerNamespaceCutter controllerNamespaceCutter) {
-        this.controllerNamespaceCutter = controllerNamespaceCutter;
-    }
-
-    public void visitControllerActions(@NotNull final Project project, @NotNull ControllerActionVisitor visitor, @Nullable String prefix) {
+    public static void visitControllerActions(@NotNull final Project project, @NotNull ControllerActionVisitor visitor) {
 
         Collection<PhpClass> allSubclasses = new HashSet<PhpClass>() {{
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Routing\\Controller"));
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\App\\Http\\Controllers\\Controller"));
         }};
-
-        controllerNamespaceCutter.init(project, prefix);
 
         for(PhpClass phpClass: allSubclasses) {
             if(!phpClass.isAbstract()) {
@@ -41,12 +33,9 @@ public class ControllerCollector {
                     if(!method.isStatic() && method.getAccess().isPublic() && !methodName.startsWith("__")) {
                         PhpClass phpTrait = method.getContainingClass();
                         if(phpTrait == null || !commonControllerTraits.contains(phpTrait.getName())) {
-
-                            controllerNamespaceCutter.cut(className, (processedClassName, prioritised) -> {
-                                if(StringUtils.isNotBlank(processedClassName)) {
-                                    visitor.visit(phpClass, method, processedClassName + "@" + methodName, prioritised);
-                                }
-                            });
+                            if(StringUtils.isNotBlank(className)) {
+                                visitor.visit(phpClass, method, className + "@" + methodName);
+                            }
                         }
                     }
                 }
@@ -54,14 +43,12 @@ public class ControllerCollector {
         }
     }
 
-    public void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor, @Nullable String prefix) {
+    public static void visitController(@NotNull final Project project, @NotNull ControllerVisitor visitor) {
 
         Collection<PhpClass> allSubclasses = new HashSet<PhpClass>() {{
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\Illuminate\\Routing\\Controller"));
             addAll(PhpIndex.getInstance(project).getAllSubclasses("\\App\\Http\\Controllers\\Controller"));
         }};
-
-        controllerNamespaceCutter.init(project, prefix);
 
         for(PhpClass phpClass: allSubclasses) {
 
@@ -71,11 +58,9 @@ public class ControllerCollector {
 
             String className = phpClass.getPresentableFQN();
 
-            controllerNamespaceCutter.cut(className, (processedClassName, prioritised) -> {
-                if(StringUtils.isNotBlank(processedClassName)) {
-                    visitor.visit(phpClass, processedClassName, prioritised);
-                }
-            });
+            if(StringUtils.isNotBlank(className)) {
+                visitor.visit(phpClass, className);
+            }
         }
     }
 
@@ -93,10 +78,10 @@ public class ControllerCollector {
     }
 
     public interface ControllerVisitor {
-        void visit(@NotNull PhpClass phpClass, @NotNull String name, boolean prioritised);
+        void visit(@NotNull PhpClass phpClass, @NotNull String name);
     }
 
     public interface ControllerActionVisitor {
-        void visit(@NotNull PhpClass phpClass, @NotNull Method method, @NotNull String name, boolean prioritised);
+        void visit(@NotNull PhpClass phpClass, @NotNull Method method, @NotNull String name);
     }
 }

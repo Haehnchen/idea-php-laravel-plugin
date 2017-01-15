@@ -23,8 +23,13 @@ public class LaravelControllerNamespaceCutter implements ControllerNamespaceCutt
      */
     private Collection<String> defaultNamespaces = new HashSet<>();
 
-    @Override
-    public void init(@NotNull Project project, @Nullable String prefix) {
+    /**
+     * Constructor.
+     *
+     * @param project current IDEA project
+     * @param prefix Controllers namespace prefix, set by parent Route::group(['namespace' => '...'
+     */
+    public LaravelControllerNamespaceCutter(@NotNull Project project, @Nullable String prefix) {
 
         this.prefix = prefix;
 

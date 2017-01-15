@@ -34,34 +34,29 @@ public class LaravelControllerNamespaceCutterTest extends LaravelLightCodeInsigh
             "}"
         );
 
-        LaravelControllerNamespaceCutter instance = new LaravelControllerNamespaceCutter();
-        instance.init(getProject(), null);
+        LaravelControllerNamespaceCutter instance = new LaravelControllerNamespaceCutter(getProject(), null);
         instance.cut("App\\Http\\Controllers\\Foo\\TestController", (processedClassName, prioritised)
                 -> assertEquals("TestController", processedClassName));
     }
 
     public void testGetDefaultNamespaceProvidesFallback() {
-        LaravelControllerNamespaceCutter instance = new LaravelControllerNamespaceCutter();
-        instance.init(getProject(), null);
+        LaravelControllerNamespaceCutter instance = new LaravelControllerNamespaceCutter(getProject(), null);
         instance.cut("App\\Http\\Controllers\\FooController", (processedClassName, prioritised)
                 -> assertEquals("FooController", processedClassName));
     }
 
     public void testGetDefaultNamespaceSettingsWins() {
-        LaravelControllerNamespaceCutter instance = new LaravelControllerNamespaceCutter();
+        LaravelControllerNamespaceCutter instance = new LaravelControllerNamespaceCutter(getProject(), null);
 
         LaravelSettings.getInstance(getProject()).routerNamespace = "\\Foo";
-        instance.init(getProject(), null);
         instance.cut("Foo\\BarController", (processedClassName, prioritised)
                 -> assertEquals("BarController", processedClassName));
 
         LaravelSettings.getInstance(getProject()).routerNamespace = "Foo";
-        instance.init(getProject(), null);
         instance.cut("Foo\\BarController", (processedClassName, prioritised)
                 -> assertEquals("BarController", processedClassName));
 
         LaravelSettings.getInstance(getProject()).routerNamespace = "";
-        instance.init(getProject(), null);
         instance.cut("App\\Http\\Controllers\\FooController", (processedClassName, prioritised)
                 -> assertEquals("FooController", processedClassName));
     }

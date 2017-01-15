@@ -14,6 +14,7 @@ import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.psi.elements.*;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.controller.namespace.ControllerNamespaceCutter;
 import de.espend.idea.laravel.controller.namespace.LaravelControllerNamespaceCutter;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
@@ -62,8 +63,6 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
     private static MethodMatcher.CallToSignature[] ROUTE_GROUP = new MethodMatcher.CallToSignature[] {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "group"),
     };
-
-    private static ControllerCollector controllerCollector = new ControllerCollector(new LaravelControllerNamespaceCutter());
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
@@ -275,16 +274,16 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
     private class ControllerRoute extends GotoCompletionProvider {
 
-        private String prefix;
+        private ControllerNamespaceCutter namespaceCutter;
 
-        public ControllerRoute(PsiElement element) {
-            super(element);
+        ControllerRoute(PsiElement element) {
+            this(element, null);
         }
 
-        public ControllerRoute(PsiElement element, String prefix) {
+        ControllerRoute(PsiElement element, String prefix) {
             super(element);
 
-            this.prefix = prefix;
+            this.namespaceCutter = new LaravelControllerNamespaceCutter(getProject(), prefix);
         }
 
         @NotNull
@@ -292,79 +291,25 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
         public Collection<LookupElement> getLookupElements() {
             final Collection<LookupElement> lookupElements = new ArrayList<>();
 
-            controllerCollector.visitControllerActions(getProject(), (phpClass, method, name, prioritised) -> {
-                LookupElementBuilder lookupElementBuilder = LookupElementBuilder.create(name)
-                    .withIcon(LaravelIcons.ROUTE)
-                    .withTypeText(phpClass.getPresentableFQN(), true);
+            ControllerCollector.visitControllerActions(getProject(), (phpClass, method, name) ->
+                namespaceCutter.cut(name, (processedClassName, prioritised) -> {
+                    LookupElementBuilder lookupElementBuilder = LookupElementBuilder.create(processedClassName)
+                            .withIcon(LaravelIcons.ROUTE)
+                            .withTypeText(phpClass.getPresentableFQN(), true);
 
-                Parameter[] parameters = method.getParameters();
-                if(parameters.length > 0) {
-                    lookupElementBuilder = lookupElementBuilder.withTailText(PhpPresentationUtil.formatParameters(null, parameters).toString());
-                }
+                    Parameter[] parameters = method.getParameters();
+                    if (parameters.length > 0) {
+                        lookupElementBuilder = lookupElementBuilder.withTailText(PhpPresentationUtil.formatParameters(null, parameters).toString());
+                    }
 
-                LookupElement lookupElement = lookupElementBuilder;
-                if(prioritised) {
-                    lookupElement = PrioritizedLookupElement.withPriority(lookupElementBuilder, 10);
-                }
+                    LookupElement lookupElement = lookupElementBuilder;
+                    if (prioritised) {
+                        lookupElement = PrioritizedLookupElement.withPriority(lookupElementBuilder, 10);
+                    }
 
-                lookupElements.add(lookupElement);
-            }, prefix);
-
-            return lookupElements;
-        }
-
-        @NotNull
-        @Override
-        public Collection<PsiElement> getPsiTargets(final StringLiteralExpression element) {
-
-            final String content = element.getContents();
-            if(StringUtils.isBlank(content)) {
-                return Collections.EMPTY_LIST;
-            }
-
-            final Collection<PsiElement> targets = new ArrayList<>();
-
-            controllerCollector.visitControllerActions(getProject(), (phpClass, method, name, prioritised) -> {
-                if (content.equalsIgnoreCase(name)) {
-                    targets.add(method);
-                }
-
-            }, prefix);
-
-            return targets;
-
-        }
-    }
-
-    private class ControllerResource extends GotoCompletionProvider {
-
-        private String prefix;
-
-        public ControllerResource(PsiElement element) {
-            super(element);
-        }
-
-        public ControllerResource(PsiElement element, String prefix) {
-            super(element);
-
-            this.prefix = prefix;
-        }
-
-        @NotNull
-        @Override
-        public Collection<LookupElement> getLookupElements() {
-
-            final Collection<LookupElement> lookupElements = new ArrayList<>();
-
-            controllerCollector.visitController(getProject(), (method, name, prioritised) -> {
-                LookupElement lookupElement = LookupElementBuilder.create(name).withIcon(LaravelIcons.ROUTE);
-
-                if(prioritised) {
-                    lookupElement = PrioritizedLookupElement.withPriority(lookupElement, 10);
-                }
-
-                lookupElements.add(lookupElement);
-            }, prefix);
+                    lookupElements.add(lookupElement);
+                })
+            );
 
             return lookupElements;
         }
@@ -380,11 +325,73 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
             final Collection<PsiElement> targets = new ArrayList<>();
 
-            controllerCollector.visitController(getProject(), (phpClass, name, prioritised) -> {
-                if(name.equals(content)) {
-                    targets.add(phpClass);
-                }
-            }, prefix);
+            ControllerCollector.visitControllerActions(getProject(), (phpClass, method, name) ->
+                namespaceCutter.cut(name, (processedClassName, prioritised) -> {
+                    if (content.equalsIgnoreCase(processedClassName)) {
+                        targets.add(method);
+                    }
+                })
+            );
+
+            return targets;
+
+        }
+    }
+
+    private class ControllerResource extends GotoCompletionProvider {
+
+        private ControllerNamespaceCutter namespaceCutter;
+
+        ControllerResource(PsiElement element) {
+            this(element, null);
+        }
+
+        ControllerResource(PsiElement element, String prefix) {
+            super(element);
+
+            this.namespaceCutter = new LaravelControllerNamespaceCutter(getProject(), prefix);
+        }
+
+        @NotNull
+        @Override
+        public Collection<LookupElement> getLookupElements() {
+
+            final Collection<LookupElement> lookupElements = new ArrayList<>();
+
+            ControllerCollector.visitController(getProject(), (method, name) ->
+                namespaceCutter.cut(name, (processedClassName, prioritised) -> {
+                    LookupElement lookupElement = LookupElementBuilder.create(name)
+                            .withIcon(LaravelIcons.ROUTE);
+
+                    if(prioritised) {
+                        lookupElement = PrioritizedLookupElement.withPriority(lookupElement, 10);
+                    }
+
+                    lookupElements.add(lookupElement);
+                })
+            );
+
+            return lookupElements;
+        }
+
+        @NotNull
+        @Override
+        public Collection<PsiElement> getPsiTargets(final StringLiteralExpression element) {
+
+            final String content = element.getContents();
+            if(StringUtils.isBlank(content)) {
+                return Collections.emptyList();
+            }
+
+            final Collection<PsiElement> targets = new ArrayList<>();
+
+            ControllerCollector.visitController(getProject(), (phpClass, name) ->
+                namespaceCutter.cut(name, (processedClassName, prioritised) -> {
+                    if (name.equals(content)) {
+                        targets.add(phpClass);
+                    }
+                })
+            );
 
             return targets;
 
