@@ -58,7 +58,7 @@ public class TemplateSettingsForm implements Configurable {
                 super.mouseClicked(e);
                 TemplateSettingsForm.this.resetList();
 
-                for (TemplatePath twigPath : ViewCollector.getPaths(TemplateSettingsForm.this.project, true)) {
+                for (TemplatePath twigPath : ViewCollector.getPaths(TemplateSettingsForm.this.project, true, false)) {
                     modelList.addRow(twigPath.clone());
                 }
             }
@@ -67,7 +67,7 @@ public class TemplateSettingsForm implements Configurable {
 
     private void attachItems(boolean includeSettings) {
         Collection<TemplatePath> sortableLookupItems = new ArrayList<>(
-            new ArrayList<>(ViewCollector.getPaths(this.project, includeSettings))
+            new ArrayList<>(ViewCollector.getPaths(this.project, includeSettings, false))
         );
 
         for (TemplatePath twigPath : sortableLookupItems) {

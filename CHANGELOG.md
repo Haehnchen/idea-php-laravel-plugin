@@ -1,3 +1,6 @@
+## 0.12.4
+* Fix thread exception in template settings forms [#99](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/99)
+
 ## 0.12.3
 * Add more pattern and language validation for completion; fix npe [#96](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/96)
 

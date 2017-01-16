@@ -57,7 +57,7 @@ public class BladeTemplateUtil {
         templateNames.add(pointName.concat(".php"));
 
         Set<VirtualFile> templateFiles = new HashSet<>();
-        for(TemplatePath templatePath : ViewCollector.getPaths(project, true)) {
+        for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
 
             if(ns != null && !ns.equals(templatePath.getNamespace())) {
                 continue;
@@ -85,7 +85,7 @@ public class BladeTemplateUtil {
     public static Set<String> resolveTemplateName(Project project, VirtualFile virtualFile) {
 
         Set<String> templateNames = new HashSet<>();
-        for(TemplatePath templatePath : ViewCollector.getPaths(project, true)) {
+        for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
 
             VirtualFile viewDir = templatePath.getRelativePath(project);
             if(viewDir == null) {

@@ -28,7 +28,7 @@ public class ViewCollectorTest extends LaravelLightCodeInsightFixtureTestCase {
     }
 
     public void testJsonConfigurationPathAreAdded() {
-        Collection<TemplatePath> paths = ViewCollector.getPaths(getProject(), false);
+        Collection<TemplatePath> paths = ViewCollector.getPaths(getProject());
 
         assertNotNull(ContainerUtil.find(paths, templatePath ->
             "src/res".equals(templatePath.getPath()) && templatePath.isCustomPath()

@@ -30,7 +30,13 @@ import java.util.*;
  */
 public class ViewCollector {
 
-    public static Collection<TemplatePath> getPaths(@NotNull Project project, boolean includeSettings) {
+    @NotNull
+    public static Collection<TemplatePath> getPaths(@NotNull Project project) {
+        return getPaths(project, true, true);
+    }
+
+    @NotNull
+    public static Collection<TemplatePath> getPaths(@NotNull Project project, boolean includeSettings, boolean includeJson) {
 
         // "resources/views" -> laravel 4
         // "app/views" -> laravel 5 (deprecated)
@@ -44,7 +50,9 @@ public class ViewCollector {
         }
 
         // ide-blade.json files
-        collectIdeJsonBladePaths(project, templatePaths);
+        if(includeJson) {
+            collectIdeJsonBladePaths(project, templatePaths);
+        }
 
         if(includeSettings) {
             List<TemplatePath> paths = LaravelSettings.getInstance(project).templatePaths;
@@ -68,7 +76,7 @@ public class ViewCollector {
     }
 
     public static void visitFile(@NotNull Project project, @NotNull final ViewVisitor visitor) {
-        for(TemplatePath templatePath : getPaths(project, true)) {
+        for(TemplatePath templatePath : getPaths(project)) {
             visitTemplatePath(project, templatePath, visitor);
         }
     }
