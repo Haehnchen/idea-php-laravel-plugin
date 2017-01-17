@@ -47,15 +47,16 @@ public class LaravelControllerNamespaceCutterTest extends LaravelLightCodeInsigh
 
     public void testGetDefaultNamespaceSettingsWins() {
         LaravelControllerNamespaceCutter instance = new LaravelControllerNamespaceCutter(getProject(), null);
-
         LaravelSettings.getInstance(getProject()).routerNamespace = "\\Foo";
         instance.cut("Foo\\BarController", (processedClassName, prioritised)
                 -> assertEquals("BarController", processedClassName));
 
+        instance = new LaravelControllerNamespaceCutter(getProject(), null);
         LaravelSettings.getInstance(getProject()).routerNamespace = "Foo";
         instance.cut("Foo\\BarController", (processedClassName, prioritised)
                 -> assertEquals("BarController", processedClassName));
 
+        instance = new LaravelControllerNamespaceCutter(getProject(), null);
         LaravelSettings.getInstance(getProject()).routerNamespace = "";
         instance.cut("App\\Http\\Controllers\\FooController", (processedClassName, prioritised)
                 -> assertEquals("FooController", processedClassName));
