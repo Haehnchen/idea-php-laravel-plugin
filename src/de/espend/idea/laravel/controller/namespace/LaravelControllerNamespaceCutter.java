@@ -21,7 +21,7 @@ public class LaravelControllerNamespaceCutter implements ControllerNamespaceCutt
     /**
      * Collection of possible default namespaces. default namespace + default namespace with prefix
      */
-    private Collection<String> defaultNamespaces = new HashSet<>();
+    private Collection<String> defaultNamespaces;
 
     /**
      * Constructor.
