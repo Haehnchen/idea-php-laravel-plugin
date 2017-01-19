@@ -16,6 +16,7 @@ import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.controller.namespace.ControllerNamespaceCutter;
 import de.espend.idea.laravel.controller.namespace.LaravelControllerNamespaceCutter;
+import de.espend.idea.laravel.routing.utils.RouteGroupUtil;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
@@ -58,10 +59,6 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
     private static MethodMatcher.CallToSignature[] ROUTE_RESOURCE = new MethodMatcher.CallToSignature[] {
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "resource"),
-    };
-
-    private static MethodMatcher.CallToSignature[] ROUTE_GROUP = new MethodMatcher.CallToSignature[] {
-        new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "group"),
     };
 
     @Override
@@ -238,35 +235,10 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
     @Nullable
     private String getControllerGroupPrefix(@NotNull PsiElement element) {
 
-        List<String> groupNamespaces = new ArrayList<>();
-
-        PsiElement routeGroup = PsiTreeUtil.findFirstParent(element, true, psiElement ->
-            MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null
-        );
-
-        while (routeGroup != null) {
-            ArrayCreationExpression arrayCreation = PsiTreeUtil.getChildOfType(routeGroup.getParent(), ArrayCreationExpression.class);
-
-            if (arrayCreation != null) {
-                for (ArrayHashElement hashElement : arrayCreation.getHashElements()) {
-                    if (hashElement.getKey() instanceof StringLiteralExpression) {
-                        if ("namespace".equals(((StringLiteralExpression) hashElement.getKey()).getContents())) {
-                            if (hashElement.getValue() instanceof StringLiteralExpression) {
-                                groupNamespaces.add(((StringLiteralExpression) hashElement.getValue()).getContents());
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            routeGroup = PsiTreeUtil.findFirstParent(routeGroup, true, psiElement ->
-                MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null
-            );
-        }
+        List<String> groupNamespaces = RouteGroupUtil.getRouteGroupPropertiesCollection(element, "namespace");
 
         if(groupNamespaces.size() > 0) {
-            return StringUtils.stripStart(StringUtils.join(Lists.reverse(groupNamespaces), "\\"), "\\");
+            return StringUtils.stripStart(StringUtils.join(groupNamespaces, "\\"), "\\");
         } else {
             return null;
         }
