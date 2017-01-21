@@ -339,10 +339,6 @@ public class PhpElementsUtil {
             }
         });
 
-        if(arrayValues == null) {
-            return Collections.emptyMap();
-        }
-
         Map<String, PsiElement> keys = new HashMap<String, PsiElement>();
         for (PsiElement child : arrayValues) {
             String stringValue = PhpElementsUtil.getStringValue(child.getFirstChild());

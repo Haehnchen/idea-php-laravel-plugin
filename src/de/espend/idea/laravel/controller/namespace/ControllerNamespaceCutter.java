@@ -1,8 +1,6 @@
 package de.espend.idea.laravel.controller.namespace;
 
-import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Cuts the controllers namespace for completion. Usually using prefix and default namespace.

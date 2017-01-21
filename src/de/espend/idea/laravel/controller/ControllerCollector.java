@@ -4,10 +4,8 @@ import com.intellij.openapi.project.Project;
 import com.jetbrains.php.PhpIndex;
 import com.jetbrains.php.lang.psi.elements.Method;
 import com.jetbrains.php.lang.psi.elements.PhpClass;
-import de.espend.idea.laravel.controller.namespace.ControllerNamespaceCutter;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -66,7 +64,7 @@ public class ControllerCollector {
 
     @NotNull
     private static Set<String> getCommonControllerTraits() {
-        Set<String> traits = new HashSet<String>();
+        Set<String> traits = new HashSet<>();
 
         traits.add("ValidatesRequests");
         traits.add("DispatchesCommands");
