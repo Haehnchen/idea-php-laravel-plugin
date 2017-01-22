@@ -54,6 +54,12 @@ public class ExtractPartialViewDialog extends DialogWrapper {
 
     @Nullable
     @Override
+    protected String getDimensionServiceKey() {
+        return "Laravel.ExtractPartialViewDialog";
+    }
+
+    @Nullable
+    @Override
     protected ValidationInfo doValidate() {
 
         Pattern pattern = Pattern.compile("^[\\w\\d\\-_]+([\\.\\/][\\w\\d\\-_]+)*$");
