@@ -122,7 +122,7 @@ public class RoutingUtil {
                         PhpPsiElement classReference = methodReference.getFirstPsiChild();
                         if(classReference instanceof ClassReference) {
                             if("Route".equalsIgnoreCase(classReference.getName())) {
-                                visitName((MethodReference) element);
+                                visitName((MethodReference) element, this.getRouteNamePrefix(element));
                                 return;
                             }
                         }
@@ -134,7 +134,7 @@ public class RoutingUtil {
                     PhpPsiElement classReference = ((MethodReference) element).getFirstPsiChild();
                     if(classReference instanceof ClassReference) {
                         if("Route".equalsIgnoreCase(classReference.getName())) {
-                            visitAs((MethodReference) element);
+                            visitAs((MethodReference) element, this.getRouteNamePrefix(element));
                         }
                     }
                 }
@@ -143,7 +143,16 @@ public class RoutingUtil {
             super.visitElement(element);
         }
 
-        private void visitAs(@NotNull MethodReference methodReference) {
+        /**
+         * Returns route name prefix, based on Route::group(['as' => values
+         */
+        @NotNull
+        private String getRouteNamePrefix(PsiElement element)
+        {
+            return StringUtils.join(RouteGroupUtil.getRouteGroupPropertiesCollection(element, "as"), "");
+        }
+
+        private void visitAs(@NotNull MethodReference methodReference, @NotNull String prefix) {
 
             PsiElement[] parameters = methodReference.getParameters();
             if(parameters.length < 2 || !(parameters[1] instanceof ArrayCreationExpression)) {
@@ -160,10 +169,10 @@ public class RoutingUtil {
                 return;
             }
 
-            this.visitor.visit(arrayValue, contents);
+            this.visitor.visit(arrayValue, prefix + contents);
         }
 
-        private void visitName(@NotNull MethodReference methodReference) {
+        private void visitName(@NotNull MethodReference methodReference, @NotNull String prefix) {
             PsiElement[] parameters = methodReference.getParameters();
             if(parameters.length < 1 || !(parameters[0] instanceof StringLiteralExpression)) {
                 return;
@@ -174,7 +183,7 @@ public class RoutingUtil {
                 return;
             }
 
-            this.visitor.visit(parameters[0], contents);
+            this.visitor.visit(parameters[0], prefix + contents);
         }
 
     }
