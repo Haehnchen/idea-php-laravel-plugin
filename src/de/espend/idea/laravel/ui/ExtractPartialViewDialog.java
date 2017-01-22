@@ -1,0 +1,65 @@
+package de.espend.idea.laravel.ui;
+
+import com.intellij.openapi.fileTypes.FileTypes;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.EditorTextField;
+import de.espend.idea.laravel.blade.actions.NewViewNameCompletionProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.regex.Pattern;
+
+public class ExtractPartialViewDialog extends DialogWrapper {
+
+    private EditorTextField viewNameEditor;
+
+    private JPanel panel;
+
+    public ExtractPartialViewDialog(@NotNull Project project, VirtualFile targetDirectory) {
+        super(project);
+
+        panel = new JPanel(new BorderLayout());
+
+        panel.add(new JLabel("View name (example: partials.header)"), BorderLayout.NORTH);
+
+        viewNameEditor = new EditorTextField("", project, FileTypes.PLAIN_TEXT);
+        new NewViewNameCompletionProvider(targetDirectory).apply(viewNameEditor);
+        panel.add(viewNameEditor.getComponent(), BorderLayout.CENTER);
+
+        setTitle("Extract Partial View");
+
+        init();
+    }
+
+    @Nullable
+    @Override
+    protected JComponent createCenterPanel() {
+        return panel;
+    }
+
+    public String getViewName() {
+        return viewNameEditor.getText();
+    }
+
+    @Nullable
+    @Override
+    public JComponent getPreferredFocusedComponent() {
+        return viewNameEditor.getComponent();
+    }
+
+    @Nullable
+    @Override
+    protected ValidationInfo doValidate() {
+
+        Pattern pattern = Pattern.compile("^[\\w\\d\\-_]+([\\.\\/][\\w\\d\\-_]+)*$");
+
+        if(!pattern.matcher(viewNameEditor.getText()).find()) return new ValidationInfo("Wrong view name", viewNameEditor.getComponent());
+
+        return null;
+    }
+}

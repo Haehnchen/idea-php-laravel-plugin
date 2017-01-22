@@ -8,11 +8,15 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.psi.PsiDirectory;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiFileFactory;
+import com.intellij.openapi.vfs.VfsUtil;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.*;
+import com.intellij.psi.impl.file.PsiFileImplUtil;
+import com.intellij.psi.util.PsiUtil;
 import com.intellij.refactoring.RefactoringActionHandler;
+import de.espend.idea.laravel.ui.ExtractPartialViewDialog;
+import de.espend.idea.laravel.view.ViewCollector;
+import de.espend.idea.laravel.view.dict.TemplatePath;
 import org.apache.commons.lang.StringUtils;
 import com.jetbrains.php.blade.BladeLanguage;
 import org.jetbrains.annotations.NotNull;
@@ -26,55 +30,55 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
 
         if(selectedText == null) return;
 
-        final String viewPath = Messages.showInputDialog(project, "View path", "New View Path", Messages.getQuestionIcon());
+        PsiDirectory targetDirectory = getViewsDirectory(project, psiFile);
 
-        if(StringUtils.isBlank(viewPath)) return;
+        if(targetDirectory == null) return;
 
-        final String canonizedViewPath = viewPath.replace('/', '.');
+        ExtractPartialViewDialog dialog = new ExtractPartialViewDialog(project, targetDirectory.getVirtualFile());
+        dialog.show();
+
+        if(!dialog.isOK()) return;
+
+        final String viewName = dialog.getViewName();
+        final String canonizedViewName = viewName.replace('/', '.');
 
         ApplicationManager.getApplication().runWriteAction(() -> {
-            Document document = FileDocumentManager.getInstance().getDocument(psiFile.getVirtualFile());
-
-            if(document == null) return;
-
             CommandProcessor.getInstance().executeCommand(editor.getProject(), () -> {
 
-                final String[] viewPathParts = canonizedViewPath.split("\\.");
+                final String[] viewPathParts = canonizedViewName.split("\\.");
 
-                PsiDirectory targetDirectory = getViewsDirectory(psiFile);
-
-                if(targetDirectory == null) return;
+                PsiDirectory directory = targetDirectory;
 
                 for(int i = 0; i < viewPathParts.length - 1; i++) {
-                    PsiDirectory newDirectory = targetDirectory.findSubdirectory(viewPathParts[i]);
+                    PsiDirectory newDirectory = directory.findSubdirectory(viewPathParts[i]);
 
                     if(newDirectory == null) {
-                        newDirectory = targetDirectory.createSubdirectory(viewPathParts[i]);
+                        newDirectory = directory.createSubdirectory(viewPathParts[i]);
                     }
 
-                    targetDirectory = newDirectory;
+                    directory = newDirectory;
                 }
 
                 final String fileName = viewPathParts[viewPathParts.length - 1] + ".blade.php";
 
-                if(targetDirectory.findFile(fileName) != null) {
+                if(directory.findFile(fileName) != null) {
                     Messages.showMessageDialog(project, "File already exists", "Info", Messages.getErrorIcon());
                     return;
                 }
 
-                targetDirectory.add(PsiFileFactory.getInstance(project).createFileFromText(fileName,
+                directory.add(PsiFileFactory.getInstance(project).createFileFromText(fileName,
                         BladeLanguage.INSTANCE,
                         selectedText));
 
                 int selectionStart = editor.getSelectionModel().getSelectionStart();
-                document.replaceString(selectionStart,
+                editor.getDocument().replaceString(selectionStart,
                         editor.getSelectionModel().getSelectionEnd(),
-                        "@include('" + canonizedViewPath + "')");
+                        "@include('" + viewName + "')");
 
                 editor.getSelectionModel().removeSelection();
                 editor.getCaretModel().moveToOffset(selectionStart);
 
-            }, "Extracting partial view", editor.getDocument());
+            }, "Extract partial view", editor.getDocument());
         });
     }
 
@@ -84,9 +88,9 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
     }
 
     @Nullable
-    private PsiDirectory getViewsDirectory(PsiFile psiFile)
+    private PsiDirectory getViewsDirectory(Project project, PsiFile psiFile)
     {
-        String basePath = psiFile.getProject().getBasePath();
+        String basePath = project.getBasePath();
 
         PsiDirectory directory = psiFile.getContainingDirectory();
         while(directory != null && !directory.getVirtualFile().getPath().equals(basePath)) {
@@ -101,14 +105,11 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
             }
         }
 
-        if(directory == null) return null;
+        for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
+            final VirtualFile templateDir = VfsUtil.findRelativeFile(templatePath.getPath(), project.getBaseDir());
 
-        // if current view isn't in 'views' directory, try to find resources/views dir.
-        PsiDirectory resourcesDirectory = directory.findSubdirectory("resources");
-        if( resourcesDirectory != null ) {
-            PsiDirectory viewsDirectory = resourcesDirectory.findSubdirectory("views");
-            if(viewsDirectory != null) {
-                return viewsDirectory;
+            if(templateDir != null) {
+                return PsiManager.getInstance(psiFile.getProject()).findDirectory(templateDir);
             }
         }
 
