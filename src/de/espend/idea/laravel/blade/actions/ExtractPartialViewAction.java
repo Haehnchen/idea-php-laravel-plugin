@@ -46,7 +46,9 @@ public class ExtractPartialViewAction extends BaseRefactoringAction {
 
         Editor editor = anActionEvent.getData(CommonDataKeys.EDITOR);
 
-        if(editor == null) return;
+        if(editor == null) {
+            return;
+        }
 
         anActionEvent.getPresentation().setEnabled((editor.getSelectionModel().hasSelection()));
     }

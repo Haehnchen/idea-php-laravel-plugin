@@ -25,7 +25,9 @@ public class NewViewNameCompletionProvider extends TextFieldCompletionProvider {
             @Override
             public boolean visitFile(@NotNull VirtualFile file) {
 
-                if(!file.isDirectory()) return true;
+                if(!file.isDirectory()) {
+                    return true;
+                }
 
                 String path = StringUtils.stripStart(file.getPath().replace(targetDirectory.getPath(), ""), "\\/");
 

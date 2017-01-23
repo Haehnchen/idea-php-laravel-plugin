@@ -10,10 +10,12 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.refactoring.RefactoringActionHandler;
+import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.ui.ExtractPartialViewDialog;
 import de.espend.idea.laravel.view.ViewCollector;
 import de.espend.idea.laravel.view.dict.TemplatePath;
 import com.jetbrains.php.blade.BladeLanguage;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,18 +23,29 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
 
     @Override
     public void invoke(@NotNull Project project, Editor editor, PsiFile psiFile, DataContext dataContext) {
+
+        if(!LaravelSettings.getInstance(project).pluginEnabled){
+            return;
+        }
+
         final String selectedText = editor.getSelectionModel().getSelectedText();
 
-        if(selectedText == null) return;
+        if(StringUtils.isBlank(selectedText)) {
+            return;
+        }
 
         PsiDirectory targetDirectory = getViewsDirectory(project, psiFile);
 
-        if(targetDirectory == null) return;
+        if(targetDirectory == null) {
+            return;
+        }
 
         ExtractPartialViewDialog dialog = new ExtractPartialViewDialog(project, targetDirectory.getVirtualFile());
         dialog.show();
 
-        if(!dialog.isOK()) return;
+        if(!dialog.isOK()) {
+            return;
+        }
 
         final String viewName = dialog.getViewName();
         final String canonizedViewName = viewName.replace('/', '.');
