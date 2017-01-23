@@ -3,21 +3,16 @@ package de.espend.idea.laravel.blade.actions;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
-import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.file.PsiFileImplUtil;
-import com.intellij.psi.util.PsiUtil;
 import com.intellij.refactoring.RefactoringActionHandler;
 import de.espend.idea.laravel.ui.ExtractPartialViewDialog;
 import de.espend.idea.laravel.view.ViewCollector;
 import de.espend.idea.laravel.view.dict.TemplatePath;
-import org.apache.commons.lang.StringUtils;
 import com.jetbrains.php.blade.BladeLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,8 +66,9 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
                         selectedText));
 
                 int selectionStart = editor.getSelectionModel().getSelectionStart();
+                int selectionEnd = editor.getSelectionModel().getSelectionEnd();
                 editor.getDocument().replaceString(selectionStart,
-                        editor.getSelectionModel().getSelectionEnd(),
+                        selectionEnd,
                         "@include('" + viewName + "')");
 
                 editor.getSelectionModel().removeSelection();
@@ -94,7 +90,7 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
 
         PsiDirectory directory = psiFile.getContainingDirectory();
         while(directory != null && !directory.getVirtualFile().getPath().equals(basePath)) {
-            if(directory.getName().equals("views")) {
+            if(directory.getName().equals("views") || directory.getName().equals("templates")) {
                 return directory;
             }
 

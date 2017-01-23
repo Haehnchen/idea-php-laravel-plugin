@@ -8,6 +8,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.refactoring.RefactoringActionHandler;
 import com.intellij.refactoring.actions.BaseRefactoringAction;
 import com.jetbrains.php.blade.BladeLanguage;
+import de.espend.idea.laravel.LaravelSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +38,11 @@ public class ExtractPartialViewAction extends BaseRefactoringAction {
     @Override
     public void update(AnActionEvent anActionEvent) {
         super.update(anActionEvent);
+
+        if(!LaravelSettings.getInstance(anActionEvent.getProject()).pluginEnabled) {
+            anActionEvent.getPresentation().setVisible(false);
+            return;
+        }
 
         Editor editor = anActionEvent.getData(CommonDataKeys.EDITOR);
 
