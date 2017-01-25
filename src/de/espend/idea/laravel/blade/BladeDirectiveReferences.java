@@ -1,14 +1,19 @@
 package de.espend.idea.laravel.blade;
 
+import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.codeInsight.lookup.LookupElementPresentation;
 import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiManager;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.indexing.FileBasedIndexImpl;
 import com.jetbrains.php.blade.BladeFileType;
+import com.jetbrains.php.blade.BladeLanguage;
 import com.jetbrains.php.blade.psi.BladeDirectiveElementType;
 import com.jetbrains.php.blade.psi.BladePsiLanguageInjectionHost;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
@@ -19,6 +24,8 @@ import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
+import de.espend.idea.laravel.stub.BladeCustomDirectivesStubIndex;
+import de.espend.idea.laravel.stub.processor.BladeCustomDirectivesVisitor;
 import de.espend.idea.laravel.translation.TranslationReferences;
 import de.espend.idea.laravel.view.ViewCollector;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
@@ -101,6 +108,15 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
             return new MyInjectedClassGotoCompletionProvider(psiElement);
         });
+
+        registrar.register(PlatformPatterns.psiElement().withLanguage(BladeLanguage.INSTANCE)
+                .withElementType(BladeTokenTypes.CUSTOM_DIRECTIVE), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                return null;
+            }
+
+            return new CustomDirectivesGotoCompletionProvider(psiElement);
+        });
     }
 
     private boolean isDirectiveWithName(PsiElement psiElement, String directiveName) {
@@ -156,7 +172,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
             if(StringUtils.isBlank(contents)) {
                 return Collections.emptyList();
             }
-            
+
             contents = contents.replace("/", ".");
             final Collection<PsiElement> psiElements = new ArrayList<>();
 
@@ -282,6 +298,91 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
             return new ArrayList<>(
                 PhpElementsUtil.getClassesOrInterfaces(getProject(), contents)
             );
+        }
+    }
+
+    private static class CustomDirectivesGotoCompletionProvider extends GotoCompletionProvider {
+
+        public CustomDirectivesGotoCompletionProvider(@NotNull PsiElement element) {
+            super(element);
+        }
+
+        @NotNull
+        @Override
+        public Collection<LookupElement> getLookupElements() {
+
+            final List<LookupElement> lookupElementList = new ArrayList<>();
+
+            FileBasedIndexImpl.getInstance().processAllKeys(BladeCustomDirectivesStubIndex.KEY, s -> {
+                lookupElementList.add(new BladeCustomDirectiveLookup(s + "()"));
+
+                return true;
+            }, getProject());
+
+            return lookupElementList;
+        }
+
+        @NotNull
+        @Override
+        public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
+            return Collections.emptyList();
+        }
+
+        @NotNull
+        @Override
+        public Collection<PsiElement> getPsiTargets(PsiElement psiElement) {
+
+            Collection<PsiElement> targets = new ArrayList<>();
+
+            String directiveName = psiElement.getText().substring(1);
+            FileBasedIndexImpl.getInstance().getFilesWithKey(
+                    BladeCustomDirectivesStubIndex.KEY,
+                    new HashSet<>(Collections.singletonList(directiveName)),
+                    virtualFile -> {
+
+                        PsiFile psiFile = PsiManager.getInstance(getProject()).findFile(virtualFile);
+
+                        if(psiFile == null) {
+                            return true;
+                        }
+
+                        psiFile.acceptChildren(new BladeCustomDirectivesVisitor(hit -> {
+                            if(directiveName.equals(hit.second)) {
+                                targets.add(hit.first);
+                            }
+                        }));
+
+                        return true;
+                    },
+                    GlobalSearchScope.allScope(getProject()));
+
+            return targets;
+        }
+
+        private class BladeCustomDirectiveLookup extends LookupElement {
+
+            private String lookupString;
+
+            private BladeCustomDirectiveLookup(String lookupString) {
+                this.lookupString = lookupString;
+            }
+
+            @NotNull
+            @Override
+            public String getLookupString() {
+                return lookupString;
+            }
+
+            @Override
+            public void handleInsert(InsertionContext context) {
+                super.handleInsert(context);
+
+                context.getEditor().getCaretModel().moveCaretRelatively(-1, 0, false, false, true);
+            }
+
+            public void renderElement(LookupElementPresentation presentation) {
+                presentation.setItemText("@" + lookupString.substring(0, lookupString.length() - 2));
+            }
         }
     }
 }
