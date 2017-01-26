@@ -10,7 +10,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiManager;
-import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.search.ProjectScope;
 import com.intellij.util.indexing.FileBasedIndexImpl;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.BladeLanguage;
@@ -26,6 +26,7 @@ import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import de.espend.idea.laravel.stub.BladeCustomDirectivesStubIndex;
 import de.espend.idea.laravel.stub.processor.BladeCustomDirectivesVisitor;
+import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
 import de.espend.idea.laravel.translation.TranslationReferences;
 import de.espend.idea.laravel.view.ViewCollector;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
@@ -313,11 +314,11 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
             final List<LookupElement> lookupElementList = new ArrayList<>();
 
-            FileBasedIndexImpl.getInstance().processAllKeys(BladeCustomDirectivesStubIndex.KEY, s -> {
-                lookupElementList.add(new BladeCustomDirectiveLookup(s + "()"));
+            Set<String> directiveNames = CollectProjectUniqueKeys.collect(getProject(), BladeCustomDirectivesStubIndex.KEY);
 
-                return true;
-            }, getProject());
+            for(String directiveName: directiveNames) {
+                lookupElementList.add(new BladeCustomDirectiveLookup(directiveName + "()"));
+            }
 
             return lookupElementList;
         }
@@ -335,6 +336,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
             Collection<PsiElement> targets = new ArrayList<>();
 
             String directiveName = psiElement.getText().substring(1);
+
             FileBasedIndexImpl.getInstance().getFilesWithKey(
                     BladeCustomDirectivesStubIndex.KEY,
                     new HashSet<>(Collections.singletonList(directiveName)),
@@ -354,7 +356,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
                         return true;
                     },
-                    GlobalSearchScope.allScope(getProject()));
+                    ProjectScope.getAllScope(getProject()));
 
             return targets;
         }

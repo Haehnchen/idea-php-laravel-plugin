@@ -23,9 +23,13 @@ public class TranslationReferencesTest extends LaravelLightCodeInsightFixtureTes
         return new File(this.getClass().getResource("fixtures").getFile()).getAbsolutePath();
     }
 
-    /*public void testThatCompletionContainsTranslation() {
-
-    }*/
+    public void testThatCompletionContainsTranslation() {
+        assertCompletionContains(PhpFileType.INSTANCE, "<?php\n" +
+                "/** @var $t \\Illuminate\\Translation\\Translator **/ \n" +
+                "$t->get('<caret>');\n",
+            "messages.foo", "admin/messages.foo"
+        );
+    }
 
     public void testThatNavigationContainsTranslation() {
         assertNavigationMatch(PhpFileType.INSTANCE, "<?php\n" +
@@ -36,13 +40,6 @@ public class TranslationReferencesTest extends LaravelLightCodeInsightFixtureTes
         assertNavigationMatch(PhpFileType.INSTANCE, "<?php\n" +
             "/** @var $t \\Illuminate\\Translation\\Translator **/ \n" +
             "$t->get('admin/mess<caret>ages.foo');\n"
-        );
-
-        // There is a bug... this test doesn't work in separated method :(
-        assertCompletionContains(PhpFileType.INSTANCE, "<?php\n" +
-                        "/** @var $t \\Illuminate\\Translation\\Translator **/ \n" +
-                        "$t->get('<caret>');\n",
-                "messages.foo", "admin/messages.foo"
         );
     }
 }
