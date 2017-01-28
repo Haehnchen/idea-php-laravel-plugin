@@ -1,5 +1,8 @@
 package de.espend.idea.laravel.blade.actions;
 
+import com.intellij.codeInsight.actions.ReformatCodeAction;
+import com.intellij.codeInsight.actions.ReformatCodeProcessor;
+import com.intellij.formatting.FormatterImpl;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
@@ -10,6 +13,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.refactoring.RefactoringActionHandler;
+import com.jetbrains.php.blade.formatter.BladeFormattingModelBuilder;
 import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.ui.ExtractPartialViewDialog;
 import de.espend.idea.laravel.view.ViewCollector;
@@ -78,6 +82,9 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
                         BladeLanguage.INSTANCE,
                         selectedText));
 
+                FormatterImpl.getInstance().format(new BladeFormattingModelBuilder(), );
+                Reformat
+
                 int selectionStart = editor.getSelectionModel().getSelectionStart();
                 int selectionEnd = editor.getSelectionModel().getSelectionEnd();
                 editor.getDocument().replaceString(selectionStart,
@@ -99,29 +106,27 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
     @Nullable
     private PsiDirectory getViewsDirectory(Project project, PsiFile psiFile)
     {
-        String basePath = project.getBasePath();
-
-        PsiDirectory directory = psiFile.getContainingDirectory();
-        while(directory != null && !directory.getVirtualFile().getPath().equals(basePath)) {
-            if(directory.getName().equals("views") || directory.getName().equals("templates")) {
-                return directory;
-            }
-
-            if(directory.getParentDirectory() != null) {
-                directory = directory.getParentDirectory();
-            } else {
-                break;
-            }
-        }
-
+        PsiDirectory firstExistingTemplatePath = null;
         for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
             final VirtualFile templateDir = VfsUtil.findRelativeFile(templatePath.getPath(), project.getBaseDir());
 
             if(templateDir != null) {
-                return PsiManager.getInstance(psiFile.getProject()).findDirectory(templateDir);
+
+                if(psiFile.getVirtualFile().getPath().startsWith(templateDir.getPath()))
+                {
+                    return PsiManager.getInstance(project).findDirectory(templateDir);
+                }
+
+                if(firstExistingTemplatePath == null) {
+                    firstExistingTemplatePath = PsiManager.getInstance(project).findDirectory(templateDir);
+                }
             }
         }
 
-        return directory;
+        if(firstExistingTemplatePath != null) {
+            return firstExistingTemplatePath;
+        }
+
+        return PsiManager.getInstance(project).findDirectory(project.getBaseDir());
     }
 }

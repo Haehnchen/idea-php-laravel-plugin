@@ -20,6 +20,10 @@ public class ExtractPartialViewDialog extends DialogWrapper {
 
     private JPanel panel;
 
+    // View name should be "header", or "partials.header", or "sh-ar_ed.partials.header",
+    // so, words with '_' and '-' separated with dots
+    private static Pattern viewNamePattern = Pattern.compile("^[\\w\\d\\-_]+([\\.\\/][\\w\\d\\-_]+)*$");
+
     public ExtractPartialViewDialog(@NotNull Project project, VirtualFile targetDirectory) {
         super(project);
 
@@ -62,9 +66,9 @@ public class ExtractPartialViewDialog extends DialogWrapper {
     @Override
     protected ValidationInfo doValidate() {
 
-        Pattern pattern = Pattern.compile("^[\\w\\d\\-_]+([\\.\\/][\\w\\d\\-_]+)*$");
-
-        if(!pattern.matcher(viewNameEditor.getText()).find()) return new ValidationInfo("Wrong view name", viewNameEditor.getComponent());
+        if(!viewNamePattern.matcher(viewNameEditor.getText()).find()) {
+            return new ValidationInfo("Wrong view name", viewNameEditor.getComponent());
+        }
 
         return null;
     }
