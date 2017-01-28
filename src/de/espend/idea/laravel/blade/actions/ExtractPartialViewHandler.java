@@ -12,6 +12,7 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
+import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.refactoring.RefactoringActionHandler;
 import com.jetbrains.php.blade.formatter.BladeFormattingModelBuilder;
 import de.espend.idea.laravel.LaravelSettings;
@@ -78,12 +79,12 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
                     return;
                 }
 
-                directory.add(PsiFileFactory.getInstance(project).createFileFromText(fileName,
+                PsiFile newViewFile = PsiFileFactory.getInstance(project).createFileFromText(fileName,
                         BladeLanguage.INSTANCE,
-                        selectedText));
+                        selectedText);
+                CodeStyleManager.getInstance(project).reformat(newViewFile, false);
 
-                FormatterImpl.getInstance().format(new BladeFormattingModelBuilder(), );
-                Reformat
+                directory.add(newViewFile);
 
                 int selectionStart = editor.getSelectionModel().getSelectionStart();
                 int selectionEnd = editor.getSelectionModel().getSelectionEnd();
