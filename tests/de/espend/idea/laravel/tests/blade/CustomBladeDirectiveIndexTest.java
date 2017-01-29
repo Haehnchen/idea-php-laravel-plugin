@@ -21,5 +21,6 @@ public class CustomBladeDirectiveIndexTest extends LaravelLightCodeInsightFixtur
 
     public void testCustomDirective() {
         assertIndexContains(BladeCustomDirectivesStubIndex.KEY, "datetime");
+        assertIndexContains(BladeCustomDirectivesStubIndex.KEY, "foo");
     }
 }

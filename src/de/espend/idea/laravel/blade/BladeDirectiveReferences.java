@@ -11,7 +11,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.ProjectScope;
-import com.intellij.util.indexing.FileBasedIndexImpl;
+import com.intellij.util.indexing.FileBasedIndex;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.BladeLanguage;
 import com.jetbrains.php.blade.psi.BladeDirectiveElementType;
@@ -337,7 +337,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
             String directiveName = psiElement.getText().substring(1);
 
-            FileBasedIndexImpl.getInstance().getFilesWithKey(
+            FileBasedIndex.getInstance().getFilesWithKey(
                     BladeCustomDirectivesStubIndex.KEY,
                     new HashSet<>(Collections.singletonList(directiveName)),
                     virtualFile -> {
