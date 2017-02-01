@@ -39,7 +39,8 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
             return;
         }
 
-        PsiDirectory targetDirectory = getViewsDirectory(project, psiFile);
+        TargetViewFolder targetViewFolder = getViewsDirectory(project, psiFile);
+        PsiDirectory targetDirectory = targetViewFolder.getDirectory();
 
         if(targetDirectory == null) {
             return;
@@ -79,18 +80,21 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
                     return;
                 }
 
-                PsiFile newViewFile = PsiFileFactory.getInstance(project).createFileFromText(fileName,
+                PsiFile newViewFile = PsiFileFactory.getInstance(project).createFileFromText(
+                        fileName,
                         BladeLanguage.INSTANCE,
                         selectedText);
+
                 CodeStyleManager.getInstance(project).reformat(newViewFile, false);
 
                 directory.add(newViewFile);
 
                 int selectionStart = editor.getSelectionModel().getSelectionStart();
                 int selectionEnd = editor.getSelectionModel().getSelectionEnd();
-                editor.getDocument().replaceString(selectionStart,
+                editor.getDocument().replaceString(
+                        selectionStart,
                         selectionEnd,
-                        "@include('" + viewName + "')");
+                        "@include('" + (targetViewFolder.getNamespace() != null ? targetViewFolder.getNamespace() + "::" : "") + viewName + "')");
 
                 editor.getSelectionModel().removeSelection();
                 editor.getCaretModel().moveToOffset(selectionStart);
@@ -104,30 +108,52 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
         // Will work only on editor, so this method won't be called
     }
 
-    @Nullable
-    private PsiDirectory getViewsDirectory(Project project, PsiFile psiFile)
+    @NotNull
+    private TargetViewFolder getViewsDirectory(Project project, PsiFile psiFile)
     {
         PsiDirectory firstExistingTemplatePath = null;
+        String firstExistingTemplatePathNamespace = null;
         for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
-            final VirtualFile templateDir = VfsUtil.findRelativeFile(templatePath.getPath(), project.getBaseDir());
+            final VirtualFile templateDir = templatePath.getRelativePath(project);
 
             if(templateDir != null) {
 
-                if(psiFile.getVirtualFile().getPath().startsWith(templateDir.getPath()))
-                {
-                    return PsiManager.getInstance(project).findDirectory(templateDir);
+                PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(templateDir);
+                if(psiFile.getVirtualFile().getPath().startsWith(templateDir.getPath())) {
+                    return new TargetViewFolder(psiDirectory, templatePath.getNamespace());
                 }
 
                 if(firstExistingTemplatePath == null) {
-                    firstExistingTemplatePath = PsiManager.getInstance(project).findDirectory(templateDir);
+                    firstExistingTemplatePath = psiDirectory;
+                    firstExistingTemplatePathNamespace = templatePath.getNamespace();
                 }
             }
         }
 
         if(firstExistingTemplatePath != null) {
-            return firstExistingTemplatePath;
+            return new TargetViewFolder(firstExistingTemplatePath, firstExistingTemplatePathNamespace);
         }
 
-        return PsiManager.getInstance(project).findDirectory(project.getBaseDir());
+        return new TargetViewFolder(PsiManager.getInstance(project).findDirectory(project.getBaseDir()), null);
+    }
+
+    private class TargetViewFolder {
+        private final PsiDirectory directory;
+        private final String namespace;
+
+        TargetViewFolder(@Nullable PsiDirectory directory, @Nullable String namespace) {
+            this.directory = directory;
+            this.namespace = namespace;
+        }
+
+        @Nullable
+        public PsiDirectory getDirectory() {
+            return directory;
+        }
+
+        @Nullable
+        public String getNamespace() {
+            return namespace;
+        }
     }
 }
