@@ -8,6 +8,7 @@ import com.intellij.psi.PsiReference;
 import com.intellij.psi.util.PsiElementFilter;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.php.PhpIndex;
+import com.jetbrains.php.codeInsight.PhpCodeInsightUtil;
 import com.jetbrains.php.lang.parser.PhpElementTypes;
 import com.jetbrains.php.lang.patterns.PhpPatterns;
 import com.jetbrains.php.lang.psi.PhpPsiUtil;
@@ -375,5 +376,29 @@ public class PhpElementsUtil {
         String methodRefName = ((MethodReference) psiElement).getName();
 
         return null != methodRefName && Arrays.asList(methodName).contains(methodRefName);
+    }
+
+    @NotNull
+    public static Map<String, String> getUseImports(@NotNull PsiElement element) {
+        // search for use alias in local file
+        final Map<String, String> useImports = new HashMap<>();
+
+        PhpPsiElement scope = PhpCodeInsightUtil.findScopeForUseOperator(element);
+        if(scope == null) {
+            return useImports;
+        }
+
+        for (PhpUseList phpUseList : PhpCodeInsightUtil.collectImports(scope)) {
+            for (PhpUse phpUse : phpUseList.getDeclarations()) {
+                String alias = phpUse.getAliasName();
+                if (alias != null) {
+                    useImports.put(alias, phpUse.getFQN());
+                } else {
+                    useImports.put(phpUse.getName(), phpUse.getFQN());
+                }
+            }
+        }
+
+        return useImports;
     }
 }

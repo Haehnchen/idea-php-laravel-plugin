@@ -164,6 +164,7 @@
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeStackStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeEachStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeYieldStubIndex"/>
+      <fileBasedIndex implementation="de.espend.idea.laravel.stub.BladeCustomDirectivesStubIndex"/>
 
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.TranslationKeyStubIndex"/>
       <fileBasedIndex implementation="de.espend.idea.laravel.stub.ConfigKeyStubIndex"/>
