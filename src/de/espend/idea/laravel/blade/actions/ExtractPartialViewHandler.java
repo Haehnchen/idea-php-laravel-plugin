@@ -1,20 +1,15 @@
 package de.espend.idea.laravel.blade.actions;
 
-import com.intellij.codeInsight.actions.ReformatCodeAction;
-import com.intellij.codeInsight.actions.ReformatCodeProcessor;
-import com.intellij.formatting.FormatterImpl;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.refactoring.RefactoringActionHandler;
-import com.jetbrains.php.blade.formatter.BladeFormattingModelBuilder;
 import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.ui.ExtractPartialViewDialog;
 import de.espend.idea.laravel.view.ViewCollector;

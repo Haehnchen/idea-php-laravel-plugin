@@ -3,7 +3,6 @@ package de.espend.idea.laravel.stub.processor;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.jetbrains.php.blade.psi.BladeDirectiveElementType;
-import com.jetbrains.php.blade.psi.BladeDirectiveParameterPsiImpl;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import de.espend.idea.laravel.util.PsiElementUtils;

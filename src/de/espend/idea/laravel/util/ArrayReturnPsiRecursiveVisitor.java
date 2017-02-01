@@ -11,7 +11,6 @@ import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

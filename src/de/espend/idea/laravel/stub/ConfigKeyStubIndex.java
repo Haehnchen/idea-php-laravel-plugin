@@ -1,6 +1,5 @@
 package de.espend.idea.laravel.stub;
 
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
@@ -8,7 +7,6 @@ import com.intellij.util.io.EnumeratorStringDescriptor;
 import com.intellij.util.io.KeyDescriptor;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.psi.PhpFile;
-import de.espend.idea.laravel.stub.processor.ArrayKeyVisitor;
 import de.espend.idea.laravel.util.ArrayReturnPsiRecursiveVisitor;
 import gnu.trove.THashMap;
 import org.jetbrains.annotations.NotNull;
