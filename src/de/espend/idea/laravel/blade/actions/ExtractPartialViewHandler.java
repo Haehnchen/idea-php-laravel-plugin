@@ -104,8 +104,7 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
     }
 
     @NotNull
-    private TargetViewFolder getViewsDirectory(Project project, PsiFile psiFile)
-    {
+    private TargetViewFolder getViewsDirectory(Project project, PsiFile psiFile) {
         PsiDirectory firstExistingTemplatePath = null;
         String firstExistingTemplatePathNamespace = null;
         for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
