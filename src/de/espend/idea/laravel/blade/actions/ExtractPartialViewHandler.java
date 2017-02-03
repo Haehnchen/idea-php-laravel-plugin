@@ -113,7 +113,7 @@ public class ExtractPartialViewHandler implements RefactoringActionHandler {
             if(templateDir != null) {
 
                 PsiDirectory psiDirectory = PsiManager.getInstance(project).findDirectory(templateDir);
-                if(psiFile.getVirtualFile().getPath().startsWith(templateDir.getPath())) {
+                if(psiFile.getVirtualFile().getPath().startsWith(templateDir.getPath() + "/")) {
                     return new TargetViewFolder(psiDirectory, templatePath.getNamespace());
                 }
 
