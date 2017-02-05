@@ -193,7 +193,11 @@
   </project-components>
 
   <actions>
-    <!-- Add your actions here -->
+    <action id="Laravel.ExtractPartialView" class="de.espend.idea.laravel.blade.actions.ExtractPartialViewAction"
+            text="Extract partial view">
+      <add-to-group group-id="RefactoringMenu" anchor="first"/>
+      <keyboard-shortcut first-keystroke="control alt P" keymap="$default"/>
+    </action>
   </actions>
 
 </idea-plugin>
