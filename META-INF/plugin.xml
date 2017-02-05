@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.12.4</version>
+  <version>0.13</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -46,6 +46,13 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.13</h2>
+    <ul>
+        <li>Extract to template file <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/102">#102</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/23">#23</a> @adelf</li>
+        <li>* Add index for custom Blade directives abd provide completion <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/103">#103</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/88">#88</a> @adelf</li>
+        <li>Partial namespaced controllers <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/95">#95</a> @adelf</li>
+    </ul>
 
     <h2>0.12.4</h2>
     <ul>
@@ -94,36 +101,10 @@
         <li>Fix Plugin throws java.util.ConcurrentModificationException <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/64">#64</a></li>
     </ul>
 
-    <h2>0.10.0</h2>
-    <ul>
-        <li>Dont print full function signature in tail text, only extract parameter</li>
-        <li>Dropping redundant view path setting elements <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/59">#59</a></li>
-        <li>Route::group old laravel versions support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/47">#47</a></li>
-        <li>Fix MethodReferenceImpl cannot be cast to ... in dic type provider <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/54">#54</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/60">#60</a></li>
-        <li>Update travis environment to use PhpStorm.2016+ and Java8 deps</li>
-        <li>Fix jump to doesn't work for @include('some/view/path') <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/62">#62</a></li>
-        <li>Support translate in subdirectories <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/61">#61</a></li>
-    </ul>
+    <br/>
+    <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/blob/master/CHANGELOG.md">open full changelog</a>
+    <br/>
 
-    <h2>0.9.1</h2>
-    <ul>
-        <li>Fix Route::group and Laravel doesn't allow Route::group for controllers not in default namespace <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/46">#46</a> @adelf</li>
-        <li>Route completion displays origin class of trait methods and provides parameter tail text</li>
-    </ul>
-
-    <h2>0.9</h2>
-    <ul>
-        <li>Better default router namespace detection; also add settings for customize <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/35">#35</a></li>
-        <li>Non-standard root namespaces support @adelf</li>
-        <li>Fixing npe in ControllerReferences <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/40">#40</a></li>
-        <li>Route::group support @adelf <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/8">#8</a></li>
-        <li>Prioritized controller completion inside groups @adelf</li>
-        <li>fix navigation to view in custom view folder without namespace problem <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/30">#30</a></li>
-        <li>Only try optional view path on settings form <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/24">#24</a></li>
-        <li>Add support for naming routes <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/21">#21</a>, <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/34">#34</a></li>
-        <li>Add blade @lang directive support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/19">#19</a></li>
-        <li>Add service dic support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/issues/42">#42</a></li>
-   </ul>
     ]]>
   </change-notes>
 

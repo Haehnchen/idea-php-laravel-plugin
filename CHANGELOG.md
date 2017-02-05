@@ -1,3 +1,8 @@
+## 0.13
+* Extract to template file [#102](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/102) [#23](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/23) @adelf
+* Add index for custom Blade directives abd provide completion [#103](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/103) [#88](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/88) @adelf
+* Partial namespaced controllers [#95](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/95) @adelf
+
 ## 0.12.4
 * Fix thread exception in template settings forms [#99](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/99)
 
