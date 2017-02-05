@@ -2,6 +2,7 @@ package de.espend.idea.laravel.blade.util;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -26,8 +27,11 @@ import de.espend.idea.laravel.view.ViewCollector;
 import de.espend.idea.laravel.view.dict.TemplatePath;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -259,10 +263,19 @@ public class BladeTemplateUtil {
         return views;
     }
 
-    public static Collection<String> getViewTemplatesScope(@NotNull PsiElement psiElement) {
-        return getViewTemplatesPairScope(psiElement)
-                .stream().map(view -> view.getFirst())
-                .collect(Collectors.toCollection(HashSet::new));
+    /**
+     * "'foobar'"
+     * "'foobar', []"
+     */
+    @Nullable
+    public static String getParameterFromParameterDirective(@NotNull String content) {
+        Matcher matcher = Pattern.compile("^\\s*['|\"]([^'\"]+)['|\"]").matcher(content);
+
+        if(matcher.find()) {
+            return StringUtil.trim(matcher.group(1));
+        }
+
+        return null;
     }
 
     private static class MyViewRecursiveElementWalkingVisitor extends PsiRecursiveElementWalkingVisitor {

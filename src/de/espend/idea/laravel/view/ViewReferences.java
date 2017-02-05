@@ -112,7 +112,7 @@ public class ViewReferences implements GotoCompletionRegistrar {
          * @includeIf('view.name')
          * @component('view.name')
          */
-        registrar.register(BladePattern.getDirectiveParameterPattern("includeIf", "component"), psiElement -> {
+        registrar.register(BladePattern.getDirectiveWithAdditionalParameterPattern("includeIf", "component"), psiElement -> {
             if (psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
@@ -146,12 +146,12 @@ public class ViewReferences implements GotoCompletionRegistrar {
         @NotNull
         @Override
         public Collection<PsiElement> getPsiTargets(@NotNull PsiElement element) {
-            String contents = element.getText();
+            String contents = BladeTemplateUtil.getParameterFromParameterDirective(element.getText());
+            if(contents == null) {
+                return Collections.emptyList();
+            }
 
-            return this.getTemplateTargets(
-                element.getProject(),
-                contents.replace("\"", "'").substring(1, contents.length() - 1)
-            );
+            return this.getTemplateTargets(element.getProject(), contents);
         }
     }
 

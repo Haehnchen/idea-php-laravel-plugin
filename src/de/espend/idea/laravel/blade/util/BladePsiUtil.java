@@ -228,13 +228,15 @@ public class BladePsiUtil {
     @Nullable
     public static String getDirectiveParameter(@NotNull BladePsiDirective directiveParameter) {
         for (PsiElement psiElement : PsiElementUtils.getChildrenFix(directiveParameter)) {
-            if(psiElement instanceof BladePsiDirectiveParameter) {
-                String text = psiElement.getText();
+            if(!(psiElement instanceof BladePsiDirectiveParameter)) {
+                continue;
+            }
 
-                if((text.startsWith("('") || text.startsWith("(\"")) && (text.startsWith("('") || text.startsWith("(\""))) {
-                    return text.substring(2, text.length() - 2);
-                } else {
-                    return null;
+            for (PsiElement element : PsiElementUtils.getChildrenFix(psiElement)) {
+                if(element.getNode().getElementType() == BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT) {
+                    return BladeTemplateUtil.getParameterFromParameterDirective(
+                        element.getText()
+                    );
                 }
             }
         }

@@ -28,22 +28,42 @@ public class BladePattern {
                     return (s.startsWith("'") || s.startsWith("\"")) && s.endsWith("'") || s.endsWith("\"");
                 }
             }))
-            .withParent(
-                PlatformPatterns.psiElement(BladePsiDirectiveParameter.class).withParent(
-                    PlatformPatterns.psiElement(BladePsiDirective.class).with(new PatternCondition<BladePsiDirective>("Directive Name") {
-                        @Override
-                        public boolean accepts(@NotNull BladePsiDirective bladePsiDirective, ProcessingContext processingContext) {
-                            for (String directive : directives) {
-                                if(("@" + directive).equals(bladePsiDirective.getName())) {
-                                    return true;
-                                }
-                            }
+            .withParent(getDirectiveNamePattern(directives));
+    }
 
-                            return false;
+    /**
+     * Pattern for @includeIf('auth.<caret>', [])
+     * @param directives "includeIf" without "@"
+     */
+    public static PsiElementPattern.Capture<PsiElement> getDirectiveWithAdditionalParameterPattern(@NotNull String... directives) {
+        return PlatformPatterns.psiElement().withElementType(BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT)
+            .withText(PlatformPatterns.string().with(new PatternCondition<String>("Directive Quoted Content") {
+                @Override
+                public boolean accepts(@NotNull String s, ProcessingContext processingContext) {
+                    return s.matches("^\\s*['|\"]([^'\"]+)['|\"].*");
+                }
+            }))
+            .withParent(getDirectiveNamePattern(directives));
+    }
+
+    /**
+     * "@foobar"
+     */
+    private static PsiElementPattern.Capture<BladePsiDirectiveParameter> getDirectiveNamePattern(@NotNull final String[] directives) {
+        return PlatformPatterns.psiElement(BladePsiDirectiveParameter.class).withParent(
+            PlatformPatterns.psiElement(BladePsiDirective.class).with(new PatternCondition<BladePsiDirective>("Directive Name") {
+                @Override
+                public boolean accepts(@NotNull BladePsiDirective bladePsiDirective, ProcessingContext processingContext) {
+                    for (String directive : directives) {
+                        if(("@" + directive).equals(bladePsiDirective.getName())) {
+                            return true;
                         }
-                    })
-                )
-            );
+                    }
+
+                    return false;
+                }
+            })
+        );
     }
 
     /**

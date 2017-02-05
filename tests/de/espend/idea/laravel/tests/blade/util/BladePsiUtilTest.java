@@ -3,6 +3,7 @@ package de.espend.idea.laravel.tests.blade.util;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.jetbrains.php.blade.BladeFileType;
+import com.jetbrains.php.blade.psi.BladePsiDirective;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import de.espend.idea.laravel.blade.BladePsiElementFactory;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
@@ -54,5 +55,31 @@ public class BladePsiUtilTest extends LaravelLightCodeInsightFixtureTestCase {
         PsiElement psiElement = myFixture.getFile().findElementAt(myFixture.getCaretOffset());
 
         assertEquals("layouts.app", BladePsiUtil.findComponentForSlotScope(psiElement));
+    }
+
+    /**
+     * @see BladePsiUtil#getDirectiveParameter
+     */
+    public void testGetDirectiveParameter() {
+        BladePsiDirective bladePsiDirective = BladePsiElementFactory.createFromText(
+            getProject(),
+            BladePsiDirective.class,
+            "@slot('layouts.app', [])\n"
+        );
+
+        assertEquals("layouts.app", BladePsiUtil.getDirectiveParameter(bladePsiDirective));
+    }
+
+    /**
+     * @see BladePsiUtil#getDirectiveParameter
+     */
+    public void testGetDirectiveParameterWithAdditionalParameter() {
+        BladePsiDirective bladePsiDirective = BladePsiElementFactory.createFromText(
+            getProject(),
+            BladePsiDirective.class,
+            "@slot('layouts.app', [])\n"
+        );
+
+        assertEquals("layouts.app", BladePsiUtil.getDirectiveParameter(bladePsiDirective));
     }
 }

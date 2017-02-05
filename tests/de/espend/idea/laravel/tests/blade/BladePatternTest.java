@@ -22,6 +22,16 @@ public class BladePatternTest extends LaravelLightCodeInsightFixtureTestCase {
     }
 
     /**
+     * @see de.espend.idea.laravel.blade.BladePattern#getDirectiveWithAdditionalParameterPattern
+     */
+    public void testGetDirectiveParameterWithAdditionalParameterPattern() {
+        myFixture.configureByText(BladeFileType.INSTANCE, "@component('auth<caret>', [])");
+        PsiElement psiElement = myFixture.getFile().findElementAt(myFixture.getCaretOffset());
+
+        assertTrue(BladePattern.getDirectiveWithAdditionalParameterPattern("component").accepts(psiElement));
+    }
+
+    /**
      * @see de.espend.idea.laravel.blade.BladePattern#getTextBlockContentVariablePattern
      */
     public void testGetTextBlockContentVariablePattern() {
