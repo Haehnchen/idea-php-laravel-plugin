@@ -11,6 +11,8 @@ namespace Illuminate\Routing
     {
         public static function get($uri, $action);
         public static function group($attributes, $callback);
+        public static function controller($uri, $controller);
+        public static function resource($uri, $controller);
     }
 }
 
@@ -26,6 +28,16 @@ namespace
         public static function group($attributes, $callback)
         {
             return \Illuminate\Routing\Router::group($attributes, $callback);
+        }
+
+        public static function controller($uri, $controller)
+        {
+            return \Illuminate\Routing\Router::controller($uri, $controller);
+        }
+
+        public static function resource($uri, $controller)
+        {
+            return \Illuminate\Routing\Router::resource($uri, $controller);
         }
     }
 }

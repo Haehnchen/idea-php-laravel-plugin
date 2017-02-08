@@ -110,4 +110,11 @@ public class ControllerReferencesTest extends LaravelLightCodeInsightFixtureTest
             new LookupElement.TailTextIsBlankAssert()
         );
     }
+
+    public void testControllerCompletion() {
+        assertCompletionContains(PhpFileType.INSTANCE, "<?php\n" +
+                        "Route::resource(null, '<caret>');\n",
+                "FooController"
+        );
+    }
 }

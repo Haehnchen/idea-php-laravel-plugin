@@ -330,7 +330,7 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
             ControllerCollector.visitController(getProject(), (method, name) ->
                 namespaceCutter.cut(name, (processedClassName, prioritised) -> {
-                    LookupElement lookupElement = LookupElementBuilder.create(name)
+                    LookupElement lookupElement = LookupElementBuilder.create(processedClassName)
                             .withIcon(LaravelIcons.ROUTE);
 
                     if(prioritised) {
