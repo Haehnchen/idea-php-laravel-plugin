@@ -1,3 +1,7 @@
+## 0.13.1
+* Fix navigation to declaration doesn't work when @component has the optional array parameter [#105](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/105)
+* Fix route controller/resource completion [#106](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/106) [#107](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/107) @adelf
+
 ## 0.13
 * Extract to template file [#102](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/102) [#23](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/23) @adelf
 * Add index for custom Blade directives abd provide completion [#103](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/103) [#88](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/88) @adelf

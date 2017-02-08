@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.13</version>
+  <version>0.13.1</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -47,10 +47,16 @@
 
   <change-notes><![CDATA[
 
+    <h2>0.13.1</h2>
+    <ul>
+        <li>Fix navigation to declaration doesn't work when @component has the optional array parameter <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/105">#105</a></li>
+        <li>Fix route controller/resource completion <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/106">#106</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/107">#107</a> @adelf</li>
+    </ul>
+
     <h2>0.13</h2>
     <ul>
         <li>Extract to template file <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/102">#102</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/23">#23</a> @adelf</li>
-        <li>* Add index for custom Blade directives abd provide completion <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/103">#103</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/88">#88</a> @adelf</li>
+        <li>Add index for custom Blade directives abd provide completion <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/103">#103</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/88">#88</a> @adelf</li>
         <li>Partial namespaced controllers <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/95">#95</a> @adelf</li>
     </ul>
 
