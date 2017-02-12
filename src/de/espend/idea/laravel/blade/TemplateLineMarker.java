@@ -3,6 +3,7 @@ package de.espend.idea.laravel.blade;
 import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
 import com.intellij.navigation.GotoRelatedItem;
+import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -211,7 +212,15 @@ public class TemplateLineMarker implements LineMarkerProvider {
             }
         }
 
-        return new LineMarkerInfo<>(lineMarkerTarget, lineMarkerTarget.getTextOffset(), icon, 6, new ConstantFunction<>(title), new RelatedPopupGotoLineMarker.NavigationHandler(gotoRelatedItems));
+        return new LineMarkerInfo<>(
+            lineMarkerTarget,
+            lineMarkerTarget.getTextRange(),
+            icon,
+            6,
+            new ConstantFunction<>(title),
+            new RelatedPopupGotoLineMarker.NavigationHandler(gotoRelatedItems),
+            GutterIconRenderer.Alignment.RIGHT
+        );
     }
 
     private void visitOverwrittenTemplateFile(final PsiFile psiFile, final List<GotoRelatedItem> gotoRelatedItems, final String sectionName) {
