@@ -155,14 +155,16 @@ public class TemplateLineMarker implements LineMarkerProvider {
         );
 
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
+        final Set<VirtualFile> relatedFiles = new HashSet<>();
 
         for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY, BladeEachStubIndex.KEY)) {
             for(String templateName: templateNames) {
                 FileBasedIndexImpl.getInstance().getFilesWithKey(key, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
                     PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
 
-                    if(psiFileTarget != null) {
+                    if(psiFileTarget != null && !relatedFiles.contains(virtualFile)) {
                         gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiFileTarget).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
+                        relatedFiles.add(virtualFile);
                     }
 
                     return true;
