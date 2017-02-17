@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -56,23 +55,12 @@ public class BladeCustomDirectivesVisitor extends PsiRecursiveElementVisitor {
 
     private void checkClassName(MethodReference methodReference, String directiveName) {
 
-        if(methodReference.getClassReference() == null) {
+        if(methodReference.getClassReference() == null || methodReference.getClassReference().getText() == null) {
             return;
         }
 
-        Map<String, String> useImports = PhpElementsUtil.getUseImports(methodReference);
-
-        String className = methodReference.getClassReference().getText();
-        className = useImports.getOrDefault(className, className);
-
-        if(!className.startsWith("\\")) {
-            className = "\\" + className;
+        if(availableClasses.contains(PhpElementsUtil.getFullClassName(methodReference, methodReference.getClassReference().getText()))) {
+            consumer.accept(Pair.create(methodReference, directiveName));
         }
-
-        if(!availableClasses.contains(className)) {
-            return;
-        }
-
-        consumer.accept(Pair.create(methodReference, directiveName));
     }
 }
