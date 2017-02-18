@@ -1,23 +1,20 @@
 package de.espend.idea.laravel.routing.utils;
 
 import com.google.common.collect.Lists;
+import com.intellij.openapi.util.Condition;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.jetbrains.php.lang.psi.elements.ArrayCreationExpression;
 import com.jetbrains.php.lang.psi.elements.ArrayHashElement;
+import com.jetbrains.php.lang.psi.elements.MethodReference;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
-import fr.adrienbrault.idea.symfony2plugin.util.MethodMatcher;
+import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class RouteGroupUtil
 {
-    private static MethodMatcher.CallToSignature[] ROUTE_GROUP = new MethodMatcher.CallToSignature[] {
-            new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Router", "group"),
-    };
-
     /**
      * Analyzes Route::group elements and returns string values for specified property.
      * Route::group(['namespace' => 'Foo'], function() {
@@ -33,12 +30,12 @@ public class RouteGroupUtil
     {
         List<String> values = new ArrayList<>();
 
-        PsiElement routeGroup = PsiTreeUtil.findFirstParent(element, true, psiElement ->
-                MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null
-        );
+        RouteGroupCondition routeGroupCondition = new RouteGroupCondition();
+
+        PsiElement routeGroup = PsiTreeUtil.findFirstParent(element, true, routeGroupCondition);
 
         while (routeGroup != null) {
-            ArrayCreationExpression arrayCreation = PsiTreeUtil.getChildOfType(routeGroup.getParent(), ArrayCreationExpression.class);
+            ArrayCreationExpression arrayCreation = PsiTreeUtil.getChildOfType(((MethodReference)routeGroup).getParameterList(), ArrayCreationExpression.class);
 
             if (arrayCreation != null) {
                 for (ArrayHashElement hashElement : arrayCreation.getHashElements()) {
@@ -53,11 +50,36 @@ public class RouteGroupUtil
                 }
             }
 
-            routeGroup = PsiTreeUtil.findFirstParent(routeGroup, true, psiElement ->
-                    MethodMatcher.getMatchedSignatureWithDepth(psiElement, ROUTE_GROUP, 1) != null
-            );
+            routeGroup = PsiTreeUtil.findFirstParent(routeGroup, true, routeGroupCondition);
         }
 
         return Lists.reverse(values);
+    }
+
+    private static class RouteGroupCondition implements Condition<PsiElement> {
+        private static Set<String> availableClasses = new HashSet<>(Arrays.asList(
+                "\\Illuminate\\Routing\\Router",
+                "\\Illuminate\\Support\\Facades\\Route",
+                "\\Route"));
+
+        @Override
+        public boolean value(PsiElement psiElement) {
+
+            if(!(psiElement instanceof MethodReference)) {
+                return false;
+            }
+
+            MethodReference methodReference = (MethodReference) psiElement;
+
+            if (!"group".equals(methodReference.getName())) {
+                return false;
+            }
+
+            if(methodReference.getClassReference() == null || methodReference.getClassReference().getName() == null) {
+                return false;
+            }
+
+            return availableClasses.contains(PhpElementsUtil.getFullClassName(methodReference, methodReference.getClassReference().getName()));
+        }
     }
 }

@@ -401,4 +401,25 @@ public class PhpElementsUtil {
 
         return useImports;
     }
+
+    /**
+     * Returns full classname for given element. Example:  use \Illuminate\Support\Facades\Route;
+     * For 'Route::group(...' method reference getFullClassName(groupPsiElement, 'Route') will return '\Illuminate\Support\Facades\Route'
+     *
+     * @param element Psi element to search imports for
+     * @param className base class name
+     * @return Canonized full class name
+     */
+    @NotNull
+    public static String getFullClassName(@NotNull PsiElement element, @NotNull String className) {
+        Map<String, String> useImports = PhpElementsUtil.getUseImports(element);
+
+        String fullClassName = useImports.getOrDefault(className, className);
+
+        if(!fullClassName.startsWith("\\")) {
+            return "\\" + fullClassName;
+        }
+
+        return fullClassName;
+    }
 }
