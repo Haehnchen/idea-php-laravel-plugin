@@ -19,19 +19,18 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
 public class RoutingUtil {
 
-    public static final String[] HTTP_METHODS = new String[]{"get", "post", "put", "delete", "patch", "delete", "options", "any"};
+    static final String[] HTTP_METHODS = new String[]{"get", "post", "put", "delete", "patch", "delete", "options", "any"};
 
     private static final Key<CachedValue<Collection<String>>> ROUTE_NAMES = new Key<>("LaravelRoutingUtilNames");
+
+    static final String[] REST_METHODS = new String[]{"index", "create", "store", "show", "edit", "update", "destroy"};
 
     public static Collection<PsiElement> getRoutesAsTargets(@NotNull PsiFile psiFile, final @NotNull String routeName) {
         final Set<PsiElement> names = new HashSet<>();
@@ -137,6 +136,15 @@ public class RoutingUtil {
                             visitAs((MethodReference) element, this.getRouteNamePrefix(element));
                         }
                     }
+                } else if("resource".equals(((MethodReference) element).getName())) {
+
+                    // Route::resource('foo', 'FooController', [...])
+                    PhpPsiElement classReference = ((MethodReference) element).getFirstPsiChild();
+                    if(classReference instanceof ClassReference) {
+                        if("Route".equalsIgnoreCase(classReference.getName())) {
+                            visitResource((MethodReference) element, this.getRouteNamePrefix(element));
+                        }
+                    }
                 }
             }
 
@@ -186,5 +194,59 @@ public class RoutingUtil {
             this.visitor.visit(parameters[0], prefix + contents);
         }
 
+        /**
+         * Visiting Route::resource('foo', 'FooController', [...])
+         * @param methodReference Route::resource element
+         * @param prefix Prefix got from ['as' => ...] values from parent Route::group elements
+         */
+        private void visitResource(@NotNull MethodReference methodReference, @NotNull String prefix) {
+            PsiElement[] parameters = methodReference.getParameters();
+            if(parameters.length < 2 || !(parameters[0] instanceof StringLiteralExpression)) {
+                return;
+            }
+
+            String routeUrl = ((StringLiteralExpression) parameters[0]).getContents();
+            if(StringUtils.isBlank(routeUrl)) {
+                return;
+            }
+
+            String baseNamesPrefix = StringUtils.join(RouteGroupUtil.getRouteGroupPropertiesCollection(methodReference, "prefix"), "/");
+            baseNamesPrefix = StringUtils.isBlank(baseNamesPrefix) ? routeUrl : baseNamesPrefix + "/" + routeUrl;
+            baseNamesPrefix = baseNamesPrefix.replace('/', '.');
+
+            for(String routeName: getResourceRouteNames(parameters)) {
+                this.visitor.visit(parameters[0], prefix + baseNamesPrefix + "." + routeName);
+            }
+        }
+
+        /**         *
+         * @param parameters Route::resource method reference parameters
+         * @return Collection of Route:;resource names, like ["index", "show"]
+         */
+        private Collection<String> getResourceRouteNames(@NotNull PsiElement[] parameters) {
+            ArrayList<String> restMethods = new ArrayList<>(Arrays.asList(REST_METHODS));
+
+            if(parameters.length < 3 || !(parameters[2] instanceof ArrayCreationExpression)) {
+                return restMethods;
+            }
+
+            PhpPsiElement onlyValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[2], "only");
+
+            if(onlyValue instanceof ArrayCreationExpression) {
+                return PhpElementsUtil.getArrayValuesAsString(((ArrayCreationExpression)onlyValue));
+            }
+
+            PhpPsiElement exceptValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[2], "except");
+
+            if(exceptValue instanceof ArrayCreationExpression) {
+                for(String method: PhpElementsUtil.getArrayValuesAsString(((ArrayCreationExpression)exceptValue))) {
+                    restMethods.remove(method.toLowerCase());
+                }
+
+                return restMethods;
+            }
+
+            return restMethods;
+        }
     }
 }
