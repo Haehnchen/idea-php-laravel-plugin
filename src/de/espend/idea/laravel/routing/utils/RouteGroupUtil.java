@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class RouteGroupUtil
-{
+public class RouteGroupUtil {
+
     /**
      * Analyzes Route::group elements and returns string values for specified property.
      * Route::group(['namespace' => 'Foo'], function() {

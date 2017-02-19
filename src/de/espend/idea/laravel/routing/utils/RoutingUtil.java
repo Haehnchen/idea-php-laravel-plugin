@@ -19,19 +19,18 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
 public class RoutingUtil {
 
-    public static final String[] HTTP_METHODS = new String[]{"get", "post", "put", "delete", "patch", "delete", "options", "any"};
+    static final String[] HTTP_METHODS = new String[]{"get", "post", "put", "delete", "patch", "delete", "options", "any"};
 
     private static final Key<CachedValue<Collection<String>>> ROUTE_NAMES = new Key<>("LaravelRoutingUtilNames");
+
+    static final String[] REST_METHODS = new String[]{"index", "create", "store", "show", "edit", "update", "destroy"};
 
     public static Collection<PsiElement> getRoutesAsTargets(@NotNull PsiFile psiFile, final @NotNull String routeName) {
         final Set<PsiElement> names = new HashSet<>();
@@ -137,6 +136,15 @@ public class RoutingUtil {
                             visitAs((MethodReference) element, this.getRouteNamePrefix(element));
                         }
                     }
+                } else if("resource".equals(((MethodReference) element).getName())) {
+
+                    // Route::resource('foo', 'FooController', [...])
+                    PhpPsiElement classReference = ((MethodReference) element).getFirstPsiChild();
+                    if(classReference instanceof ClassReference) {
+                        if("Route".equalsIgnoreCase(classReference.getName())) {
+                            visitResource((MethodReference) element, this.getRouteNamePrefix(element));
+                        }
+                    }
                 }
             }
 
@@ -147,8 +155,7 @@ public class RoutingUtil {
          * Returns route name prefix, based on Route::group(['as' => values
          */
         @NotNull
-        private String getRouteNamePrefix(PsiElement element)
-        {
+        private String getRouteNamePrefix(PsiElement element) {
             return StringUtils.join(RouteGroupUtil.getRouteGroupPropertiesCollection(element, "as"), "");
         }
 
@@ -186,5 +193,86 @@ public class RoutingUtil {
             this.visitor.visit(parameters[0], prefix + contents);
         }
 
+        /**
+         * Visiting Route::resource('foo', 'FooController', [...])
+         *
+         * @param methodReference Route::resource element
+         * @param prefix          Prefix got from ['as' => ...] values from parent Route::group elements
+         */
+        private void visitResource(@NotNull MethodReference methodReference, @NotNull String prefix) {
+            PsiElement[] parameters = methodReference.getParameters();
+            if(parameters.length < 2 || !(parameters[0] instanceof StringLiteralExpression)) {
+                return;
+            }
+
+            String routeUrl = ((StringLiteralExpression) parameters[0]).getContents();
+            if(StringUtils.isBlank(routeUrl)) {
+                return;
+            }
+
+            String baseNamesPrefix = StringUtils.join(RouteGroupUtil.getRouteGroupPropertiesCollection(methodReference, "prefix"), "/");
+            baseNamesPrefix = StringUtils.isBlank(baseNamesPrefix) ? routeUrl : baseNamesPrefix + "/" + routeUrl;
+            baseNamesPrefix = baseNamesPrefix.replace('/', '.');
+
+            for(String routeName : getResourceRouteNames(parameters, prefix + baseNamesPrefix + ".")) {
+                this.visitor.visit(parameters[0], routeName);
+            }
+        }
+
+        /**
+         * @param parameters Route::resource method reference parameters
+         * @return Collection of full Route::resource names, like ["users.index", "users.show"]
+         */
+        private Collection<String> getResourceRouteNames(@NotNull PsiElement[] parameters, @NotNull String prefix) {
+            Map<String, String> restMethods = new HashMap<>();
+            for(String method : REST_METHODS) {
+                restMethods.put(method, prefix + method);
+            }
+
+            if(parameters.length < 3 || !(parameters[2] instanceof ArrayCreationExpression)) {
+                return restMethods.values();
+            }
+
+            // Route::resource(..., ['only' => []])
+            PhpPsiElement onlyValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[2], "only");
+
+            Map<String, String> resultMethods;
+            if(onlyValue instanceof ArrayCreationExpression) {
+                resultMethods = new HashMap<>();
+                for(String method : PhpElementsUtil.getArrayValuesAsString(((ArrayCreationExpression) onlyValue))) {
+                    if(restMethods.containsKey(method)) {
+                        resultMethods.put(method, prefix + method);
+                    }
+                }
+            } else {
+                // Route::resource(..., ['except' => []])
+                PhpPsiElement exceptValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[2], "except");
+
+                if(exceptValue instanceof ArrayCreationExpression) {
+                    resultMethods = restMethods;
+                    for(String method : PhpElementsUtil.getArrayValuesAsString(((ArrayCreationExpression) exceptValue))) {
+                        resultMethods.remove(method);
+                    }
+                } else {
+                    resultMethods = restMethods;
+                }
+            }
+
+            // Route::resource(..., ['values' => []]) it overrides standard route names
+            PhpPsiElement namesValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[2], "names");
+
+            if(namesValue instanceof ArrayCreationExpression) {
+                resultMethods = restMethods;
+                for(Map.Entry<String, PsiElement> entry : PhpElementsUtil.getArrayValueMap(((ArrayCreationExpression) namesValue)).entrySet()) {
+
+                    if(entry.getValue() instanceof StringLiteralExpression && resultMethods.containsKey(entry.getKey())) {
+                        resultMethods.replace(entry.getKey(), ((StringLiteralExpression) entry.getValue()).getContents());
+                    }
+                }
+            }
+
+            return resultMethods.values();
+        }
     }
 }
+
