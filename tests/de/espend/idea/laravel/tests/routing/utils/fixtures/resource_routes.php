@@ -18,6 +18,16 @@ Route::resource('test4', 'FooController', [
 
 Route::resource('test5', 'FooController', [
     'except' => [
-        'show', 'edit', 'update', 'destroy'
+        'show', 'edit', 'update', 'destroy', 'wrong'
+    ]
+]);
+
+Route::resource('test6', 'FooController', [
+    'only' => [
+        'index', 'show', 'wrong'
+    ],
+    'names' => [
+        'index' => 'named.route',
+        'wrong' => 'nothing',
     ]
 ]);

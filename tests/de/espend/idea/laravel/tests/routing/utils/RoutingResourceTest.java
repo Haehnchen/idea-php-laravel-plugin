@@ -46,5 +46,10 @@ public class RoutingResourceTest extends LaravelLightCodeInsightFixtureTestCase 
         assertFalse(routesAsNames.contains("test5.edit"));
         assertFalse(routesAsNames.contains("test5.update"));
         assertFalse(routesAsNames.contains("test5.destroy"));
+
+        assertContainsElements(routesAsNames, "named.route", "test6.show");
+        assertFalse(routesAsNames.contains("test6.index")); // It was overridden
+        assertFalse(routesAsNames.contains("test6.wrong"));
+        assertFalse(routesAsNames.contains("nothing"));
     }
 }

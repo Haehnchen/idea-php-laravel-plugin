@@ -155,8 +155,7 @@ public class RoutingUtil {
          * Returns route name prefix, based on Route::group(['as' => values
          */
         @NotNull
-        private String getRouteNamePrefix(PsiElement element)
-        {
+        private String getRouteNamePrefix(PsiElement element) {
             return StringUtils.join(RouteGroupUtil.getRouteGroupPropertiesCollection(element, "as"), "");
         }
 
@@ -196,8 +195,9 @@ public class RoutingUtil {
 
         /**
          * Visiting Route::resource('foo', 'FooController', [...])
+         *
          * @param methodReference Route::resource element
-         * @param prefix Prefix got from ['as' => ...] values from parent Route::group elements
+         * @param prefix          Prefix got from ['as' => ...] values from parent Route::group elements
          */
         private void visitResource(@NotNull MethodReference methodReference, @NotNull String prefix) {
             PsiElement[] parameters = methodReference.getParameters();
@@ -214,39 +214,65 @@ public class RoutingUtil {
             baseNamesPrefix = StringUtils.isBlank(baseNamesPrefix) ? routeUrl : baseNamesPrefix + "/" + routeUrl;
             baseNamesPrefix = baseNamesPrefix.replace('/', '.');
 
-            for(String routeName: getResourceRouteNames(parameters)) {
-                this.visitor.visit(parameters[0], prefix + baseNamesPrefix + "." + routeName);
+            for(String routeName : getResourceRouteNames(parameters, prefix + baseNamesPrefix + ".")) {
+                this.visitor.visit(parameters[0], routeName);
             }
         }
 
-        /**         *
+        /**
          * @param parameters Route::resource method reference parameters
-         * @return Collection of Route:;resource names, like ["index", "show"]
+         * @return Collection of full Route::resource names, like ["users.index", "users.show"]
          */
-        private Collection<String> getResourceRouteNames(@NotNull PsiElement[] parameters) {
-            ArrayList<String> restMethods = new ArrayList<>(Arrays.asList(REST_METHODS));
+        private Collection<String> getResourceRouteNames(@NotNull PsiElement[] parameters, @NotNull String prefix) {
+            Map<String, String> restMethods = new HashMap<>();
+            for(String method : REST_METHODS) {
+                restMethods.put(method, prefix + method);
+            }
 
             if(parameters.length < 3 || !(parameters[2] instanceof ArrayCreationExpression)) {
-                return restMethods;
+                return restMethods.values();
             }
 
+            // Route::resource(..., ['only' => []])
             PhpPsiElement onlyValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[2], "only");
 
+            Map<String, String> resultMethods;
             if(onlyValue instanceof ArrayCreationExpression) {
-                return PhpElementsUtil.getArrayValuesAsString(((ArrayCreationExpression)onlyValue));
-            }
-
-            PhpPsiElement exceptValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[2], "except");
-
-            if(exceptValue instanceof ArrayCreationExpression) {
-                for(String method: PhpElementsUtil.getArrayValuesAsString(((ArrayCreationExpression)exceptValue))) {
-                    restMethods.remove(method.toLowerCase());
+                resultMethods = new HashMap<>();
+                for(String method : PhpElementsUtil.getArrayValuesAsString(((ArrayCreationExpression) onlyValue))) {
+                    if(restMethods.containsKey(method)) {
+                        resultMethods.put(method, prefix + method);
+                    }
                 }
+            } else {
+                // Route::resource(..., ['except' => []])
+                PhpPsiElement exceptValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[2], "except");
 
-                return restMethods;
+                if(exceptValue instanceof ArrayCreationExpression) {
+                    resultMethods = restMethods;
+                    for(String method : PhpElementsUtil.getArrayValuesAsString(((ArrayCreationExpression) exceptValue))) {
+                        resultMethods.remove(method);
+                    }
+                } else {
+                    resultMethods = restMethods;
+                }
             }
 
-            return restMethods;
+            // Route::resource(..., ['values' => []]) it overrides standard route names
+            PhpPsiElement namesValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[2], "names");
+
+            if(namesValue instanceof ArrayCreationExpression) {
+                resultMethods = restMethods;
+                for(Map.Entry<String, PsiElement> entry : PhpElementsUtil.getArrayValueMap(((ArrayCreationExpression) namesValue)).entrySet()) {
+
+                    if(entry.getValue() instanceof StringLiteralExpression && resultMethods.containsKey(entry.getKey())) {
+                        resultMethods.replace(entry.getKey(), ((StringLiteralExpression) entry.getValue()).getContents());
+                    }
+                }
+            }
+
+            return resultMethods.values();
         }
     }
 }
+
