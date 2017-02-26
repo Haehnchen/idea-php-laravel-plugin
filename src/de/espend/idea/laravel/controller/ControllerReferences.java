@@ -357,7 +357,7 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
             ControllerCollector.visitController(getProject(), (phpClass, name) ->
                 namespaceCutter.cut(name, (processedClassName, prioritised) -> {
-                    if (name.equals(content)) {
+                    if (processedClassName.equals(content)) {
                         targets.add(phpClass);
                     }
                 })
