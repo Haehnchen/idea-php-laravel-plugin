@@ -1,3 +1,9 @@
+## 0.13.2
+* Replace deprecated api usages
+* Prevent duplicates on blade templates Related files [#112](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/112) @adelf
+* Remove index calling in RouteGroupUtil. Fixes IndexNotReadyException [#108](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/108), [#109](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/109) @adelf
+* Route::resource route names support [#113](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/113) @adelf
+
 ## 0.13.1
 * Fix navigation to declaration doesn't work when @component has the optional array parameter [#105](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/105)
 * Fix route controller/resource completion [#106](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/106) [#107](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/107) @adelf

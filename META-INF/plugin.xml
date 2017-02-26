@@ -1,7 +1,7 @@
 <idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.13.1</version>
+  <version>0.13.2</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -46,6 +46,14 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.13.2</h2>
+    <ul>
+        <li>Replace deprecated api usages</li>
+        <li>Prevent duplicates on blade templates Related files <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/112">#112</a> @adelf</li>
+        <li>Remove index calling in RouteGroupUtil. Fixes IndexNotReadyException <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/108">#108</a>, <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/109">#109</a> @adelf</li>
+        <li>Route::resource route names support <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/113">#113</a> @adelf</li>
+    </ul>
 
     <h2>0.13.1</h2>
     <ul>
