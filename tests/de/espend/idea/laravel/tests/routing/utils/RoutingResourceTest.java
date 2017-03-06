@@ -33,9 +33,13 @@ public class RoutingResourceTest extends LaravelLightCodeInsightFixtureTestCase 
 
         assertContainsElements(routesAsNames, "test1.index", "test1.show", "test1.store");
 
-        assertContainsElements(routesAsNames, "foo::foo.test2.index", "foo::foo.test2.show", "foo::foo.test2.store");
+        assertContainsElements(routesAsNames, "foo::test2.index", "foo::test2.show", "foo::test2.store");
 
-        assertContainsElements(routesAsNames, "foo::bar::foo.bar.test3.index", "foo::bar::foo.bar.test3.show", "foo::bar::foo.bar.test3.store");
+        assertContainsElements(routesAsNames, "foo::bar::test3.index", "foo::bar::test3.show", "foo::bar::test3.store");
+
+        assertContainsElements(routesAsNames, "testNonPrefix.index", "testNonPrefix.show", "testNonPrefix.store");
+
+        assertContainsElements(routesAsNames, "testLongRouteName.index");
 
         assertContainsElements(routesAsNames, "test4.index", "test4.show");
         assertFalse(routesAsNames.contains("test4.store"));
