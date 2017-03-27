@@ -210,10 +210,8 @@ public class RoutingUtil {
                 return;
             }
 
-            String baseNamesPrefix = StringUtils.join(RouteGroupUtil.getRouteGroupPropertiesCollection(methodReference, "prefix"), "/");
-            baseNamesPrefix = StringUtils.isBlank(baseNamesPrefix) ? routeUrl : baseNamesPrefix + "/" + routeUrl;
-            baseNamesPrefix = baseNamesPrefix.replace('/', '.');
-
+            String[] routeUrlParts = routeUrl.replace('/', '.').split("\\.");
+            String baseNamesPrefix = routeUrlParts[routeUrlParts.length - 1]; // Only last part of the url goes to route name
             for(String routeName : getResourceRouteNames(parameters, prefix + baseNamesPrefix + ".")) {
                 this.visitor.visit(parameters[0], routeName);
             }

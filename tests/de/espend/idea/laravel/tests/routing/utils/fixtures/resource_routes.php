@@ -10,6 +10,12 @@ Route::group(['prefix' => 'foo', 'as' => 'foo::'], function () {
     });
 });
 
+Route::group(['prefix' => 'bar'], function () { // Prefix don't participate in route naming
+    Route::resource('testNonPrefix', 'FooController');
+});
+
+Route::resource('foo/bar/{user}/testLongRouteName', 'FooController'); // only 'testLongRouteName' should go to route name.
+
 Route::resource('test4', 'FooController', [
     'only' => [
         'index', 'show'
