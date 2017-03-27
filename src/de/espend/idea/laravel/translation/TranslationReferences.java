@@ -37,6 +37,7 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
         new MethodMatcher.CallToSignature("\\Illuminate\\Translation\\Translator", "get"),
         new MethodMatcher.CallToSignature("\\Illuminate\\Translation\\Translator", "has"),
         new MethodMatcher.CallToSignature("\\Illuminate\\Translation\\Translator", "choice"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Translation\\Translator", "transChoice"),
     };
 
     @Override
@@ -48,7 +49,7 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
 
             PsiElement parent = psiElement.getParent();
             if(parent != null && (
-                MethodMatcher.getMatchedSignatureWithDepth(parent, TRANSLATION_KEY) != null || PhpElementsUtil.isFunctionReference(parent, 0, "trans")
+                MethodMatcher.getMatchedSignatureWithDepth(parent, TRANSLATION_KEY) != null || PhpElementsUtil.isFunctionReference(parent, 0, "trans", "__", "trans_choice")
             )) {
                 return new TranslationKey(parent);
             }
