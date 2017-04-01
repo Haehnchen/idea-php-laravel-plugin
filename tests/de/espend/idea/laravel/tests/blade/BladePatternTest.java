@@ -15,20 +15,20 @@ public class BladePatternTest extends LaravelLightCodeInsightFixtureTestCase {
      * @see de.espend.idea.laravel.blade.BladePattern#getDirectiveParameterPattern
      */
     public void testGetDirectiveParameterPattern() {
-        myFixture.configureByText(BladeFileType.INSTANCE, "@includeIf('auth<caret>')");
+        myFixture.configureByText(BladeFileType.INSTANCE, "@foobar('au<caret>th')");
         PsiElement psiElement = myFixture.getFile().findElementAt(myFixture.getCaretOffset());
 
-        assertTrue(BladePattern.getDirectiveParameterPattern("includeIf").accepts(psiElement));
+        assertTrue(BladePattern.getDirectiveParameterPattern("foobar").accepts(psiElement));
     }
 
     /**
      * @see de.espend.idea.laravel.blade.BladePattern#getDirectiveWithAdditionalParameterPattern
      */
     public void testGetDirectiveParameterWithAdditionalParameterPattern() {
-        myFixture.configureByText(BladeFileType.INSTANCE, "@component('auth<caret>', [])");
+        myFixture.configureByText(BladeFileType.INSTANCE, "@foobar('auth<caret>', [])");
         PsiElement psiElement = myFixture.getFile().findElementAt(myFixture.getCaretOffset());
 
-        assertTrue(BladePattern.getDirectiveWithAdditionalParameterPattern("component").accepts(psiElement));
+        assertTrue(BladePattern.getDirectiveWithAdditionalParameterPattern("foobar").accepts(psiElement));
     }
 
     /**

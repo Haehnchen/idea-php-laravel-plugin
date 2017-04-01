@@ -16,6 +16,7 @@ import com.jetbrains.php.lang.psi.elements.ParameterList;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.blade.BladePattern;
 import de.espend.idea.laravel.util.PsiElementUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,11 +69,19 @@ public class BladePsiUtil {
 
     }
 
-    public static boolean isDirective(@NotNull PsiElement psiElement, @NotNull IElementType elementType) {
-        PsiLanguageInjectionHost host = InjectedLanguageManager.getInstance(psiElement.getProject()).getInjectionHost(psiElement);
+    /**
+     * Checks for registered directive on language injection
+     *
+     * "@foobar('bar')"
+     */
+    public static boolean isDirective(@NotNull PsiElement psiElement, @NotNull IElementType... elementType) {
+        PsiLanguageInjectionHost host = InjectedLanguageManager
+            .getInstance(psiElement.getProject())
+            .getInjectionHost(psiElement);
 
-        return host instanceof BladePsiDirectiveParameter &&
-            ((BladePsiDirectiveParameter) host).getDirectiveElementType() == elementType;
+        return
+            host instanceof BladePsiDirectiveParameter &&
+            ArrayUtils.contains(elementType, ((BladePsiDirectiveParameter) host).getDirectiveElementType());
     }
 
     /**
@@ -195,16 +204,20 @@ public class BladePsiUtil {
      */
     @Nullable
     public static String findComponentForSlotScope(@NotNull PsiElement psiDirectiveParameter) {
-        if(psiDirectiveParameter.getNode().getElementType() != BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT) {
+        PsiElement bladeHost;
+        if(psiDirectiveParameter.getNode().getElementType() == BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT) {
+            bladeHost = psiDirectiveParameter.getParent();
+        } else {
+            bladeHost = InjectedLanguageManager
+                .getInstance(psiDirectiveParameter.getProject())
+                .getInjectionHost(psiDirectiveParameter);
+        }
+
+        if(!(bladeHost instanceof BladePsiDirectiveParameter)) {
             return null;
         }
 
-        PsiElement bladeParameter = psiDirectiveParameter.getParent();
-        if(!(bladeParameter instanceof BladePsiDirectiveParameter)) {
-            return null;
-        }
-
-        PsiElement bladeDirective = bladeParameter.getParent();
+        PsiElement bladeDirective = bladeHost.getParent();
         if(!(bladeDirective instanceof BladePsiDirective)) {
             return null;
         }

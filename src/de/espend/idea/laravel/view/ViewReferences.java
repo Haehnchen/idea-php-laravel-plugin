@@ -2,7 +2,7 @@ package de.espend.idea.laravel.view;
 
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
@@ -52,23 +52,10 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
     @Override
     public void register(GotoCompletionRegistrarParameter registrar) {
-        registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class).withLanguage(PhpLanguage.INSTANCE), psiElement -> {
-            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
-                return null;
-            }
-
-            PsiElement parent = psiElement.getParent();
-            if(parent == null) {
-                return null;
-            }
-
-            if (MethodMatcher.getMatchedSignatureWithDepth(parent, VIEWS) != null) {
-                return new ViewProvider(parent);
-            }
-
-            return null;
-        });
-
+        /*
+         * view('caret');
+         * Factory::make('caret');
+         */
         registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class).withLanguage(PhpLanguage.INSTANCE), psiElement -> {
             if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
@@ -79,7 +66,8 @@ public class ViewReferences implements GotoCompletionRegistrar {
                 return null;
             }
 
-            if(!de.espend.idea.laravel.util.PsiElementUtils.isFunctionReference(stringLiteral, "view", 0)) {
+            if(!PsiElementUtils.isFunctionReference(stringLiteral, "view", 0) &&
+                MethodMatcher.getMatchedSignatureWithDepth(stringLiteral, VIEWS) == null) {
                 return null;
             }
 
@@ -90,12 +78,8 @@ public class ViewReferences implements GotoCompletionRegistrar {
          * @each('view.name', $jobs, 'job')
          * @each('view.name', $jobs, 'job', 'view.empty')
          */
-        registrar.register(PlatformPatterns.psiElement().withParent(StringLiteralExpression.class).withLanguage(PhpLanguage.INSTANCE), psiElement -> {
+        registrar.register(BladePattern.getParameterDirectiveForElementType(BladeTokenTypes.EACH_DIRECTIVE), psiElement -> {
             if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
-                return null;
-            }
-
-            if(!BladePsiUtil.isDirective(psiElement, BladeTokenTypes.EACH_DIRECTIVE)) {
                 return null;
             }
 
@@ -114,14 +98,34 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
         /*
          * @includeIf('view.name')
+         */
+        registrar.register(BladePattern.getParameterDirectiveForElementType(BladeTokenTypes.INCLUDE_IF_DIRECTIVE, BladeTokenTypes.COMPONENT_DIRECTIVE), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                return null;
+            }
+
+            PsiElement stringLiteral = psiElement.getParent();
+            if(!(stringLiteral instanceof StringLiteralExpression)) {
+                return null;
+            }
+
+            ParameterBag parameterBag = PhpElementsUtil.getCurrentParameterIndex(stringLiteral);
+            if(parameterBag == null || parameterBag.getIndex() != 0) {
+                return null;
+            }
+
+            return new ViewProvider(stringLiteral);
+        });
+
+         /*
          * @component('view.name')
          */
-        registrar.register(BladePattern.getDirectiveWithAdditionalParameterPattern("includeIf", "component"), psiElement -> {
+        registrar.register(BladePattern.getDirectiveParameterPattern("component"), psiElement -> {
             if (psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
 
-            return new BladeViewProvider(psiElement);
+            return new ViewDirectiveCompletionProvider(psiElement);
         });
 
         /*
@@ -136,32 +140,9 @@ public class ViewReferences implements GotoCompletionRegistrar {
         });
     }
 
-    private static class BladeViewProvider extends ViewProvider {
-        private BladeViewProvider(PsiElement element) {
-            super(element);
-        }
-
-        @NotNull
-        @Override
-        public Collection<PsiElement> getPsiTargets(final StringLiteralExpression element) {
-            return Collections.emptyList();
-        }
-
-        @NotNull
-        @Override
-        public Collection<PsiElement> getPsiTargets(@NotNull PsiElement element) {
-            String contents = BladeTemplateUtil.getParameterFromParameterDirective(element.getText());
-            if(contents == null) {
-                return Collections.emptyList();
-            }
-
-            return this.getTemplateTargets(element.getProject(), contents);
-        }
-    }
-
     private static class ViewProvider extends GotoCompletionProvider {
 
-        public ViewProvider(PsiElement element) {
+        ViewProvider(PsiElement element) {
             super(element);
         }
 
@@ -175,6 +156,11 @@ public class ViewReferences implements GotoCompletionRegistrar {
                 lookupElements.add(LookupElementBuilder.create(name).withIcon(virtualFile.getFileType().getIcon()))
             );
 
+            // @TODO: no filesystem access in test; fake item
+            if(ApplicationManager.getApplication().isUnitTestMode()) {
+                lookupElements.add(LookupElementBuilder.create("test_view"));
+            }
+
             return lookupElements;
         }
 
@@ -186,18 +172,18 @@ public class ViewReferences implements GotoCompletionRegistrar {
                 return Collections.emptyList();
             }
 
-            return getTemplateTargets(element.getProject(), content);
-        }
-
-        @NotNull
-        protected Collection<PsiElement> getTemplateTargets(@NotNull Project project, @NotNull String content) {
             final Collection<PsiElement> targets = new ArrayList<>();
 
-            for(VirtualFile virtualFile: BladeTemplateUtil.resolveTemplateName(project, content)) {
-                PsiFile psiFile = PsiManager.getInstance(project).findFile(virtualFile);
+            for(VirtualFile virtualFile: BladeTemplateUtil.resolveTemplateName(getProject(), content)) {
+                PsiFile psiFile = PsiManager.getInstance(getProject()).findFile(virtualFile);
                 if(psiFile != null) {
                     targets.add(psiFile);
                 }
+            }
+
+            // @TODO: no filesystem access in test; fake item
+            if("test_view".equals(content) && ApplicationManager.getApplication().isUnitTestMode()) {
+                targets.add(PsiManager.getInstance(getProject()).findDirectory(getProject().getBaseDir()));
             }
 
             return targets;
@@ -275,6 +261,49 @@ public class ViewReferences implements GotoCompletionRegistrar {
         @Override
         public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
             return Collections.emptyList();
+        }
+    }
+
+    private static class ViewDirectiveCompletionProvider extends GotoCompletionProvider {
+        public ViewDirectiveCompletionProvider(PsiElement psiElement) {
+            super(psiElement);
+        }
+
+        @NotNull
+        @Override
+        public Collection<LookupElement> getLookupElements() {
+            Collection<LookupElement> lookupElements = new ArrayList<>();
+
+            ViewCollector.visitFile(getProject(), (virtualFile, name) ->
+                lookupElements.add(LookupElementBuilder.create(name).withIcon(virtualFile.getFileType().getIcon()))
+            );
+
+            return lookupElements;
+        }
+
+        @NotNull
+        @Override
+        public Collection<PsiElement> getPsiTargets(PsiElement element) {
+            List<String> strings = BladePsiUtil.extractParameters(element.getText());
+            if(strings.size() < 1) {
+                return Collections.emptyList();
+            }
+
+            String content = PsiElementUtils.trimQuote(strings.get(0));
+            if(StringUtils.isBlank(content)) {
+                return Collections.emptyList();
+            }
+
+            Collection<PsiElement> targets = new ArrayList<>();
+
+            for(VirtualFile virtualFile: BladeTemplateUtil.resolveTemplateName(getProject(), content)) {
+                PsiFile psiFile = PsiManager.getInstance(getProject()).findFile(virtualFile);
+                if(psiFile != null) {
+                    targets.add(psiFile);
+                }
+            }
+
+            return targets;
         }
     }
 }

@@ -28,6 +28,7 @@ import de.espend.idea.laravel.stub.BladeCustomDirectivesStubIndex;
 import de.espend.idea.laravel.stub.processor.BladeCustomDirectivesVisitor;
 import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
 import de.espend.idea.laravel.translation.TranslationReferences;
+import de.espend.idea.laravel.util.PsiElementUtils;
 import de.espend.idea.laravel.view.ViewCollector;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionRegistrar;
@@ -286,19 +287,18 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
         @NotNull
         @Override
         public Collection<PsiElement> getPsiTargets(PsiElement element) {
-            List<String> strings = BladePsiUtil.extractParameters(element.getText());
+            String text = element.getText();
+            List<String> strings = BladePsiUtil.extractParameters(text);
             if(strings.size() < 2) {
                 return Collections.emptyList();
             }
 
-            String contents = de.espend.idea.laravel.util.PsiElementUtils.trimQuote(strings.get(1));
+            String contents = PsiElementUtils.trimQuote(strings.get(1));
             if(StringUtils.isBlank(contents)) {
                 return Collections.emptyList();
             }
 
-            return new ArrayList<>(
-                PhpElementsUtil.getClassesOrInterfaces(getProject(), contents)
-            );
+            return new ArrayList<>(PhpElementsUtil.getClassesOrInterfaces(getProject(), contents));
         }
     }
 

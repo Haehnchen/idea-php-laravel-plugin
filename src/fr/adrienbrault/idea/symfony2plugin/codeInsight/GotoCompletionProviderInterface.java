@@ -7,6 +7,7 @@ import fr.adrienbrault.idea.symfony2plugin.codeInsight.completion.CompletionCont
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Collections;
 
 public interface GotoCompletionProviderInterface {
     void getLookupElements(CompletionContributorParameter parameter);
@@ -15,7 +16,9 @@ public interface GotoCompletionProviderInterface {
     Collection<LookupElement> getLookupElements();
 
     @NotNull
-    Collection<PsiElement> getPsiTargets(StringLiteralExpression element);
+    default Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
+        return Collections.emptyList();
+    }
 
     @NotNull
     Collection<PsiElement> getPsiTargets(PsiElement element);
