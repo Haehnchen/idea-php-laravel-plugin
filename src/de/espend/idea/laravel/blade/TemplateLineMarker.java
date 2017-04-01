@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -78,6 +79,12 @@ public class TemplateLineMarker implements LineMarkerProvider {
                 Pair<PsiElement, String> section = extractSectionParameter(psiElement);
                 if(section != null) {
                     collectPushOverwrites(section.getFirst(), collection, section.getSecond());
+                }
+            } else if(psiElement.getNode().getElementType() == BladeTokenTypes.SLOT_DIRECTIVE) {
+                // @slot('foobar')
+                Pair<PsiElement, String> section = extractSectionParameter(psiElement);
+                if(section != null) {
+                    collectSlotOverwrites(section.getFirst(), collection, section.getSecond());
                 }
             }
         }
@@ -345,5 +352,40 @@ public class TemplateLineMarker implements LineMarkerProvider {
         }
 
         collection.add(getRelatedPopover("Stack Section", "Stack Overwrites", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES));
+    }
+
+    /**
+     * Support: @slot('foobar')
+     */
+    private void collectSlotOverwrites(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
+        if(!(psiElement instanceof BladePsiDirectiveParameter)) {
+            return;
+        }
+
+        String component = BladePsiUtil.findComponentForSlotScope((BladePsiDirectiveParameter) psiElement);
+        if(component == null) {
+            return;
+        }
+
+        List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
+
+        for (VirtualFile virtualFile : BladeTemplateUtil.resolveTemplateName(psiElement.getProject(), component)) {
+            PsiFile file = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
+            if(file == null) {
+                continue;
+            }
+
+            gotoRelatedItems.addAll(BladePsiUtil.collectPrintBlockVariableTargets(file, sectionName).stream()
+                .map((Function<PsiElement, GotoRelatedItem>) element ->
+                    new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(element).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL))
+                .collect(Collectors.toList()
+            ));
+        }
+
+        if(gotoRelatedItems.size() == 0) {
+            return;
+        }
+
+        collection.add(getRelatedPopover("Slot Overwrites", "Slot Overwrites", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES));
     }
 }

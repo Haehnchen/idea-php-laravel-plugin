@@ -217,7 +217,22 @@ public class BladePsiUtil {
             return null;
         }
 
-        PsiElement bladeDirective = bladeHost.getParent();
+        return findComponentForSlotScope((BladePsiDirectiveParameter) bladeHost);
+    }
+
+    /**
+     * Crazy shit to find component directive for a given slot
+     * Blade Plugin do not provide a nested tree!
+     *
+     * "@component('layouts.app')"
+     *  "@slot('title')"
+     *      Home Page
+     *  "@endslot"
+     * "@endcomponent"
+     */
+    @Nullable
+    public static String findComponentForSlotScope(@NotNull BladePsiDirectiveParameter psiDirectiveParameter) {
+        PsiElement bladeDirective = psiDirectiveParameter.getParent();
         if(!(bladeDirective instanceof BladePsiDirective)) {
             return null;
         }
