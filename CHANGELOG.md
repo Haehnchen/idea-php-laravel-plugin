@@ -1,3 +1,10 @@
+## 0.14
+* Support for __() and trans_choice() [#124](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/124) [#125](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/125) @adelf
+* Fix incorrect route name generation for Route::resource [#119](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/119) @adelf
+* Add view references for the Mailer Class @diogogomeswww [#126](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/126)
+* PhpStorm 2017.1 migration for new directive support in Blade views
+* Add linemaker for Blade slot overwrites inside components
+
 ## 0.13.2
 * Replace deprecated api usages
 * Prevent duplicates on blade templates Related files [#112](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/112) @adelf

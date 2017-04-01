@@ -1,7 +1,7 @@
-<idea-plugin version="2" url="https://github.com/Haehnchen/idea-php-laravel-plugin">
+<idea-plugin url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.13.2</version>
+  <version>0.14</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -30,8 +30,8 @@
         <li>PHP/Translation: Translation key indexer, completion and goto</li>
         <li>PHP: Service dic</li>
         <li>Blade: extends, include and Php usage linemarker</li>
-        <li>Blade: section, yield overwrite and implements linemarker</li>
-        <li>Blade: Improvements in blade template name completion and navigation</li>
+        <li>Blade: section, yield, stack overwrite and implements linemarker</li>
+        <li>Blade: Improvements in Blade template name completion and navigation</li>
         <li>Blade: trans directive</li>
         <li>Template: Index for Php usage</li>
       </ul>
@@ -46,6 +46,15 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <h2>0.14</h2>
+    <ul>
+        <li>Support for __() and trans_choice() <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/124">#124</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/125">#125</a> @adelf</li>
+        <li>Fix incorrect route name generation for Route::resource <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/119">#119</a> @adelf</li>
+        <li>Add view references for the Mailer Class @diogogomeswww <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/126">#126</a></li>
+        <li>PhpStorm 2017.1 migration for new directive support in Blade views</li>
+        <li>Add linemaker for Blade slot overwrites inside components</li>
+    </ul>
 
     <h2>0.13.2</h2>
     <ul>
@@ -123,7 +132,7 @@
   </change-notes>
 
   <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
-  <idea-version since-build="145.0"/>
+  <idea-version since-build="171.3780"/>
 
   <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
        on how to target different products -->
