@@ -142,6 +142,7 @@
 
     <extensions defaultExtensionNs="com.jetbrains.php">
         <typeProvider3 implementation="de.espend.idea.laravel.blade.BladeInjectTypeProvider"/>
+        <typeProvider3 implementation="de.espend.idea.laravel.dic.DicTypeProvider"/>
     </extensions>
 
   <extensions defaultExtensionNs="com.intellij">
@@ -158,8 +159,6 @@
                            parentId="Laravel.SettingsForm"
                            nonDefaultProject="true"
               />
-
-      <php.typeProvider2 implementation="de.espend.idea.laravel.dic.DicTypeProvider"/>
 
       <projectService serviceImplementation="de.espend.idea.laravel.LaravelSettings"/>
 

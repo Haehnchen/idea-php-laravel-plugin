@@ -47,6 +47,11 @@ public class DicTypeProviderTest extends LaravelLightCodeInsightFixtureTestCase 
                 "$f->make('Foo\\Bar')->b<caret>ar()",
             PlatformPatterns.psiElement(Method.class).withName("bar")
         );
-    }
 
+        assertPhpReferenceResolveTo(PhpFileType.INSTANCE, "<?php\n" +
+                "/** @var $f \\Illuminate\\Contracts\\Container\\Container */" +
+                "$f->make(\\Foo\\Bar::class)->b<caret>ar()",
+            PlatformPatterns.psiElement(Method.class).withName("bar")
+        );
+    }
 }

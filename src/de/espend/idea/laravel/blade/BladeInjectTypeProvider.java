@@ -16,6 +16,7 @@ import com.jetbrains.php.lang.psi.elements.PhpNamedElement;
 import com.jetbrains.php.lang.psi.elements.Variable;
 import com.jetbrains.php.lang.psi.resolve.types.PhpType;
 import com.jetbrains.php.lang.psi.resolve.types.PhpTypeProvider3;
+import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.util.PsiElementUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,7 +38,7 @@ public class BladeInjectTypeProvider implements PhpTypeProvider3 {
     @Nullable
     @Override
     public PhpType getType(PsiElement element) {
-        if(!(element instanceof Variable)){
+        if(!(element instanceof Variable) || !LaravelSettings.getInstance(element.getProject()).pluginEnabled){
             return null;
         }
 

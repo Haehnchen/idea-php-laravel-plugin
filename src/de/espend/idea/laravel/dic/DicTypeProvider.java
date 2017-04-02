@@ -1,11 +1,11 @@
 package de.espend.idea.laravel.dic;
 
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.jetbrains.php.PhpIndex;
 import com.jetbrains.php.lang.psi.elements.*;
-import com.jetbrains.php.lang.psi.resolve.types.PhpTypeProvider2;
+import com.jetbrains.php.lang.psi.resolve.types.PhpType;
+import com.jetbrains.php.lang.psi.resolve.types.PhpTypeProvider3;
 import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.dic.utils.LaravelDicUtil;
 import fr.adrienbrault.idea.symfony2plugin.Symfony2InterfacesUtil;
@@ -16,15 +16,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
-public class DicTypeProvider implements PhpTypeProvider2 {
+public class DicTypeProvider implements PhpTypeProvider3 {
 
-    final static char TRIM_KEY = '\u0197';
+    private final static char TRIM_KEY = '\u0197';
 
     @Override
     public char getKey() {
@@ -33,9 +33,8 @@ public class DicTypeProvider implements PhpTypeProvider2 {
 
     @Nullable
     @Override
-    public String getType(PsiElement psiElement) {
-
-        if (DumbService.getInstance(psiElement.getProject()).isDumb() || !LaravelSettings.getInstance(psiElement.getProject()).pluginEnabled) {
+    public PhpType getType(PsiElement psiElement) {
+        if (!LaravelSettings.getInstance(psiElement.getProject()).pluginEnabled) {
             return null;
         }
 
@@ -45,25 +44,29 @@ public class DicTypeProvider implements PhpTypeProvider2 {
             if(parameters.length > 0 && parameters[0] instanceof StringLiteralExpression) {
                 String contents = ((StringLiteralExpression) parameters[0]).getContents();
                 if(StringUtils.isNotBlank(contents)) {
-                    return ((FunctionReference) psiElement).getSignature() + TRIM_KEY + contents;
+                    return new PhpType().add(
+                        "#" + this.getKey() + ((FunctionReference) psiElement).getSignature() + TRIM_KEY + contents
+                    );
                 }
             }
         }
 
         // container calls are only on "get" methods
         if(psiElement instanceof MethodReference && PhpElementsUtil.isMethodWithFirstStringOrFieldReference(psiElement, "make")) {
-            return PhpTypeProviderUtil.getReferenceSignature((MethodReference) psiElement, TRIM_KEY);
+            String referenceSignature = PhpTypeProviderUtil.getReferenceSignature((MethodReference) psiElement, TRIM_KEY);
+            if(referenceSignature != null) {
+                return new PhpType().add("#" + this.getKey() + referenceSignature);
+            }
         }
 
         return null;
     }
 
     @Override
-    public Collection<? extends PhpNamedElement> getBySignature(String expression, Project project) {
-
+    public Collection<? extends PhpNamedElement> getBySignature(String expression, Set<String> visited, int depth, Project project) {
         int endIndex = expression.lastIndexOf(TRIM_KEY);
         if(endIndex == -1) {
-            return Collections.emptySet();
+            return null;
         }
 
         String originalSignature = expression.substring(0, endIndex);
@@ -73,31 +76,31 @@ public class DicTypeProvider implements PhpTypeProvider2 {
         PhpIndex phpIndex = PhpIndex.getInstance(project);
         Collection<? extends PhpNamedElement> phpNamedElementCollections = phpIndex.getBySignature(originalSignature, null, 0);
         if(phpNamedElementCollections.size() == 0) {
-            return Collections.emptySet();
+            return null;
         }
 
         // get first matched item
         PhpNamedElement phpNamedElement = phpNamedElementCollections.iterator().next();
         if(!(phpNamedElement instanceof Function)) {
-            return phpNamedElementCollections;
+            return null;
         }
 
         // on method reference check class instance
         if(phpNamedElement instanceof Method) {
             PhpClass containingClass = ((Method) phpNamedElement).getContainingClass();
             if(containingClass == null) {
-                return phpNamedElementCollections;
+                return null;
             }
 
             Symfony2InterfacesUtil util = new Symfony2InterfacesUtil();
             if(!(util.isInstanceOf(containingClass, "App") || util.isInstanceOf(containingClass, "Illuminate\\Contracts\\Container\\Container"))) {
-                return phpNamedElementCollections;
+                return null;
             }
         }
 
         parameter = PhpTypeProviderUtil.getResolvedParameter(phpIndex, parameter);
         if(parameter == null) {
-            return phpNamedElementCollections;
+            return null;
         }
 
         Collection<PhpNamedElement> phpClasses = new ArrayList<>();
@@ -119,6 +122,6 @@ public class DicTypeProvider implements PhpTypeProvider2 {
             }
         }
 
-        return phpClasses;
+        return !phpClasses.isEmpty() ? phpClasses : null;
     }
 }
