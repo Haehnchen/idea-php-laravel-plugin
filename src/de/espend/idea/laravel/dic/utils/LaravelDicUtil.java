@@ -1,6 +1,7 @@
 package de.espend.idea.laravel.dic.utils;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Condition;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiRecursiveElementVisitor;
@@ -8,10 +9,12 @@ import com.intellij.psi.util.*;
 import com.intellij.util.containers.ContainerUtil;
 import com.jetbrains.php.PhpIndex;
 import com.jetbrains.php.lang.parser.PhpElementTypes;
+import com.jetbrains.php.lang.psi.PhpPsiUtil;
 import com.jetbrains.php.lang.psi.elements.*;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.utils.PhpElementsUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -73,9 +76,36 @@ public class LaravelDicUtil {
                     values.add(StringUtils.stripStart(contents, "\\"));
                 }
             } else if(value instanceof ArrayCreationExpression) {
-                values.addAll(ContainerUtil.map(PhpElementsUtil.getArrayValuesAsString((ArrayCreationExpression) value), s -> {
-                    return StringUtils.stripStart(s, "\\");
-                }));
+                // [Foo::class, 'Foo']
+                List<PsiElement> arrayValues = PhpPsiUtil.getChildren(value, psiElement ->
+                    psiElement.getNode().getElementType() == PhpElementTypes.ARRAY_VALUE
+                );
+
+                for (PsiElement arrayValue : arrayValues) {
+                    if(arrayValue.getNode().getElementType() != PhpElementTypes.ARRAY_VALUE) {
+                        continue;
+                    }
+
+                    PsiElement arrayValueChild = arrayValue.getFirstChild();
+                    if(arrayValueChild instanceof MemberReference) {
+                        // Foobar::class
+                        String classConstantFqn = PhpElementsUtil.getClassConstantFqn((MemberReference) arrayValueChild);
+                        if(classConstantFqn != null) {
+                            values.add(classConstantFqn);
+                        }
+                    } else if (arrayValueChild instanceof StringLiteralExpression) {
+                        // "Foo"
+                        String contents = ((StringLiteralExpression) arrayValueChild).getContents();
+                        if(StringUtils.isNotBlank(contents)) {
+                            values.add(StringUtils.stripStart(contents, "\\"));
+                        }
+                    }
+                }
+            } else if(value instanceof MemberReference) {
+                String classConstantFqn = PhpElementsUtil.getClassConstantFqn((MemberReference) value);
+                if(classConstantFqn != null) {
+                    values.add(classConstantFqn);
+                }
             }
 
             map.put(keyName, values);

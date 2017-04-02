@@ -82,6 +82,8 @@ public class LaravelDicUtilTest extends LaravelLightCodeInsightFixtureTestCase {
         Map<String, Collection<String>> map = LaravelDicUtil.getDicMap(getProject());
         assertContainsElements(map.get("foo"), "DateTime");
         assertContainsElements(map.get("blade.compiler"), "Illuminate\\View\\Compilers\\BladeCompiler");
+        assertContainsElements(map.get("blade.compiler_class"), "Illuminate\\View\\Compilers\\BladeCompiler");
+        assertContainsElements(map.get("blade.compiler_class_array"), "Illuminate\\View\\Compilers\\BladeCompiler");
     }
 
     /**

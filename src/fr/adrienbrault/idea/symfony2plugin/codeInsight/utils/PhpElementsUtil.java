@@ -422,4 +422,20 @@ public class PhpElementsUtil {
 
         return fullClassName;
     }
+
+    /**
+     * Foobar::class => "Foobar"
+     */
+    @Nullable
+    public static String getClassConstantFqn(@NotNull MemberReference value) {
+        PhpExpression classReference = value.getClassReference();
+        if(classReference instanceof PhpReference) {
+            String fqn = ((PhpReference) classReference).getFQN();
+            if(StringUtils.isNotBlank(fqn)) {
+                return StringUtils.stripStart(fqn, "\\");
+            }
+        }
+
+        return null;
+    }
 }
