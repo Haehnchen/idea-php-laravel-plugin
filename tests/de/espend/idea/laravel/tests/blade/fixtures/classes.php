@@ -2,5 +2,7 @@
 
 namespace Foobar
 {
-    class Bar{}
+    class Bar{
+        public function foobar() {}
+    }
 }
