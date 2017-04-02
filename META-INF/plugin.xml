@@ -1,7 +1,7 @@
 <idea-plugin url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.14</version>
+  <version>0.14.1</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -46,12 +46,19 @@
     ]]></description>
 
   <change-notes><![CDATA[
+    <h2>0.14.1</h2>
+    <ul>
+        <li>Add TypeProvider for Blade @inject Directive <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/128">#128</a></li>
+        <li>Implement PhpTypeProvider3 for type resolving <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/78">#78</a></li>
+        <li>Support class constant of provider alias</li>
+        <li>Support subdirectories of routes definitions <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/129">#129</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/69">#69</a></li>
+    </ul>
 
     <h2>0.14</h2>
     <ul>
         <li>Support for __() and trans_choice() <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/124">#124</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/125">#125</a> @adelf</li>
         <li>Fix incorrect route name generation for Route::resource <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/119">#119</a> @adelf</li>
-        <li>Add view references for the Mailer Class @diogogomeswww <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/126">#126</a></li>
+        <li>Add view references for the Mailer Class <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/126">#126</a> @diogogomeswww</li>
         <li>PhpStorm 2017.1 migration for new directive support in Blade views</li>
         <li>Add linemaker for Blade slot overwrites inside components</li>
     </ul>

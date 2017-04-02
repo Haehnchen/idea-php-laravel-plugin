@@ -1,7 +1,13 @@
+## 0.14.1
+* Add TypeProvider for Blade @inject Directive [#128](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/128)
+* Implement PhpTypeProvider3 for type resolving [#78](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/78)
+* Support class constant of provider alias
+* Support subdirectories of routes definitions [#129](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/129) [#69](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/69)
+    
 ## 0.14
 * Support for __() and trans_choice() [#124](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/124) [#125](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/125) @adelf
 * Fix incorrect route name generation for Route::resource [#119](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/119) @adelf
-* Add view references for the Mailer Class @diogogomeswww [#126](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/126)
+* Add view references for the Mailer Class [#126](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/126) @diogogomeswww
 * PhpStorm 2017.1 migration for new directive support in Blade views
 * Add linemaker for Blade slot overwrites inside components
 
