@@ -15,6 +15,7 @@ public class RouteIndexExtensionTest extends LaravelLightCodeInsightFixtureTestC
         super.setUp();
         myFixture.copyFileToProject("routes.php");
         myFixture.copyFileToProject("routes_api.php", "routes/foo.php");
+        myFixture.copyFileToProject("routes_subfolder.php", "routes/foo/foo.php");
     }
 
     protected String getTestDataPath() {
@@ -29,6 +30,10 @@ public class RouteIndexExtensionTest extends LaravelLightCodeInsightFixtureTestC
     public void testThatRoutesForLaravel53() {
         assertIndexContains(RouteIndexExtension.KEY,
             "foobar"
+        );
+
+        assertIndexContains(RouteIndexExtension.KEY,
+            "profile_subfolder"
         );
     }
 }

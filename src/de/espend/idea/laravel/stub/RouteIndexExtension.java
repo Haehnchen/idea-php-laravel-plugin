@@ -53,7 +53,7 @@ public class RouteIndexExtension extends FileBasedIndexExtension<String, Void> {
         }
 
         return psiFile.getFile().getPath()
-            .matches(".*/routes/[^/]+\\.\\w{1,4}");
+            .matches(".*/routes/(?:.+[/]+?)?([^/]+.\\w{1,4})$");
     }
 
     @NotNull
