@@ -211,6 +211,11 @@ public class RoutingUtil {
             }
 
             String[] routeUrlParts = routeUrl.replace('/', '.').split("\\.");
+
+            if(routeUrlParts.length == 0) {
+                return;
+            }
+
             String baseNamesPrefix = routeUrlParts[routeUrlParts.length - 1]; // Only last part of the url goes to route name
             for(String routeName : getResourceRouteNames(parameters, prefix + baseNamesPrefix + ".")) {
                 this.visitor.visit(parameters[0], routeName);
