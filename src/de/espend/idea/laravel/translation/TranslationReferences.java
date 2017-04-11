@@ -14,6 +14,7 @@ import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.stub.TranslationKeyStubIndex;
 import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
 import de.espend.idea.laravel.translation.utils.TranslationUtil;
@@ -52,6 +53,11 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
                 MethodMatcher.getMatchedSignatureWithDepth(parent, TRANSLATION_KEY) != null || PhpElementsUtil.isFunctionReference(parent, 0, "trans", "__", "trans_choice")
             )) {
                 return new TranslationKey(parent);
+            }
+
+            // for blade @lang directive
+            if(BladePsiUtil.isDirectiveWithInstance(psiElement, "Illuminate\\Support\\Facades\\Lang", "get")) {
+                return new TranslationKey(psiElement);
             }
 
             return null;
