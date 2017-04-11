@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.indexing.FileBasedIndexImpl;
+import com.intellij.util.indexing.FileBasedIndex;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
@@ -83,7 +83,7 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
             final Collection<LookupElement> lookupElements = new ArrayList<>();
 
             CollectProjectUniqueKeys ymlProjectProcessor = new CollectProjectUniqueKeys(getProject(), TranslationKeyStubIndex.KEY);
-            FileBasedIndexImpl.getInstance().processAllKeys(TranslationKeyStubIndex.KEY, ymlProjectProcessor, getProject());
+            FileBasedIndex.getInstance().processAllKeys(TranslationKeyStubIndex.KEY, ymlProjectProcessor, getProject());
             for(String key: ymlProjectProcessor.getResult()) {
                 lookupElements.add(LookupElementBuilder.create(key).withIcon(LaravelIcons.TRANSLATION));
             }
@@ -95,17 +95,17 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
         @Override
         public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
 
-            final Set<PsiElement> priorityTargets = new LinkedHashSet<>();
-            final Set<PsiElement> targets = new LinkedHashSet<>();
-
             final String contents = element.getContents();
             if(StringUtils.isBlank(contents)) {
-                return targets;
+                return Collections.emptyList();
             }
 
             final String priorityTemplate = "/" + LaravelSettings.getInstance(element.getProject()).getMainLanguage() + "/";
 
-            FileBasedIndexImpl.getInstance().getFilesWithKey(TranslationKeyStubIndex.KEY, new HashSet<>(Collections.singletonList(contents)), virtualFile -> {
+            final Set<PsiElement> priorityTargets = new LinkedHashSet<>();
+            final Set<PsiElement> targets = new LinkedHashSet<>();
+
+            FileBasedIndex.getInstance().getFilesWithKey(TranslationKeyStubIndex.KEY, new HashSet<>(Collections.singletonList(contents)), virtualFile -> {
                 PsiFile psiFileTarget = PsiManager.getInstance(getProject()).findFile(virtualFile);
                 if(psiFileTarget == null) {
                     return true;
