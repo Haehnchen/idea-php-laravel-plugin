@@ -8,12 +8,13 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.indexing.FileBasedIndexImpl;
+import com.intellij.util.indexing.FileBasedIndex;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.stub.TranslationKeyStubIndex;
 import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
@@ -82,7 +83,7 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
             final Collection<LookupElement> lookupElements = new ArrayList<>();
 
             CollectProjectUniqueKeys ymlProjectProcessor = new CollectProjectUniqueKeys(getProject(), TranslationKeyStubIndex.KEY);
-            FileBasedIndexImpl.getInstance().processAllKeys(TranslationKeyStubIndex.KEY, ymlProjectProcessor, getProject());
+            FileBasedIndex.getInstance().processAllKeys(TranslationKeyStubIndex.KEY, ymlProjectProcessor, getProject());
             for(String key: ymlProjectProcessor.getResult()) {
                 lookupElements.add(LookupElementBuilder.create(key).withIcon(LaravelIcons.TRANSLATION));
             }
@@ -94,14 +95,17 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
         @Override
         public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
 
-            final Set<PsiElement> targets = new HashSet<>();
-
             final String contents = element.getContents();
             if(StringUtils.isBlank(contents)) {
-                return targets;
+                return Collections.emptyList();
             }
 
-            FileBasedIndexImpl.getInstance().getFilesWithKey(TranslationKeyStubIndex.KEY, new HashSet<>(Collections.singletonList(contents)), virtualFile -> {
+            final String priorityTemplate = "/" + LaravelSettings.getInstance(element.getProject()).getMainLanguage() + "/";
+
+            final Set<PsiElement> priorityTargets = new LinkedHashSet<>();
+            final Set<PsiElement> targets = new LinkedHashSet<>();
+
+            FileBasedIndex.getInstance().getFilesWithKey(TranslationKeyStubIndex.KEY, new HashSet<>(Collections.singletonList(contents)), virtualFile -> {
                 PsiFile psiFileTarget = PsiManager.getInstance(getProject()).findFile(virtualFile);
                 if(psiFileTarget == null) {
                     return true;
@@ -114,14 +118,19 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
 
                 psiFileTarget.acceptChildren(new ArrayReturnPsiRecursiveVisitor(namespace, (key, psiKey, isRootElement) -> {
                     if(!isRootElement && key.equalsIgnoreCase(contents)) {
-                        targets.add(psiKey);
+                        if(virtualFile.getPath().contains(priorityTemplate)) {
+                            priorityTargets.add(psiKey);
+                        } else {
+                            targets.add(psiKey);
+                        }
                     }
                 }));
 
                 return true;
             }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(getProject()), PhpFileType.INSTANCE));
 
-            return targets;
+            priorityTargets.addAll(targets);
+            return priorityTargets;
         }
 
     }
