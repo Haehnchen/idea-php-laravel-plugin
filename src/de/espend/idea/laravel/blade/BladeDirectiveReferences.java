@@ -75,20 +75,6 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
         });
 
-        // @lang('lang.foo')
-        registrar.register(PlatformPatterns.psiElement().inVirtualFile(PlatformPatterns.virtualFile().withName(PlatformPatterns.string().endsWith("blade.php"))), psiElement -> {
-            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
-                return null;
-            }
-
-            if(BladePsiUtil.isDirectiveWithInstance(psiElement, "Illuminate\\Support\\Facades\\Lang", "get")) {
-                return new TranslationReferences.TranslationKey(psiElement);
-            }
-
-            return null;
-
-        });
-
         // @push('my_stack')
         registrar.register(PlatformPatterns.psiElement().inVirtualFile(PlatformPatterns.virtualFile().withName(PlatformPatterns.string().endsWith("blade.php"))), psiElement -> {
             if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
