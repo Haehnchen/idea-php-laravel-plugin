@@ -14,6 +14,7 @@ import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.LaravelIcons;
 import de.espend.idea.laravel.LaravelProjectComponent;
+import de.espend.idea.laravel.LaravelSettings;
 import de.espend.idea.laravel.stub.TranslationKeyStubIndex;
 import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
 import de.espend.idea.laravel.translation.utils.TranslationUtil;
@@ -88,12 +89,15 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
         @Override
         public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
 
-            final Set<PsiElement> targets = new HashSet<>();
+            final Set<PsiElement> priorityTargets = new LinkedHashSet<>();
+            final Set<PsiElement> targets = new LinkedHashSet<>();
 
             final String contents = element.getContents();
             if(StringUtils.isBlank(contents)) {
                 return targets;
             }
+
+            final String priorityTemplate = "/" + LaravelSettings.getInstance(element.getProject()).getMainLanguage() + "/";
 
             FileBasedIndexImpl.getInstance().getFilesWithKey(TranslationKeyStubIndex.KEY, new HashSet<>(Collections.singletonList(contents)), virtualFile -> {
                 PsiFile psiFileTarget = PsiManager.getInstance(getProject()).findFile(virtualFile);
@@ -108,14 +112,19 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
 
                 psiFileTarget.acceptChildren(new ArrayReturnPsiRecursiveVisitor(namespace, (key, psiKey, isRootElement) -> {
                     if(!isRootElement && key.equalsIgnoreCase(contents)) {
-                        targets.add(psiKey);
+                        if(virtualFile.getPath().contains(priorityTemplate)) {
+                            priorityTargets.add(psiKey);
+                        } else {
+                            targets.add(psiKey);
+                        }
                     }
                 }));
 
                 return true;
             }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(getProject()), PhpFileType.INSTANCE));
 
-            return targets;
+            priorityTargets.addAll(targets);
+            return priorityTargets;
         }
 
     }

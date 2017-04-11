@@ -26,6 +26,7 @@ public class LaravelProjectSettingsForm implements Configurable {
     private JPanel panel1;
     private JCheckBox useAutoPopopForCompletionCheckBox;
     private JTextField textRouterNamespace;
+    private JTextField textMainLang;
 
     @Nls
     @Override
@@ -50,6 +51,7 @@ public class LaravelProjectSettingsForm implements Configurable {
         return !enabled.isSelected() == getSettings().pluginEnabled
             || !useAutoPopopForCompletionCheckBox.isSelected() == getSettings().useAutoPopup
             || !textRouterNamespace.getText().equals(getSettings().routerNamespace)
+            || !textMainLang.getText().equals(getSettings().mainLanguage)
             ;
     }
 
@@ -58,6 +60,7 @@ public class LaravelProjectSettingsForm implements Configurable {
         getSettings().pluginEnabled = enabled.isSelected();
         getSettings().useAutoPopup = useAutoPopopForCompletionCheckBox.isSelected();
         getSettings().routerNamespace = textRouterNamespace.getText();
+        getSettings().mainLanguage = textMainLang.getText();
     }
 
     @Override
@@ -69,6 +72,7 @@ public class LaravelProjectSettingsForm implements Configurable {
         enabled.setSelected(getSettings().pluginEnabled);
         useAutoPopopForCompletionCheckBox.setSelected(getSettings().useAutoPopup);
         textRouterNamespace.setText(getSettings().routerNamespace);
+        textMainLang.setText(getSettings().getMainLanguage());
     }
 
     @Override
