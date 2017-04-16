@@ -1,75 +1,80 @@
+## 0.14.2
+* Additional check for Route::resource analyzer [#130](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/130) [#131](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/131) @adelf
+* Fixed duplicates in @lang blade directive [#133](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/133) @adelf
+* Feature prioritized lang goto [#134](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/134) @adelf
+
 ## 0.14.1
-* Add TypeProvider for Blade @inject Directive [#128](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/128)
-* Implement PhpTypeProvider3 for type resolving [#78](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/78)
+* Add TypeProvider for Blade @inject Directive [#128](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/128)
+* Implement PhpTypeProvider3 for type resolving [#78](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/78)
 * Support class constant of provider alias
-* Support subdirectories of routes definitions [#129](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/129) [#69](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/69)
+* Support subdirectories of routes definitions [#129](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/129) [#69](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/69)
     
 ## 0.14
-* Support for __() and trans_choice() [#124](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/124) [#125](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/125) @adelf
-* Fix incorrect route name generation for Route::resource [#119](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/119) @adelf
-* Add view references for the Mailer Class [#126](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/126) @diogogomeswww
+* Support for __() and trans_choice() [#124](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/124) [#125](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/125) @adelf
+* Fix incorrect route name generation for Route::resource [#119](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/119) @adelf
+* Add view references for the Mailer Class [#126](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/126) @diogogomeswww
 * PhpStorm 2017.1 migration for new directive support in Blade views
 * Add linemaker for Blade slot overwrites inside components
 
 ## 0.13.2
 * Replace deprecated api usages
-* Prevent duplicates on blade templates Related files [#112](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/112) @adelf
-* Remove index calling in RouteGroupUtil. Fixes IndexNotReadyException [#108](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/108), [#109](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/109) @adelf
-* Route::resource route names support [#113](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/113) @adelf
+* Prevent duplicates on blade templates Related files [#112](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/112) @adelf
+* Remove index calling in RouteGroupUtil. Fixes IndexNotReadyException [#108](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/108), [#109](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/109) @adelf
+* Route::resource route names support [#113](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/113) @adelf
 
 ## 0.13.1
-* Fix navigation to declaration doesn't work when @component has the optional array parameter [#105](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/105)
-* Fix route controller/resource completion [#106](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/106) [#107](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/107) @adelf
+* Fix navigation to declaration doesn't work when @component has the optional array parameter [#105](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/105)
+* Fix route controller/resource completion [#106](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/106) [#107](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/107) @adelf
 
 ## 0.13
-* Extract to template file [#102](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/102) [#23](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/23) @adelf
-* Add index for custom Blade directives abd provide completion [#103](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/103) [#88](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/88) @adelf
-* Partial namespaced controllers [#95](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/95) @adelf
+* Extract to template file [#102](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/102) [#23](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/23) @adelf
+* Add index for custom Blade directives abd provide completion [#103](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/103) [#88](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/88) @adelf
+* Partial namespaced controllers [#95](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/95) @adelf
 
 ## 0.12.4
-* Fix thread exception in template settings forms [#99](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/99)
+* Fix thread exception in template settings forms [#99](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/99)
 
 ## 0.12.3
-* Add more pattern and language validation for completion; fix npe [#96](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/96)
+* Add more pattern and language validation for completion; fix npe [#96](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/96)
 
 ## 0.12.2
-* Fix npe in ControllerReferences [#92](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/92) [#90](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/90) [#93](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/93) @adelf
-* Support Laravel 5.4 blade component directive [#91](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/91)
+* Fix npe in ControllerReferences [#92](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/92) [#90](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/90) [#93](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/93) @adelf
+* Support Laravel 5.4 blade component directive [#91](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/91)
 
 ## 0.12.1
-* Support template "each" directive [#86](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/86)
-* Add Blade "inject" directive for service injection [#87](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/87)
-* Add Blade "includeIf" directive template references [#89](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/89)
+* Support template "each" directive [#86](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/86)
+* Add Blade "inject" directive for service injection [#87](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/87)
+* Add Blade "includeIf" directive template references [#89](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/89)
 
 ## 0.12
-* Remove AuthorizesRequests trait methods [#52](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/52)
-* Add references for Blade @push @stack directives [#73](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/73)
+* Remove AuthorizesRequests trait methods [#52](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/52)
+* Add references for Blade @push @stack directives [#73](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/73)
 * Add PhpStorm environments up to 2016.3.2 for travis testing
-* Add dialog for automatically detect the need to enable plugin [#80](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/80)
+* Add dialog for automatically detect the need to enable plugin [#80](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/80)
 
 ## 0.11
-* Move settings form into PHP related menu [#63](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/63)
-* Support route file structure of Laravel 5.3 and include route name index instead in of live extract "as" routes [#69](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/69)
+* Move settings form into PHP related menu [#63](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/63)
+* Support route file structure of Laravel 5.3 and include route name index instead in of live extract "as" routes [#69](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/69)
 * Drop project usage for LaravelSettings and make it stateless to prevent memory leaks; cleanup unused code of LaravelProjectSettingsForm
-* Fix npe in ControllerReferences [#66](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/66)
-* Fix locating translations doesn't seem to work when using a locale which is not an official locale; support "fr-FR" [#58](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/58)
+* Fix npe in ControllerReferences [#66](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/66)
+* Fix locating translations doesn't seem to work when using a locale which is not an official locale; support "fr-FR" [#58](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/58)
 * Travis testing environment update for PhpStorm 2016.2.1
 * Fix settings for template path reset was not filled
 
 ## 0.11
-* Fix Plugin throws java.util.ConcurrentModificationException [#64](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/64)
+* Fix Plugin throws java.util.ConcurrentModificationException [#64](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/64)
 
 ## 0.10.0
 * Dont print full function signature in tail text, only extract parameter
-* Dropping redundant view path setting elements [#59](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/59)
-* Route::group old laravel versions support [#47](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/47)
-* Fix MethodReferenceImpl cannot be cast to ... in dic type provider [#54](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/54) [#60](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/60)
+* Dropping redundant view path setting elements [#59](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/59)
+* Route::group old laravel versions support [#47](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/47)
+* Fix MethodReferenceImpl cannot be cast to ... in dic type provider [#54](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/54) [#60](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/60)
 * Update travis environment to use PhpStorm.2016+ and Java8 deps
-* Fix jump to doesn't work for @include('some/view/path') [#62](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/62)
-* Support translate in subdirectories [#61](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/61)
+* Fix jump to doesn't work for @include('some/view/path') [#62](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/62)
+* Support translate in subdirectories [#61](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/61)
 
 ## 0.9.1
-* Fix Route::group and Laravel doesn't allow Route::group for controllers not in default namespace [#46](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/46) @adelf
+* Fix Route::group and Laravel doesn't allow Route::group for controllers not in default namespace [#46](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/46) @adelf
 * Route completion displays origin class of trait methods and provides parameter tail text
 
 ## 0.9
