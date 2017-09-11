@@ -4,7 +4,7 @@ IntelliJ IDEA / PhpStorm Laravel Plugin
 [![Version](http://phpstorm.espend.de/badge/7532/version)](https://plugins.jetbrains.com/plugin/7532)
 [![Downloads](http://phpstorm.espend.de/badge/7532/downloads)](https://plugins.jetbrains.com/plugin/7532)
 [![Downloads last month](http://phpstorm.espend.de/badge/7532/last-month)](https://plugins.jetbrains.com/plugin/7532)
-[![Donate to this project using Paypal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5ZTGW6H4Y7MT8)
+[![Donate to this project using Paypal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/DanielEspendiller)
 
 Based on [Symfony Plugin](https://github.com/Haehnchen/idea-php-symfony2-plugin)
 
