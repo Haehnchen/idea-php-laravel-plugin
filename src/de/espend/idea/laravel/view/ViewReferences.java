@@ -44,7 +44,10 @@ public class ViewReferences implements GotoCompletionRegistrar {
         new MethodMatcher.CallToSignature("\\Illuminate\\View\\Factory", "renderEach"),
         new MethodMatcher.CallToSignature("\\Illuminate\\View\\Factory", "callComposer"),
         new MethodMatcher.CallToSignature("\\Illuminate\\View\\Factory", "callCreator"),
+
         new MethodMatcher.CallToSignature("\\Illuminate\\Mail\\Mailer", "send"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Mail\\Mailer", "plain"),
+        new MethodMatcher.CallToSignature("\\Illuminate\\Mail\\Mailer", "queue"),
     };
 
     @Override
@@ -114,6 +117,19 @@ public class ViewReferences implements GotoCompletionRegistrar {
          * @component('view.name')
          */
         registrar.register(BladePattern.getDirectiveWithAdditionalParameterPattern("includeIf", "component"), psiElement -> {
+            if (psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                return null;
+            }
+
+            return new BladeViewProvider(psiElement);
+        });
+
+
+        /*
+         * @includeWhen($boolean, 'view.name', ['some' => 'data'])
+         * @component('view.name')
+         */
+        registrar.register(BladePattern.getDirectiveWithAdditionalParameterPattern("includeWhen", "component"), psiElement -> {
             if (psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
