@@ -11,6 +11,8 @@ import com.jetbrains.php.blade.psi.BladePsiDirective;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
 import com.jetbrains.php.blade.psi.BladeTokenTypes;
 import com.jetbrains.php.lang.PhpLanguage;
+import com.jetbrains.php.lang.parser.PhpElementTypes;
+import com.jetbrains.php.lang.psi.elements.ArrayCreationExpression;
 import com.jetbrains.php.lang.psi.elements.ParameterList;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
@@ -93,6 +95,28 @@ public class BladePattern {
                     .withParent(PlatformPatterns.psiElement(ParameterList.class)).with(
                         new MyDirectiveInjectionElementPatternCondition(elementType)
                 )
+            )
+            .withLanguage(PhpLanguage.INSTANCE);
+    }
+
+    /**
+     * "@foobar(['<caret>'])"
+     *
+     * whereas "foobar" is registered a directive
+     */
+    public static PsiElementPattern.Capture<PsiElement> getArrayParameterDirectiveForElementType(@NotNull IElementType... elementType) {
+        return PlatformPatterns.psiElement()
+            .withParent(
+                PlatformPatterns.psiElement(StringLiteralExpression.class)
+                    .withParent(
+                        PlatformPatterns.psiElement(PhpElementTypes.ARRAY_VALUE).withParent(
+                            PlatformPatterns.psiElement(ArrayCreationExpression.class)
+                                .withParent(ParameterList.class)
+                        )
+                    )
+                    .with(
+                        new MyDirectiveInjectionElementPatternCondition(elementType)
+                    )
             )
             .withLanguage(PhpLanguage.INSTANCE);
     }

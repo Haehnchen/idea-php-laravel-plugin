@@ -98,6 +98,7 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
         /*
          * @includeIf('view.name')
+         * @component('view.name')
          */
         registrar.register(BladePattern.getParameterDirectiveForElementType(BladeTokenTypes.INCLUDE_IF_DIRECTIVE, BladeTokenTypes.COMPONENT_DIRECTIVE), psiElement -> {
             if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
@@ -111,6 +112,43 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
             ParameterBag parameterBag = PhpElementsUtil.getCurrentParameterIndex(stringLiteral);
             if(parameterBag == null || parameterBag.getIndex() != 0) {
+                return null;
+            }
+
+            return new ViewProvider(stringLiteral);
+        });
+
+        /*
+         * @includeWhen($boolean, 'view.name', ['some' => 'data'])
+         */
+        registrar.register(BladePattern.getParameterDirectiveForElementType(BladeTokenTypes.INCLUDE_WHEN_DIRECTIVE), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                return null;
+            }
+
+            PsiElement stringLiteral = psiElement.getParent();
+            if(!(stringLiteral instanceof StringLiteralExpression)) {
+                return null;
+            }
+
+            ParameterBag parameterBag = PhpElementsUtil.getCurrentParameterIndex(stringLiteral);
+            if(parameterBag == null || parameterBag.getIndex() != 1) {
+                return null;
+            }
+
+            return new ViewProvider(stringLiteral);
+        });
+
+        /*
+         * @includeFirst(['custom-template', 'default-template'])
+         */
+        registrar.register(BladePattern.getArrayParameterDirectiveForElementType(BladeTokenTypes.INCLUDE_FIRST_DIRECTIVE), psiElement -> {
+            if(psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                return null;
+            }
+
+            PsiElement stringLiteral = psiElement.getParent();
+            if(!(stringLiteral instanceof StringLiteralExpression)) {
                 return null;
             }
 

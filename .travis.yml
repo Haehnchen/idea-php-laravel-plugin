@@ -13,8 +13,8 @@ before_script:
  - chmod +x travis.sh
 
 env:
-  - PHPSTORM_ENV=2017.1
-  - PHPSTORM_ENV=eap
+  - PHPSTORM_ENV=2017.3.2
+  # - PHPSTORM_ENV=eap # not maintained
 
 matrix:
   allow_failures:
