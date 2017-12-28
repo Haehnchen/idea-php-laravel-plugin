@@ -158,7 +158,7 @@ public class ViewReferences implements GotoCompletionRegistrar {
          /*
          * @component('view.name')
          */
-        registrar.register(BladePattern.getDirectiveParameterPattern("component"), psiElement -> {
+        registrar.register(BladePattern.getParameterDirectiveForElementType(BladeTokenTypes.COMPONENT_DIRECTIVE), psiElement -> {
             if (psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
@@ -169,7 +169,7 @@ public class ViewReferences implements GotoCompletionRegistrar {
         /*
          * @slot('title')
          */
-        registrar.register(BladePattern.getDirectiveParameterPattern("slot"), psiElement -> {
+        registrar.register(BladePattern.getParameterDirectiveForElementType(BladeTokenTypes.SLOT_DIRECTIVE), psiElement -> {
             if (psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
                 return null;
             }
