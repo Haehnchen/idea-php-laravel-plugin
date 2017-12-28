@@ -166,6 +166,19 @@ public class ViewReferences implements GotoCompletionRegistrar {
             return new ViewDirectiveCompletionProvider(psiElement);
         });
 
+
+        /*
+         * @includeWhen($boolean, 'view.name', ['some' => 'data'])
+         * @component('view.name')
+         */
+        registrar.register(BladePattern.getDirectiveWithAdditionalParameterPattern("includeWhen", "component"), psiElement -> {
+            if (psiElement == null || !LaravelProjectComponent.isEnabled(psiElement)) {
+                return null;
+            }
+
+            return new BladeViewProvider(psiElement);
+        });
+
         /*
          * @slot('title')
          */
