@@ -5,6 +5,7 @@ import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
 import com.intellij.util.io.EnumeratorStringDescriptor;
 import com.intellij.util.io.KeyDescriptor;
+import com.intellij.util.io.VoidDataExternalizer;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.psi.PhpFile;
 import de.espend.idea.laravel.stub.processor.BladeCustomDirectivesVisitor;
@@ -53,7 +54,7 @@ public class BladeCustomDirectivesStubIndex extends FileBasedIndexExtension<Stri
     @NotNull
     @Override
     public DataExternalizer<Void> getValueExternalizer() {
-        return ScalarIndexExtension.VOID_DATA_EXTERNALIZER;
+        return VoidDataExternalizer.INSTANCE;
     }
 
     @NotNull
