@@ -13,8 +13,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class NewViewNameCompletionProvider extends TextFieldCompletionProvider {
-
     private final List<LookupElement> completions;
 
     public NewViewNameCompletionProvider(VirtualFile targetDirectory) {

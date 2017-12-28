@@ -13,6 +13,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class BladeCustomDirectivesStubIndex extends FileBasedIndexExtension<String, Void> {
 
     public static final ID<String, Void> KEY = ID.create("de.espend.idea.laravel.blade.customs");

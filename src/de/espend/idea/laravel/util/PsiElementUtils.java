@@ -11,8 +11,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class PsiElementUtils {
-
     /**
      * getChildren fixed helper
      */

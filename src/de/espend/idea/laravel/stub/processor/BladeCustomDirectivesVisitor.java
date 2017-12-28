@@ -13,10 +13,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class BladeCustomDirectivesVisitor extends PsiRecursiveElementVisitor {
-
-    private static Set<String> availableClasses = new HashSet<>(Arrays.asList("\\Illuminate\\Support\\Facades\\Blade",
-            "\\Blade"));
+    private static Set<String> availableClasses = new HashSet<>(
+        Arrays.asList("\\Illuminate\\Support\\Facades\\Blade", "\\Blade")
+    );
 
     private Consumer<Pair<PsiElement, String>> consumer;
 

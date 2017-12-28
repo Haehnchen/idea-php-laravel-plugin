@@ -6,6 +6,7 @@ import de.espend.idea.laravel.tests.LaravelLightCodeInsightFixtureTestCase;
 import java.io.File;
 
 /**
+ * @author Daniel Espendiller <daniel@espendiller.net>
  * @see de.espend.idea.laravel.stub.BladeCustomDirectivesStubIndex
  */
 public class CustomBladeDirectiveIndexTest extends LaravelLightCodeInsightFixtureTestCase {

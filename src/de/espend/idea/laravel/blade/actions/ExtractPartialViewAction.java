@@ -12,9 +12,10 @@ import de.espend.idea.laravel.LaravelSettings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class ExtractPartialViewAction extends BaseRefactoringAction {
-
-
     @Override
     protected boolean isAvailableInEditorOnly() {
         return true;

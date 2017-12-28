@@ -14,6 +14,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.regex.Pattern;
 
+/**
+ * @author Daniel Espendiller <daniel@espendiller.net>
+ */
 public class ExtractPartialViewDialog extends DialogWrapper {
 
     private EditorTextField viewNameEditor;

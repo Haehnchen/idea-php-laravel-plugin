@@ -1,6 +1,5 @@
 package de.espend.idea.laravel.completion;
 
-
 import com.intellij.codeInsight.completion.CompletionConfidence;
 import com.intellij.openapi.project.Project;
 import com.intellij.patterns.PlatformPatterns;

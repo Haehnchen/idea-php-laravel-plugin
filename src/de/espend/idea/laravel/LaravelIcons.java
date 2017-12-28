@@ -1,6 +1,5 @@
 package de.espend.idea.laravel;
 
-
 import com.intellij.openapi.util.IconLoader;
 
 import javax.swing.*;
