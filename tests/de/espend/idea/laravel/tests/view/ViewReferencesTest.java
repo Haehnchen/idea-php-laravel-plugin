@@ -28,6 +28,16 @@ public class ViewReferencesTest extends LaravelLightCodeInsightFixtureTestCase {
         assertNavigationMatch(BladeFileType.INSTANCE, "@includeIf('test<caret>_view')", PlatformPatterns.psiElement());
     }
 
+    public void testBladeIncludeWhen() {
+        assertCompletionContains(BladeFileType.INSTANCE, "@includeWhen(true, '<caret>')", "test_view");
+        assertNavigationMatch(BladeFileType.INSTANCE, "@includeWhen(true, 'test<caret>_view')", PlatformPatterns.psiElement());
+    }
+
+    public void testBladeIncludeFirst() {
+        assertCompletionContains(BladeFileType.INSTANCE, "@includeFirst(['', '<caret>'])", "test_view");
+        assertNavigationMatch(BladeFileType.INSTANCE, "@includeFirst(['', 'test<caret>_view'])", PlatformPatterns.psiElement());
+    }
+
     public void testBladeComponent() {
         assertCompletionContains(BladeFileType.INSTANCE, "@component('<caret>')", "test_view");
         assertNavigationMatch(BladeFileType.INSTANCE, "@component('test<caret>_view')", PlatformPatterns.psiElement());
