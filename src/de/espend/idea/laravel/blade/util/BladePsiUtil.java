@@ -3,14 +3,9 @@ package de.espend.idea.laravel.blade.util;
 import com.intellij.lang.injection.InjectedLanguageManager;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiLanguageInjectionHost;
-import com.intellij.psi.PsiRecursiveElementVisitor;
+import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
-import com.jetbrains.php.blade.psi.BladePsiDirective;
-import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
-import com.jetbrains.php.blade.psi.BladeTokenTypes;
+import com.jetbrains.php.blade.psi.*;
 import com.jetbrains.php.lang.psi.elements.MethodReference;
 import com.jetbrains.php.lang.psi.elements.ParameterList;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
@@ -255,20 +250,125 @@ public class BladePsiUtil {
      */
     @Nullable
     public static String getDirectiveParameter(@NotNull BladePsiDirective directiveParameter) {
-        for (PsiElement psiElement : PsiElementUtils.getChildrenFix(directiveParameter)) {
-            if(!(psiElement instanceof BladePsiDirectiveParameter)) {
-                continue;
-            }
+        String parameterText = getDirectiveParameterContent(directiveParameter);
+        if(parameterText != null) {
+            return BladeTemplateUtil.getParameterFromParameterDirective(parameterText);
+        }
 
-            for (PsiElement element : PsiElementUtils.getChildrenFix(psiElement)) {
-                if(element.getNode().getElementType() == BladeTokenTypes.DIRECTIVE_PARAMETER_CONTENT) {
-                    return BladeTemplateUtil.getParameterFromParameterDirective(
-                        element.getText()
-                    );
-                }
+        return null;
+    }
+
+    /**
+     * Extract parameter content from Blade directive
+     *
+     * "@component('layouts.app', 'foo')" => "'layouts.app', 'foo'"
+     */
+    @Nullable
+    public static String getDirectiveParameterContent(@NotNull BladePsiDirective directiveParameter) {
+        BladePsiDirectiveParameter parameter = directiveParameter.getParameter();
+        if(parameter != null) {
+            String parameterText = parameter.getParameterText();
+            if(parameterText != null) {
+                return parameterText;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Extract parameter from Blade directive
+     *
+     * "@component('layouts.app', "foobar")" => "layouts.app"
+     */
+    @NotNull
+    public static List<String> getDirectiveParameters(@NotNull BladePsiDirective directiveParameter) {
+        BladePsiDirectiveParameter parameter = directiveParameter.getParameter();
+        if(parameter != null) {
+            String parameterText = parameter.getParameterText();
+            if(parameterText != null) {
+                return extractParameters(parameterText);
+            }
+        }
+
+        return Collections.emptyList();
+    }
+
+    /**
+     * Visit all Blade include directives
+     *
+     * "@include", "@includeIf", "@includeWhen", "@includeFirst"
+     */
+    public static void visitIncludes(@NotNull PsiFile bladeFile, @NotNull Consumer<Pair<String, PsiElement>> consumer) {
+        bladeFile.acceptChildren(new TemplateIncludeElementWalkingVisitor(consumer));
+    }
+
+    private static class TemplateIncludeElementWalkingVisitor extends PsiRecursiveElementWalkingVisitor {
+        @NotNull
+        private final Consumer<Pair<String, PsiElement>> consumer;
+
+        private TemplateIncludeElementWalkingVisitor(@NotNull Consumer<Pair<String, PsiElement>> consumer) {
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void visitElement(PsiElement element) {
+            if((element instanceof BladePsiDirective)) {
+                IElementType elementType = ((BladePsiDirective) element).getDirectiveElementType();
+
+                if(elementType == BladeTokenTypes.INCLUDE_DIRECTIVE) {
+                    // @include('foobar.include')
+
+                    for (String parameter : getDirectiveParameters(((BladePsiDirective) element))) {
+                        String parameterTrim = PsiElementUtils.trimQuote(parameter);
+                        if(StringUtils.isNotBlank(parameterTrim)) {
+                            consumer.accept(Pair.create(parameterTrim, element));
+                        }
+                    }
+                } else if(elementType == BladeTokenTypes.INCLUDE_IF_DIRECTIVE) {
+                    // @includeIf( 'foobar.includeIf' , ['some' => 'data'])
+
+                    List<String> directiveParameters = getDirectiveParameters(((BladePsiDirective) element));
+                    if(directiveParameters.size() > 0) {
+                        String parameterTrim = PsiElementUtils.trimQuote(directiveParameters.get(0));
+                        if(StringUtils.isNotBlank(parameterTrim)) {
+                            consumer.accept(Pair.create(parameterTrim, element));
+                        }
+                    }
+                } else if(elementType == BladeTokenTypes.INCLUDE_WHEN_DIRECTIVE) {
+                    // @includeWhen($boolean, 'foobar.includeWhen', ['some' => 'data'])
+
+                    List<String> directiveParameters = getDirectiveParameters(((BladePsiDirective) element));
+                    if(directiveParameters.size() > 1) {
+                        String parameterTrim = PsiElementUtils.trimQuote(directiveParameters.get(1));
+                        if(StringUtils.isNotBlank(parameterTrim)) {
+                            consumer.accept(Pair.create(parameterTrim, element));
+                        }
+                    }
+                } else if(elementType == BladeTokenTypes.INCLUDE_FIRST_DIRECTIVE) {
+                    // @includeFirst(['foobar.includeFirst', 'foobar.includeFirst2'], ['some' => 'data'])
+
+                    String parameter = getDirectiveParameterContent(((BladePsiDirective) element));
+                    if(parameter != null) {
+                        // find first array
+
+                        Matcher matcher = Pattern.compile("\\s*\\[([^\\[]+)]").matcher(parameter);
+                        if(matcher.find()) {
+                            // split array value
+
+                            Matcher matcher2 = Pattern.compile("['|\"]([^'\"]*)['|\"]").matcher(matcher.group(0));
+                            while(matcher2.find()) {
+                                String trim = PsiElementUtils.trimQuote(StringUtil.trim(matcher2.group(0)));
+                                if(StringUtils.isNotBlank(trim)) {
+                                    consumer.accept(Pair.create(trim, element));
+                                }
+                            }
+                        }
+                     }
+                }
+            }
+
+            super.visitElement(element);
+        }
     }
 }

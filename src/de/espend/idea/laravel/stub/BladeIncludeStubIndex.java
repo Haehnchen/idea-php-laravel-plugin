@@ -8,8 +8,7 @@ import com.intellij.util.io.KeyDescriptor;
 import com.intellij.util.io.VoidDataExternalizer;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.psi.BladeFileImpl;
-import com.jetbrains.php.blade.psi.BladeTokenTypes;
-import de.espend.idea.laravel.stub.processor.BladeDirectivePsiElementWalkingVisitor;
+import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import gnu.trove.THashMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,7 +39,9 @@ public class BladeIncludeStubIndex extends FileBasedIndexExtension<String, Void>
                 return map;
             }
 
-            psiFile.acceptChildren(new BladeDirectivePsiElementWalkingVisitor(BladeTokenTypes.INCLUDE_DIRECTIVE, map));
+            BladePsiUtil.visitIncludes(psiFile, pair ->
+                map.put(pair.getFirst(), null)
+            );
 
             return map;
         };
