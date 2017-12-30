@@ -8,6 +8,7 @@ import com.intellij.util.io.KeyDescriptor;
 import com.intellij.util.io.VoidDataExternalizer;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.psi.PhpFile;
+import de.espend.idea.laravel.config.ConfigFileUtil;
 import de.espend.idea.laravel.util.ArrayReturnPsiRecursiveVisitor;
 import gnu.trove.THashMap;
 import org.jetbrains.annotations.NotNull;
@@ -39,12 +40,12 @@ public class ConfigKeyStubIndex extends FileBasedIndexExtension<String, Void> {
                 return map;
             }
 
-            String path = fileContent.getFile().getPath();
+            ConfigFileUtil.ConfigFileMatchResult result = ConfigFileUtil.matchConfigFile(fileContent.getProject(), fileContent.getFile());
 
             // config/app.php
             // config/testing/app.php
-            if(path.matches(".*/config/\\w+.php$") || path.matches(".*/config/\\w+/\\w+.php$")) {
-                psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(fileContent.getFile().getNameWithoutExtension(), (key, psiKey, isRootElement) -> {
+            if(result.matches()) {
+                psiFile.acceptChildren(new ArrayReturnPsiRecursiveVisitor(result.getKeyPrefix(), (key, psiKey, isRootElement) -> {
                     if (!isRootElement) {
                         map.put(key, null);
                     }
