@@ -1,6 +1,5 @@
 package de.espend.idea.laravel.routing.utils;
 
-import com.google.common.collect.Lists;
 import com.intellij.openapi.util.Condition;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -55,7 +54,8 @@ public class RouteGroupUtil {
             routeGroup = PsiTreeUtil.findFirstParent(routeGroup, true, routeGroupCondition);
         }
 
-        return Lists.reverse(values);
+        Collections.reverse(values);
+        return values;
     }
 
     private static class RouteGroupCondition implements Condition<PsiElement> {
