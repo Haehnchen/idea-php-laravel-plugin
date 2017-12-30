@@ -11,7 +11,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiRecursiveElementWalkingVisitor;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.util.indexing.FileBasedIndexImpl;
+import com.intellij.util.indexing.FileBasedIndex;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.blade.psi.BladeDirectiveElementType;
 import com.jetbrains.php.blade.psi.BladePsiDirectiveParameter;
@@ -174,7 +174,7 @@ public class BladeTemplateUtil {
         }
 
         final int finalDepth = depth;
-        FileBasedIndexImpl.getInstance().getFilesWithKey(BladeExtendsStubIndex.KEY, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
+        FileBasedIndex.getInstance().getFilesWithKey(BladeExtendsStubIndex.KEY, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
             if (!virtualFiles.contains(virtualFile)) {
                 virtualFiles.add(virtualFile);
                 Set<String> nextTpls = BladeTemplateUtil.resolveTemplateName(project, virtualFile);

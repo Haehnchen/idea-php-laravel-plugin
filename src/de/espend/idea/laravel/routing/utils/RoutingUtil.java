@@ -9,7 +9,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiRecursiveElementVisitor;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.*;
-import com.intellij.util.indexing.FileBasedIndexImpl;
+import com.intellij.util.indexing.FileBasedIndex;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.psi.elements.*;
 import de.espend.idea.laravel.stub.RouteIndexExtension;
@@ -50,7 +50,7 @@ public class RoutingUtil {
         Set<VirtualFile> virtualFiles = new HashSet<>();
 
         // find files with route name
-        FileBasedIndexImpl.getInstance().getFilesWithKey(RouteIndexExtension.KEY, new HashSet<>(Collections.singletonList(routeName)), virtualFile -> {
+        FileBasedIndex.getInstance().getFilesWithKey(RouteIndexExtension.KEY, new HashSet<>(Collections.singletonList(routeName)), virtualFile -> {
             virtualFiles.add(virtualFile);
             return true;
         }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(project), PhpFileType.INSTANCE));

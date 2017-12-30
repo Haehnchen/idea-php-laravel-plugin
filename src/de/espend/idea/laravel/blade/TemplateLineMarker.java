@@ -12,7 +12,7 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.ConstantFunction;
-import com.intellij.util.indexing.FileBasedIndexImpl;
+import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.indexing.ID;
 import com.jetbrains.php.PhpIcons;
 import com.jetbrains.php.blade.BladeFileType;
@@ -166,7 +166,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
         for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY, BladeEachStubIndex.KEY)) {
             for(String templateName: templateNames) {
-                FileBasedIndexImpl.getInstance().getFilesWithKey(key, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
+                FileBasedIndex.getInstance().getFilesWithKey(key, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
                     PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
 
                     if(psiFileTarget != null && !relatedFiles.contains(virtualFile)) {
@@ -183,7 +183,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
         Collection<VirtualFile> files = new HashSet<>();
         for(final String templateName: templateNames) {
             files.addAll(
-                FileBasedIndexImpl.getInstance().getContainingFiles(PhpTemplateUsageStubIndex.KEY, templateName, GlobalSearchScope.allScope(psiFile.getProject()))
+                FileBasedIndex.getInstance().getContainingFiles(PhpTemplateUsageStubIndex.KEY, templateName, GlobalSearchScope.allScope(psiFile.getProject()))
             );
         }
 

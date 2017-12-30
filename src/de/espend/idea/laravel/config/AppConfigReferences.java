@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.indexing.FileBasedIndexImpl;
+import com.intellij.util.indexing.FileBasedIndex;
 import com.jetbrains.php.lang.PhpFileType;
 import com.jetbrains.php.lang.PhpLanguage;
 import com.jetbrains.php.lang.psi.elements.StringLiteralExpression;
@@ -73,7 +73,7 @@ public class AppConfigReferences implements GotoCompletionLanguageRegistrar {
             final Collection<LookupElement> lookupElements = new ArrayList<>();
 
             CollectProjectUniqueKeys ymlProjectProcessor = new CollectProjectUniqueKeys(getProject(), ConfigKeyStubIndex.KEY);
-            FileBasedIndexImpl.getInstance().processAllKeys(ConfigKeyStubIndex.KEY, ymlProjectProcessor, getProject());
+            FileBasedIndex.getInstance().processAllKeys(ConfigKeyStubIndex.KEY, ymlProjectProcessor, getProject());
             for(String key: ymlProjectProcessor.getResult()) {
                 lookupElements.add(LookupElementBuilder.create(key).withIcon(LaravelIcons.CONFIG));
             }
@@ -92,7 +92,7 @@ public class AppConfigReferences implements GotoCompletionLanguageRegistrar {
                 return targets;
             }
 
-            FileBasedIndexImpl.getInstance().getFilesWithKey(ConfigKeyStubIndex.KEY, new HashSet<>(Collections.singletonList(contents)), virtualFile -> {
+            FileBasedIndex.getInstance().getFilesWithKey(ConfigKeyStubIndex.KEY, new HashSet<>(Collections.singletonList(contents)), virtualFile -> {
                 PsiFile psiFileTarget = PsiManager.getInstance(getProject()).findFile(virtualFile);
                 if(psiFileTarget == null) {
                     return true;
