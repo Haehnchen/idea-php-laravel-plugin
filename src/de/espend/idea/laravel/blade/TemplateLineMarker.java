@@ -142,7 +142,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
     }
 
     private void collectTemplateFileRelatedFiles(@NotNull PsiFile psiFile, @NotNull Collection<LineMarkerInfo> collection) {
-        Set<String> collectedTemplates = BladeTemplateUtil.getFileTemplateName(psiFile.getProject(), psiFile.getVirtualFile());
+        Collection<String> collectedTemplates = BladeTemplateUtil.resolveTemplateName(psiFile);
         if(collectedTemplates.size() == 0) {
             return;
         }
@@ -209,12 +209,12 @@ public class TemplateLineMarker implements LineMarkerProvider {
         collection.add(getRelatedPopover("Template", "Blade File", psiFile, gotoRelatedItems, PhpIcons.IMPLEMENTED));
     }
 
-    private LineMarkerInfo getRelatedPopover(String singleItemTitle, String singleItemTooltipPrefix, PsiElement lineMarkerTarget, List<GotoRelatedItem> gotoRelatedItems, Icon icon) {
+    private LineMarkerInfo getRelatedPopover(String singleItemTitle, String singleItemTooltipPrefix, PsiElement lineMarkerTarget, Collection<GotoRelatedItem> gotoRelatedItems, Icon icon) {
 
         // single item has no popup
         String title = singleItemTitle;
         if(gotoRelatedItems.size() == 1) {
-            String customName = gotoRelatedItems.get(0).getCustomName();
+            String customName = gotoRelatedItems.iterator().next().getCustomName();
             if(customName != null) {
                 title = String.format(singleItemTooltipPrefix, customName);
             }
@@ -267,14 +267,13 @@ public class TemplateLineMarker implements LineMarkerProvider {
      * Find all sub implementations of a section that are overwritten by an extends tag
      * Possible targets are: @section('sidebar')
      */
-    private void collectImplementsSection(PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
-
-        Set<String> templateNames = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
+    private void collectImplementsSection(PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, @NotNull String sectionName) {
+        Collection<String> templateNames = BladeTemplateUtil.resolveTemplateName(psiElement.getContainingFile());
         if(templateNames.size() == 0) {
             return;
         }
 
-        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
+        Collection<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
         Set<VirtualFile> virtualFiles = BladeTemplateUtil.getExtendsImplementations(psiElement.getProject(), templateNames);
         if(virtualFiles.size() == 0) {
@@ -290,7 +289,6 @@ public class TemplateLineMarker implements LineMarkerProvider {
                     }
                 });
             }
-
         }
 
         if(gotoRelatedItems.size() == 0) {
@@ -304,7 +302,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
      * Support: @stack('foobar')
      */
     private void collectStackImplements(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
-        Set<String> templateNames = BladeTemplateUtil.getFileTemplateName(psiElement.getProject(), psiElement.getContainingFile().getVirtualFile());
+        Collection<String> templateNames = BladeTemplateUtil.resolveTemplateName(psiElement.getContainingFile());
         if(templateNames.size() == 0) {
             return;
         }

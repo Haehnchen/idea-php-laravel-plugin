@@ -27,7 +27,6 @@ import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import de.espend.idea.laravel.stub.BladeCustomDirectivesStubIndex;
 import de.espend.idea.laravel.stub.processor.BladeCustomDirectivesVisitor;
 import de.espend.idea.laravel.stub.processor.CollectProjectUniqueKeys;
-import de.espend.idea.laravel.translation.TranslationReferences;
 import de.espend.idea.laravel.util.PsiElementUtils;
 import de.espend.idea.laravel.view.ViewCollector;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.GotoCompletionProvider;
@@ -127,7 +126,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
     private static class BladeExtendGotoProvider extends GotoCompletionProvider {
 
-        public BladeExtendGotoProvider(PsiElement element) {
+        BladeExtendGotoProvider(PsiElement element) {
             super(element);
         }
 
@@ -149,7 +148,6 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
         @NotNull
         @Override
         public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
-
             // disable this, is in core but not really nice
             // if we enable this, Blade path goto is not possible, without a filter on "." prefix
             /* if(true == true) {
@@ -161,30 +159,18 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
                 return Collections.emptyList();
             }
 
-            contents = contents.replace("/", ".");
-            final Collection<PsiElement> psiElements = new ArrayList<>();
-
-            final String finalContents = contents;
-            ViewCollector.visitFile(getProject(), (virtualFile, name) -> {
-                if(finalContents.equalsIgnoreCase(name)) {
-                    PsiFile psiFile = PsiManager.getInstance(getProject()).findFile(virtualFile);
-                    if(psiFile != null) {
-                        psiElements.add(psiFile);
-                    }
-                }
-            });
-
-
-            return psiElements;
+            return new ArrayList<>(PsiElementUtils.convertVirtualFilesToPsiFiles(
+                getProject(),
+                BladeTemplateUtil.resolveTemplateName(getProject(), contents)
+            ));
         }
     }
 
     private static class BladeSectionGotoCompletionProvider extends GotoCompletionProvider {
-
         @NotNull
         private final BladeDirectiveElementType[] visitElements;
 
-        public BladeSectionGotoCompletionProvider(@NotNull PsiElement element, @NotNull BladeDirectiveElementType... visitElements) {
+        BladeSectionGotoCompletionProvider(@NotNull PsiElement element, @NotNull BladeDirectiveElementType... visitElements) {
             super(element);
             this.visitElements = visitElements;
         }
@@ -206,9 +192,8 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
                     uniqueSet.add(parameter.getContent());
 
                     LookupElementBuilder lookupElement = LookupElementBuilder.create(parameter.getContent()).withIcon(LaravelIcons.LARAVEL);
-                    Set<String> templateNames = BladeTemplateUtil.getFileTemplateName(parameter.getPsiElement().getProject(), parameter.getPsiElement().getContainingFile().getVirtualFile());
 
-                    for(String templateName: templateNames) {
+                    for(String templateName: BladeTemplateUtil.resolveTemplateName(parameter.getPsiElement().getContainingFile())) {
 
                         lookupElement = lookupElement.withTypeText(templateName, true);
 
@@ -254,7 +239,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
     }
 
     private static class MyInjectedClassGotoCompletionProvider extends GotoCompletionProvider {
-        public MyInjectedClassGotoCompletionProvider(PsiElement stringLiteral) {
+        MyInjectedClassGotoCompletionProvider(PsiElement stringLiteral) {
             super(stringLiteral);
         }
 
@@ -289,8 +274,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
     }
 
     private static class CustomDirectivesGotoCompletionProvider extends GotoCompletionProvider {
-
-        public CustomDirectivesGotoCompletionProvider(@NotNull PsiElement element) {
+        CustomDirectivesGotoCompletionProvider(@NotNull PsiElement element) {
             super(element);
         }
 

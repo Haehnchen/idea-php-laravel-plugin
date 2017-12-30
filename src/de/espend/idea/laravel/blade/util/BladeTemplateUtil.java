@@ -85,6 +85,11 @@ public class BladeTemplateUtil {
     }
 
     @NotNull
+    public static Collection<String> resolveTemplateName(@NotNull PsiFile psiFile) {
+        return resolveTemplateName(psiFile.getProject(), psiFile.getVirtualFile());
+    }
+
+    @NotNull
     public static Collection<String> resolveTemplateName(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         Set<String> templateNames = new HashSet<>();
 
@@ -127,20 +132,6 @@ public class BladeTemplateUtil {
 
     private static void visitSectionOrYield(@NotNull final PsiFile psiFile, final DirectiveParameterVisitor visitor, @NotNull BladeDirectiveElementType... elementTypes) {
         psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, elementTypes));
-    }
-
-    @NotNull
-    public static Set<String> getFileTemplateName(@NotNull Project project, @NotNull VirtualFile currentVirtualFile) {
-        Set<String> strings = new HashSet<>();
-
-        ViewCollector.visitFile(project, (virtualFile, name) -> {
-            if(virtualFile.equals(currentVirtualFile)) {
-                strings.add(name);
-            }
-        });
-
-        return strings;
-
     }
 
     public static Set<VirtualFile> getExtendsImplementations(Project project, String templateName) {

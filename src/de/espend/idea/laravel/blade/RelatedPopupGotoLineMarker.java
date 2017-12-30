@@ -10,7 +10,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
@@ -19,22 +20,20 @@ public class RelatedPopupGotoLineMarker {
 
     public static class NavigationHandler implements GutterIconNavigationHandler<PsiElement> {
 
-        private List<GotoRelatedItem> items;
+        private Collection<GotoRelatedItem> items;
 
-        public NavigationHandler(List<GotoRelatedItem> items){
+        public NavigationHandler(Collection<GotoRelatedItem> items){
             this.items = items;
         }
 
         public void navigate(MouseEvent e, PsiElement elt) {
-            List<GotoRelatedItem>  items = this.items;
+            Collection<GotoRelatedItem>  items = this.items;
             if (items.size() == 1) {
-                items.get(0).navigate();
+                items.iterator().next().navigate();
             } else {
-                NavigationUtil.getRelatedItemsPopup(items, "Go to Related Files").show(new RelativePoint(e));
+                NavigationUtil.getRelatedItemsPopup(new ArrayList<>(items), "Go to Related Files").show(new RelativePoint(e));
             }
-
         }
-
     }
 
     public static class PopupGotoRelatedItem extends GotoRelatedItem {

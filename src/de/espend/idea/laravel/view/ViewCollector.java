@@ -74,12 +74,18 @@ public class ViewCollector {
         }
     }
 
+    /**
+     * Visit all templates in project path configuration
+     */
     public static void visitFile(@NotNull Project project, @NotNull ViewVisitor visitor) {
         for(TemplatePath templatePath : getPaths(project)) {
             visitTemplatePath(project, templatePath, visitor);
         }
     }
 
+    /**
+     * Visit all templates in given path
+     */
     private static void visitTemplatePath(@NotNull Project project, @NotNull TemplatePath templatePath, @NotNull ViewVisitor visitor) {
         final VirtualFile templateDir = VfsUtil.findRelativeFile(templatePath.getPath(), project.getBaseDir());
         if(templateDir == null) {
