@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -165,26 +166,30 @@ public class TemplateLineMarker implements LineMarkerProvider {
             .collect(Collectors.toList())
         );
 
-        final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
-        final Set<VirtualFile> relatedFiles = new HashSet<>();
-
+        AtomicBoolean includeLineMarker = new AtomicBoolean(false);
         for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY, BladeEachStubIndex.KEY)) {
             for(String templateName: templateNames) {
                 FileBasedIndex.getInstance().getFilesWithKey(key, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
-                    PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
+                    includeLineMarker.set(true);
 
-                    if(psiFileTarget != null && !relatedFiles.contains(virtualFile)) {
-                        gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(psiFileTarget).withIcon(LaravelIcons.LARAVEL, LaravelIcons.LARAVEL));
-                        relatedFiles.add(virtualFile);
-                    }
+                    // stop on first file match
+                    return false;
+                }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(psiFile.getProject()), BladeFileType.INSTANCE));
+            }
 
-                    return true;
-                }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(psiFile.getProject()), BladeFileType.INSTANCE, BladeFileType.INSTANCE));
+            // found an element; stop iteration for all index keys
+            if(includeLineMarker.get()) {
+                break;
             }
         }
 
-        if(gotoRelatedItems.size() > 0) {
-            collection.add(getRelatedPopover("Template", "Blade File", psiFile, gotoRelatedItems, PhpIcons.IMPLEMENTED));
+        if(includeLineMarker.get()) {
+            NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder
+                .create(PhpIcons.IMPLEMENTED)
+                .setTargets(new TemplateIncludeCollectionNotNullLazyValue(psiFile.getProject(), templateNames))
+                .setTooltipText("Navigate to Blade file");
+
+            collection.add(builder.createLineMarkerInfo(psiFile));
         }
 
         // try to find at least von controller target; lazyly load target later via click
@@ -428,6 +433,39 @@ public class TemplateLineMarker implements LineMarkerProvider {
             }
 
             return targets;
+        }
+    }
+
+    /**
+     * Provide navigation for all rendering calls in php controller of given template names
+     */
+    private static class TemplateIncludeCollectionNotNullLazyValue extends NotNullLazyValue<Collection<? extends PsiElement>> {
+        @NotNull
+        private final Project project;
+
+        @NotNull
+        private final Collection<String> templateNames;
+
+        private TemplateIncludeCollectionNotNullLazyValue(@NotNull Project project, @NotNull Collection<String> templateNames) {
+            this.project = project;
+            this.templateNames = templateNames;
+        }
+
+        @NotNull
+        @Override
+        protected Collection<? extends PsiElement> compute() {
+            Collection<VirtualFile> virtualFiles = new ArrayList<>();
+
+            for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY, BladeEachStubIndex.KEY)) {
+                for(String templateName: templateNames) {
+                    FileBasedIndex.getInstance().getFilesWithKey(key, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
+                        virtualFiles.add(virtualFile);
+                        return true;
+                    }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(project), BladeFileType.INSTANCE));
+                }
+            }
+
+            return PsiElementUtils.convertVirtualFilesToPsiFiles(project, virtualFiles);
         }
     }
 }
