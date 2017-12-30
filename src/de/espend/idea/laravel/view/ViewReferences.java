@@ -267,7 +267,7 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
         @NotNull
         @Override
-        public Collection<PsiElement> getPsiTargets(PsiElement element) {
+        public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
             List<String> strings = BladePsiUtil.extractParameters(element.getText());
             if(strings.size() < 1) {
                 return Collections.emptyList();
@@ -294,12 +294,6 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
             return psiElements;
         }
-
-        @NotNull
-        @Override
-        public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
-            return Collections.emptyList();
-        }
     }
 
     private static class ViewDirectiveCompletionProvider extends GotoCompletionProvider {
@@ -317,6 +311,12 @@ public class ViewReferences implements GotoCompletionRegistrar {
             );
 
             return lookupElements;
+        }
+
+        @NotNull
+        @Override
+        public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
+            return getPsiTargets((PsiElement) element);
         }
 
         @NotNull
