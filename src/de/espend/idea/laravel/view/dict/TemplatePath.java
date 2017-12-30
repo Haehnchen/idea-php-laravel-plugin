@@ -84,5 +84,4 @@ public class TemplatePath {
     public void setNamespace(@Nullable String namespace) {
         this.namespace = namespace;
     }
-
 }

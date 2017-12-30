@@ -141,8 +141,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
         collection.add(getRelatedPopover("Parent Section", "Blade Section", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES));
     }
 
-    private void collectTemplateFileRelatedFiles(final PsiFile psiFile, @NotNull Collection<LineMarkerInfo> collection) {
-
+    private void collectTemplateFileRelatedFiles(@NotNull PsiFile psiFile, @NotNull Collection<LineMarkerInfo> collection) {
         Set<String> collectedTemplates = BladeTemplateUtil.getFileTemplateName(psiFile.getProject(), psiFile.getVirtualFile());
         if(collectedTemplates.size() == 0) {
             return;
@@ -181,7 +180,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
         // collect tagged index files
         Collection<VirtualFile> files = new HashSet<>();
-        for(final String templateName: templateNames) {
+        for(String templateName: templateNames) {
             files.addAll(
                 FileBasedIndex.getInstance().getContainingFiles(PhpTemplateUsageStubIndex.KEY, templateName, GlobalSearchScope.allScope(psiFile.getProject()))
             );

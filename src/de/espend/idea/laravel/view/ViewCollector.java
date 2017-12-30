@@ -75,13 +75,13 @@ public class ViewCollector {
         }
     }
 
-    public static void visitFile(@NotNull Project project, @NotNull final ViewVisitor visitor) {
+    public static void visitFile(@NotNull Project project, @NotNull ViewVisitor visitor) {
         for(TemplatePath templatePath : getPaths(project)) {
             visitTemplatePath(project, templatePath, visitor);
         }
     }
 
-    public static void visitTemplatePath(@NotNull Project project, final @NotNull TemplatePath templatePath, @NotNull final ViewVisitor visitor) {
+    private static void visitTemplatePath(@NotNull Project project, final @NotNull TemplatePath templatePath, @NotNull ViewVisitor visitor) {
         final VirtualFile templateDir = VfsUtil.findRelativeFile(templatePath.getPath(), project.getBaseDir());
         if(templateDir == null) {
             return;
@@ -90,7 +90,6 @@ public class ViewCollector {
         VfsUtil.visitChildrenRecursively(templateDir, new VirtualFileVisitor() {
             @Override
             public boolean visitFile(@NotNull VirtualFile virtualFile) {
-
                 if(virtualFile.isDirectory() || !isTemplateFile(virtualFile)) {
                     return true;
                 }
@@ -123,7 +122,6 @@ public class ViewCollector {
             }
 
             private boolean isTemplateFile(VirtualFile virtualFile) {
-
                 if(virtualFile.getFileType() == BladeFileType.INSTANCE || virtualFile.getFileType() == PhpFileType.INSTANCE) {
                     return true;
                 }
@@ -135,9 +133,7 @@ public class ViewCollector {
 
                 return false;
             }
-
         });
-
     }
 
     public interface ViewVisitor {

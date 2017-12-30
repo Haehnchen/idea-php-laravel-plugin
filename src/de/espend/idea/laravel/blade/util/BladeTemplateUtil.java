@@ -32,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author Daniel Espendiller <daniel@espendiller.net>
@@ -44,8 +43,7 @@ public class BladeTemplateUtil {
     }};
 
     @NotNull
-    public static Set<VirtualFile> resolveTemplateName(Project project, String templateName) {
-
+    public static Set<VirtualFile> resolveTemplateName(@NotNull Project project, @NotNull String templateName) {
         Set<String> templateNames = new HashSet<>();
 
         int i = templateName.indexOf("::");
@@ -56,13 +54,15 @@ public class BladeTemplateUtil {
         }
 
         String pointName = templateName.replace(".", "/");
+
+        // find template files by extensions
         templateNames.add(pointName.concat(".blade.php"));
         templateNames.add(pointName.concat(".html.twig"));
         templateNames.add(pointName.concat(".php"));
 
         Set<VirtualFile> templateFiles = new HashSet<>();
         for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
-
+            // we have a namespace given; ignore all other paths
             if(ns != null && !ns.equals(templatePath.getNamespace())) {
                 continue;
             }
@@ -84,13 +84,11 @@ public class BladeTemplateUtil {
         return templateFiles;
     }
 
-
     @NotNull
-    public static Set<String> resolveTemplateName(Project project, VirtualFile virtualFile) {
-
+    public static Collection<String> resolveTemplateName(@NotNull Project project, @NotNull VirtualFile virtualFile) {
         Set<String> templateNames = new HashSet<>();
-        for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
 
+        for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
             VirtualFile viewDir = templatePath.getRelativePath(project);
             if(viewDir == null) {
                 continue;
@@ -100,10 +98,10 @@ public class BladeTemplateUtil {
             if(relativePath != null) {
                 if(relativePath.endsWith(".blade.php")) {
                     relativePath = relativePath.substring(0, relativePath.length() - ".blade.php".length());
-                }
-
-                if(relativePath.endsWith(".twig.html")) {
-                    relativePath = relativePath.substring(0, relativePath.length() - ".twig.html".length());
+                } else if(relativePath.endsWith(".html.twig")) {
+                    relativePath = relativePath.substring(0, relativePath.length() - ".html.twig".length());
+                } else if(relativePath.endsWith(".php")) {
+                    relativePath = relativePath.substring(0, relativePath.length() - ".php".length());
                 }
 
                 if(templatePath.getNamespace() != null && StringUtils.isNotBlank(templatePath.getNamespace())) {
@@ -111,36 +109,35 @@ public class BladeTemplateUtil {
                 } else {
                     templateNames.add(relativePath.replace("/", "."));
                 }
-
             }
-
         }
 
         return templateNames;
     }
 
-    public static void visitSection(@NotNull final PsiFile psiFile, final DirectiveParameterVisitor visitor) {
-        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(BladeTokenTypes.SECTION_DIRECTIVE, visitor));
+    public static void visitSection(@NotNull PsiFile psiFile, final DirectiveParameterVisitor visitor) {
+        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, BladeTokenTypes.SECTION_DIRECTIVE));
     }
 
     public static void visitExtends(final @NotNull PsiFile psiFile, final DirectiveParameterVisitor visitor) {
-        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(BladeTokenTypes.EXTENDS_DIRECTIVE, visitor));
+        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, BladeTokenTypes.EXTENDS_DIRECTIVE));
     }
 
-    public static void visitYield(@NotNull final PsiFile psiFile, DirectiveParameterVisitor visitor) {
-        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(BladeTokenTypes.YIELD_DIRECTIVE, visitor));
+    public static void visitYield(@NotNull PsiFile psiFile, DirectiveParameterVisitor visitor) {
+        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, BladeTokenTypes.YIELD_DIRECTIVE));
     }
 
-    public static void visit(@NotNull final PsiFile psiFile, @NotNull BladeDirectiveElementType elementType, DirectiveParameterVisitor visitor) {
-        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(elementType, visitor));
+    public static void visit(@NotNull PsiFile psiFile, @NotNull BladeDirectiveElementType elementType, @NotNull DirectiveParameterVisitor visitor) {
+        psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, elementType));
     }
 
-    public static void visitSectionOrYield(@NotNull final PsiFile psiFile, final DirectiveParameterVisitor visitor, @NotNull BladeDirectiveElementType... elementTypes) {
+    private static void visitSectionOrYield(@NotNull final PsiFile psiFile, final DirectiveParameterVisitor visitor, @NotNull BladeDirectiveElementType... elementTypes) {
         psiFile.acceptChildren(new DirectivePsiRecursiveElementWalkingVisitor(visitor, elementTypes));
     }
 
-    public static Set<String> getFileTemplateName(Project project, final VirtualFile currentVirtualFile) {
-        final Set<String> strings = new HashSet<>();
+    @NotNull
+    public static Set<String> getFileTemplateName(@NotNull Project project, @NotNull VirtualFile currentVirtualFile) {
+        Set<String> strings = new HashSet<>();
 
         ViewCollector.visitFile(project, (virtualFile, name) -> {
             if(virtualFile.equals(currentVirtualFile)) {
@@ -167,18 +164,16 @@ public class BladeTemplateUtil {
         return virtualFiles;
     }
 
-    private static void getExtendsImplementations(final Project project, String templateName, final Set<VirtualFile> virtualFiles, int depth) {
-
+    private static void getExtendsImplementations(@NotNull Project project, @NotNull String templateName, @NotNull Set<VirtualFile> virtualFiles, int depth) {
         if(depth-- <= 0) {
             return;
         }
 
-        final int finalDepth = depth;
+        int finalDepth = depth;
         FileBasedIndex.getInstance().getFilesWithKey(BladeExtendsStubIndex.KEY, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
             if (!virtualFiles.contains(virtualFile)) {
                 virtualFiles.add(virtualFile);
-                Set<String> nextTpls = BladeTemplateUtil.resolveTemplateName(project, virtualFile);
-                for (String nextTpl : nextTpls) {
+                for (String nextTpl : BladeTemplateUtil.resolveTemplateName(project, virtualFile)) {
                     getExtendsImplementations(project, nextTpl, virtualFiles, finalDepth);
                 }
             }
@@ -207,15 +202,13 @@ public class BladeTemplateUtil {
 
     private static class DirectivePsiRecursiveElementWalkingVisitor extends PsiRecursiveElementWalkingVisitor {
 
+        @NotNull
         private final BladeDirectiveElementType[] elementTypes;
+
+        @NotNull
         private final DirectiveParameterVisitor visitor;
 
-        public DirectivePsiRecursiveElementWalkingVisitor(BladeDirectiveElementType elementType, DirectiveParameterVisitor visitor) {
-            this.elementTypes = new BladeDirectiveElementType[] {elementType} ;
-            this.visitor = visitor;
-        }
-
-        public DirectivePsiRecursiveElementWalkingVisitor(DirectiveParameterVisitor visitor, BladeDirectiveElementType... elementTypes) {
+        DirectivePsiRecursiveElementWalkingVisitor(@NotNull DirectiveParameterVisitor visitor, @NotNull BladeDirectiveElementType... elementTypes) {
             this.elementTypes = elementTypes;
             this.visitor = visitor;
         }
