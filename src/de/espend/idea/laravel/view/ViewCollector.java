@@ -16,6 +16,7 @@ import com.intellij.psi.util.CachedValuesManager;
 import com.jetbrains.php.blade.BladeFileType;
 import com.jetbrains.php.lang.PhpFileType;
 import de.espend.idea.laravel.LaravelSettings;
+import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import de.espend.idea.laravel.util.VfsExUtil;
 import de.espend.idea.laravel.view.dict.JsonTemplatePaths;
 import de.espend.idea.laravel.view.dict.TemplatePath;
@@ -29,6 +30,14 @@ import java.util.*;
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
 public class ViewCollector {
+    /**
+     * Default "view" path based on laravel versions
+     */
+    private static TemplatePath[] DEFAULT_TEMPLATE_PATH = new TemplatePath[] {
+        new TemplatePath("resources/views", false), // laravel 4
+        new TemplatePath("app/views", false), // laravel 5 (deprecated)
+        new TemplatePath("resources/templates", false), // laravel 5
+    };
 
     @NotNull
     public static Collection<TemplatePath> getPaths(@NotNull Project project) {
@@ -37,17 +46,7 @@ public class ViewCollector {
 
     @NotNull
     public static Collection<TemplatePath> getPaths(@NotNull Project project, boolean includeSettings, boolean includeJson) {
-
-        // "resources/views" -> laravel 4
-        // "app/views" -> laravel 5 (deprecated)
-        // "resources/templates" -> laravel 5
-
-        String[] defaultDirs = new String[] {"resources/views", "app/views", "resources/templates"};
-        Collection<TemplatePath> templatePaths = new ArrayList<>();
-
-        for(String path: new HashSet<>(Arrays.asList(defaultDirs))) {
-            templatePaths.add(new TemplatePath(path, false));
-        }
+        Collection<TemplatePath> templatePaths = new ArrayList<>(Arrays.asList(DEFAULT_TEMPLATE_PATH));
 
         // ide-blade.json files
         if(includeJson) {
@@ -67,7 +66,7 @@ public class ViewCollector {
     }
 
     private static void collectIdeJsonBladePaths(@NotNull Project project, @NotNull Collection<TemplatePath> templatePaths) {
-        for (final PsiFile psiFile : FilenameIndex.getFilesByName(project, "ide-blade.json", GlobalSearchScope.allScope(project))) {
+        for (PsiFile psiFile : FilenameIndex.getFilesByName(project, "ide-blade.json", GlobalSearchScope.allScope(project))) {
             Collection<TemplatePath> cachedValue = CachedValuesManager.getCachedValue(psiFile, new MyJsonCachedValueProvider(psiFile));
             if(cachedValue != null) {
                 templatePaths.addAll(cachedValue);
@@ -81,7 +80,7 @@ public class ViewCollector {
         }
     }
 
-    private static void visitTemplatePath(@NotNull Project project, final @NotNull TemplatePath templatePath, @NotNull ViewVisitor visitor) {
+    private static void visitTemplatePath(@NotNull Project project, @NotNull TemplatePath templatePath, @NotNull ViewVisitor visitor) {
         final VirtualFile templateDir = VfsUtil.findRelativeFile(templatePath.getPath(), project.getBaseDir());
         if(templateDir == null) {
             return;
@@ -99,17 +98,7 @@ public class ViewCollector {
                     return true;
                 }
 
-                if(filename.endsWith(".php")) {
-                    filename = filename.substring(0, filename.length() - 4);
-                }
-
-                if(filename.endsWith(".blade")) {
-                    filename = filename.substring(0, filename.length() - 6);
-                }
-
-                if(filename.endsWith(".html.twig")) {
-                    filename = filename.substring(0, filename.length() - ".html.twig".length());
-                }
+                filename = BladeTemplateUtil.stripTemplateExtensions(filename);
 
                 String namespace = templatePath.getNamespace();
                 if(namespace != null && StringUtils.isNotBlank(namespace)) {
@@ -137,7 +126,7 @@ public class ViewCollector {
     }
 
     public interface ViewVisitor {
-        void visit(@NotNull VirtualFile virtualFile, String name);
+        void visit(@NotNull VirtualFile virtualFile, @NotNull String name);
     }
 
     private static class MyJsonCachedValueProvider implements CachedValueProvider<Collection<TemplatePath>> {

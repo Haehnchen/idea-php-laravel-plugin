@@ -96,13 +96,7 @@ public class BladeTemplateUtil {
 
             String relativePath = VfsUtil.getRelativePath(virtualFile, viewDir);
             if(relativePath != null) {
-                if(relativePath.endsWith(".blade.php")) {
-                    relativePath = relativePath.substring(0, relativePath.length() - ".blade.php".length());
-                } else if(relativePath.endsWith(".html.twig")) {
-                    relativePath = relativePath.substring(0, relativePath.length() - ".html.twig".length());
-                } else if(relativePath.endsWith(".php")) {
-                    relativePath = relativePath.substring(0, relativePath.length() - ".php".length());
-                }
+                relativePath = stripTemplateExtensions(relativePath);
 
                 if(templatePath.getNamespace() != null && StringUtils.isNotBlank(templatePath.getNamespace())) {
                     templateNames.add(templatePath.getNamespace() + "::" + relativePath.replace("/", "."));
@@ -269,6 +263,27 @@ public class BladeTemplateUtil {
         }
 
         return null;
+    }
+
+
+    /**
+     * Strip template extension for given template name
+     *
+     * "foo_blade.blade.php" => "foo_blade"
+     * "foo_blade.html.twig" => "foo_blade"
+     * "foo_blade.php" => "foo_blade"
+     */
+    @NotNull
+    public static String stripTemplateExtensions(@NotNull String filename) {
+        if(filename.endsWith(".blade.php")) {
+            filename = filename.substring(0, filename.length() - ".blade.php".length());
+        } else if(filename.endsWith(".html.twig")) {
+            filename = filename.substring(0, filename.length() - ".html.twig".length());
+        } else if(filename.endsWith(".php")) {
+            filename = filename.substring(0, filename.length() - ".php".length());
+        }
+
+        return filename;
     }
 
     private static class MyViewRecursiveElementWalkingVisitor extends PsiRecursiveElementWalkingVisitor {
