@@ -63,7 +63,8 @@ public class BladeTemplateUtil {
         Set<VirtualFile> templateFiles = new HashSet<>();
         for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
             // we have a namespace given; ignore all other paths
-            if(ns != null && !ns.equals(templatePath.getNamespace())) {
+            String namespace = templatePath.getNamespace();
+            if((ns == null && namespace != null) || ns != null && !ns.equals(namespace)) {
                 continue;
             }
 
@@ -112,6 +113,39 @@ public class BladeTemplateUtil {
         }
 
         return templateNames;
+    }
+
+    @NotNull
+    public static Set<VirtualFile> resolveTemplateDirectory(@NotNull Project project, @NotNull String directory) {
+        int i = directory.indexOf("::");
+        String ns = null;
+        if(i > 0) {
+            ns = directory.substring(0, i);
+            directory = directory.substring(i + 2, directory.length());
+        }
+
+        directory = directory.replace(".", "/");
+
+        Set<VirtualFile> templateFiles = new HashSet<>();
+        for(TemplatePath templatePath : ViewCollector.getPaths(project)) {
+            // we have a namespace given; ignore all other paths
+            String namespace = templatePath.getNamespace();
+            if((ns == null && namespace != null) || ns != null && !ns.equals(namespace)) {
+                continue;
+            }
+
+            VirtualFile viewDir = templatePath.getRelativePath(project);
+            if(viewDir == null) {
+                continue;
+            }
+
+            VirtualFile viewsDir = VfsUtil.findRelativeFile(directory, viewDir);
+            if(viewsDir != null) {
+                templateFiles.add(viewsDir);
+            }
+        }
+
+        return templateFiles;
     }
 
     public static void visitSection(@NotNull PsiFile psiFile, final DirectiveParameterVisitor visitor) {

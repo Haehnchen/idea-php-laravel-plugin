@@ -97,4 +97,45 @@ public class BladeTemplateUtilTempTest extends LaravelTempCodeInsightFixtureTest
         file = createFile("custom/foo/bar/namespace_blade.blade.php");
         assertContainsElements(BladeTemplateUtil.resolveTemplateName(getProject(), file), "foo::foo.bar.namespace_blade");
     }
+
+    /**
+     * @see BladeTemplateUtil#resolveTemplateDirectory
+     */
+    public void testResolveTemplateDirectory() {
+        LaravelSettings.getInstance(getProject()).templatePaths = Collections.singletonList(
+            new TemplatePath("custom", "foo", true)
+        );
+
+        createFiles(
+            "resources/views/foobar/foo_blade.blade.php",
+            "custom/foo/bar/namespace_blade.blade.php"
+        );
+
+        assertNotNull(BladeTemplateUtil.resolveTemplateDirectory(getProject(), "foobar")
+            .stream()
+            .filter(
+                virtualFile -> virtualFile.isDirectory() && "foobar".equals(virtualFile.getName())
+            )
+            .findFirst()
+            .orElse(null)
+        );
+
+        assertNotNull(BladeTemplateUtil.resolveTemplateDirectory(getProject(), "foo::foo")
+            .stream()
+            .filter(
+                virtualFile -> virtualFile.isDirectory() && "foo".equals(virtualFile.getName())
+            )
+            .findFirst()
+            .orElse(null)
+        );
+
+        assertNotNull(BladeTemplateUtil.resolveTemplateDirectory(getProject(), "foo::foo.bar")
+            .stream()
+            .filter(
+                virtualFile -> virtualFile.isDirectory() && "bar".equals(virtualFile.getName())
+            )
+            .findFirst()
+            .orElse(null)
+        );
+    }
 }
