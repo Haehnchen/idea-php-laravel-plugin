@@ -2,9 +2,11 @@ package de.espend.idea.laravel.blade;
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo;
 import com.intellij.codeInsight.daemon.LineMarkerProvider;
+import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder;
 import com.intellij.navigation.GotoRelatedItem;
 import com.intellij.openapi.editor.markup.GutterIconRenderer;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.NotNullLazyValue;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -23,6 +25,7 @@ import de.espend.idea.laravel.LaravelProjectComponent;
 import de.espend.idea.laravel.blade.util.BladePsiUtil;
 import de.espend.idea.laravel.blade.util.BladeTemplateUtil;
 import de.espend.idea.laravel.stub.*;
+import de.espend.idea.laravel.util.PsiElementUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,6 +61,8 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
         for(PsiElement psiElement: psiElements) {
             if(psiElement instanceof PsiFile) {
+                // template file like rendering:
+
                 collectTemplateFileRelatedFiles((PsiFile) psiElement, collection);
             } else if(psiElement.getNode().getElementType() == BladeTokenTypes.SECTION_DIRECTIVE) {
                 Pair<PsiElement, String> section = extractSectionParameter(psiElement);
@@ -178,35 +183,28 @@ public class TemplateLineMarker implements LineMarkerProvider {
             }
         }
 
-        // collect tagged index files
-        Collection<VirtualFile> files = new HashSet<>();
+        if(gotoRelatedItems.size() > 0) {
+            collection.add(getRelatedPopover("Template", "Blade File", psiFile, gotoRelatedItems, PhpIcons.IMPLEMENTED));
+        }
+
+        // try to find at least von controller target; lazyly load target later via click
+        boolean controllerLineMarker = false;
         for(String templateName: templateNames) {
-            files.addAll(
-                FileBasedIndex.getInstance().getContainingFiles(PhpTemplateUsageStubIndex.KEY, templateName, GlobalSearchScope.allScope(psiFile.getProject()))
-            );
-        }
-
-        for (VirtualFile file : files) {
-            PsiFile psiFileTarget = PsiManager.getInstance(psiFile.getProject()).findFile(file);
-            if(psiFileTarget == null) {
-                continue;
-            }
-
-            Collection<Pair<String, PsiElement>> pairs = BladeTemplateUtil.getViewTemplatesPairScope(psiFileTarget);
-            for (String templateName : templateNames) {
-                for (Pair<String, PsiElement> pair : pairs) {
-                    if(templateName.equalsIgnoreCase(pair.first)) {
-                        gotoRelatedItems.add(new RelatedPopupGotoLineMarker.PopupGotoRelatedItem(pair.getSecond()).withIcon(PhpIcons.IMPLEMENTED, PhpIcons.IMPLEMENTED));
-                    }
-                }
+            Collection<VirtualFile> files = FileBasedIndex.getInstance().getContainingFiles(PhpTemplateUsageStubIndex.KEY, templateName, GlobalSearchScope.allScope(psiFile.getProject()));
+            if(files.size() > 0) {
+                controllerLineMarker = true;
+                break;
             }
         }
 
-        if(gotoRelatedItems.size() == 0) {
-            return;
-        }
+        if(controllerLineMarker) {
+            NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder
+                .create(LaravelIcons.TEMPLATE_CONTROLLER_LINE_MARKER)
+                .setTargets(new ControllerRenderViewCollectionNotNullLazyValue(psiFile.getProject(), templateNames))
+                .setTooltipText("Navigate to controller");
 
-        collection.add(getRelatedPopover("Template", "Blade File", psiFile, gotoRelatedItems, PhpIcons.IMPLEMENTED));
+            collection.add(builder.createLineMarkerInfo(psiFile));
+        }
     }
 
     private LineMarkerInfo getRelatedPopover(String singleItemTitle, String singleItemTooltipPrefix, PsiElement lineMarkerTarget, Collection<GotoRelatedItem> gotoRelatedItems, Icon icon) {
@@ -384,5 +382,52 @@ public class TemplateLineMarker implements LineMarkerProvider {
         }
 
         collection.add(getRelatedPopover("Slot Overwrites", "Slot Overwrites", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES));
+    }
+
+    /**
+     * Provide navigation for all rendering calls in php controller of given template names
+     */
+    private static class ControllerRenderViewCollectionNotNullLazyValue extends NotNullLazyValue<Collection<? extends PsiElement>> {
+        @NotNull
+        private final Project project;
+
+        @NotNull
+        private final Collection<String> templateNames;
+
+        private ControllerRenderViewCollectionNotNullLazyValue(@NotNull Project project, @NotNull Collection<String> templateNames) {
+            this.project = project;
+            this.templateNames = templateNames;
+        }
+
+        @NotNull
+        @Override
+        protected Collection<? extends PsiElement> compute() {
+            Collection<VirtualFile> files = new HashSet<>();
+
+            // find template usages of controller
+            for (String templateName: templateNames) {
+                files.addAll(FileBasedIndex.getInstance().getContainingFiles(
+                    PhpTemplateUsageStubIndex.KEY,
+                    templateName,
+                    GlobalSearchScope.allScope(project)
+                ));
+            }
+
+            Collection<PsiElement> targets = new ArrayList<>();
+
+            for (PsiFile psiFile : PsiElementUtils.convertVirtualFilesToPsiFiles(project, files)) {
+                Collection<Pair<String, PsiElement>> pairs = BladeTemplateUtil.getViewTemplatesPairScope(psiFile);
+
+                for (String templateName : templateNames) {
+                    for (Pair<String, PsiElement> pair : pairs) {
+                        if (templateName.equalsIgnoreCase(pair.first)) {
+                            targets.add(pair.getSecond());
+                        }
+                    }
+                }
+            }
+
+            return targets;
+        }
     }
 }
