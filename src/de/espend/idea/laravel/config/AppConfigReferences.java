@@ -98,7 +98,7 @@ public class AppConfigReferences implements GotoCompletionLanguageRegistrar {
                     return true;
                 }
 
-                psiFileTarget.acceptChildren(new ArrayReturnPsiRecursiveVisitor(virtualFile.getNameWithoutExtension(), (key, psiKey, isRootElement) -> {
+                psiFileTarget.acceptChildren(new ArrayReturnPsiRecursiveVisitor(ConfigFileUtil.matchConfigFile(getProject(), virtualFile).getKeyPrefix(), (key, psiKey, isRootElement) -> {
                     if(!isRootElement && key.equals(contents)) {
                         targets.add(psiKey);
                     }
