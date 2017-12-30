@@ -316,8 +316,9 @@ public class BladePsiUtil {
             if((element instanceof BladePsiDirective)) {
                 IElementType elementType = ((BladePsiDirective) element).getDirectiveElementType();
 
-                if(elementType == BladeTokenTypes.INCLUDE_DIRECTIVE) {
+                if(elementType == BladeTokenTypes.INCLUDE_DIRECTIVE || elementType == BladeTokenTypes.COMPONENT_DIRECTIVE) {
                     // @include('foobar.include')
+                    // @component('inc.alert')
 
                     for (String parameter : getDirectiveParameters(((BladePsiDirective) element))) {
                         String parameterTrim = PsiElementUtils.trimQuote(parameter);

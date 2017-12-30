@@ -15,7 +15,8 @@ public class BladeIncludeStubIndexTest extends LaravelLightCodeInsightFixtureTes
             "@includeIf( 'foobar.includeIf' , ['some' => 'data'])\n" +
             "@includeWhen($boolean, 'foobar.includeWhen', ['some' => 'data'])\n" +
             "@includeFirst(['foobar.includeFirst', 'foobar.includeFirst2'], ['some' => 'data'])\n" +
-            "@includeFirst(   [    'foobar.includeFirst3'    , \"foobar.includeFirst4\"]    )\n"
+            "@includeFirst(   [    'foobar.includeFirst3'    , \"foobar.includeFirst4\"]    )\n" +
+            "@component('foobar.component')\n<h1>Home Page</h1>@endcomponent\n"
         );
 
         assertIndexContains(BladeIncludeStubIndex.KEY , "foobar.include");
@@ -27,6 +28,8 @@ public class BladeIncludeStubIndexTest extends LaravelLightCodeInsightFixtureTes
 
         assertIndexContains(BladeIncludeStubIndex.KEY , "foobar.includeFirst3");
         assertIndexContains(BladeIncludeStubIndex.KEY , "foobar.includeFirst4");
+
+        assertIndexContains(BladeIncludeStubIndex.KEY , "foobar.component");
 
         assertIndexNotContains(BladeIncludeStubIndex.KEY , "some");
         assertIndexNotContains(BladeIncludeStubIndex.KEY , "data");
