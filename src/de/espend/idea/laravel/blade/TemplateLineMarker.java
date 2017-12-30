@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
  * @author Daniel Espendiller <daniel@espendiller.net>
  */
 public class TemplateLineMarker implements LineMarkerProvider {
-
     @Nullable
     @Override
     public LineMarkerInfo getLineMarkerInfo(@NotNull PsiElement psiElement) {
@@ -49,7 +48,6 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
     @Override
     public void collectSlowLineMarkers(@NotNull List<PsiElement> psiElements, @NotNull Collection<LineMarkerInfo> collection) {
-
         // we need project element; so get it from first item
         if(psiElements.size() == 0) {
             return;
@@ -60,37 +58,60 @@ public class TemplateLineMarker implements LineMarkerProvider {
             return;
         }
 
+        LazyVirtualFileTemplateResolver resolver = null;
+
         for(PsiElement psiElement: psiElements) {
             if(psiElement instanceof PsiFile) {
                 // template file like rendering:
 
-                collectTemplateFileRelatedFiles((PsiFile) psiElement, collection);
+                if(resolver == null) resolver = new LazyVirtualFileTemplateResolver();
+                collectTemplateFileRelatedFiles((PsiFile) psiElement, collection, resolver);
             } else if(psiElement.getNode().getElementType() == BladeTokenTypes.SECTION_DIRECTIVE) {
                 Pair<PsiElement, String> section = extractSectionParameter(psiElement);
                 if(section != null) {
-                    collectOverwrittenSection(section.getFirst(), collection, section.getSecond());
-                    collectImplementsSection(section.getFirst(), collection, section.getSecond());
+                    if(resolver == null) {
+                        resolver = new LazyVirtualFileTemplateResolver();
+                    }
+
+                    collectOverwrittenSection(section.getFirst(), collection, section.getSecond(), resolver);
+                    collectImplementsSection(section.getFirst(), collection, section.getSecond(), resolver);
                 }
             } else if(psiElement.getNode().getElementType() == BladeTokenTypes.YIELD_DIRECTIVE) {
                 Pair<PsiElement, String> section = extractSectionParameter(psiElement);
                 if(section != null) {
-                    collectImplementsSection(section.getFirst(), collection, section.getSecond());
+                    if(resolver == null) {
+                        resolver = new LazyVirtualFileTemplateResolver();
+                    }
+
+                    collectImplementsSection(section.getFirst(), collection, section.getSecond(), resolver);
                 }
             } else if(psiElement.getNode().getElementType() == BladeTokenTypes.STACK_DIRECTIVE) {
                 Pair<PsiElement, String> section = extractSectionParameter(psiElement);
                 if(section != null) {
-                    collectStackImplements(section.getFirst(), collection, section.getSecond());
+                    if(resolver == null) {
+                        resolver = new LazyVirtualFileTemplateResolver();
+                    }
+
+                    collectStackImplements(section.getFirst(), collection, section.getSecond(), resolver);
                 }
             } else if(psiElement.getNode().getElementType() == BladeTokenTypes.PUSH_DIRECTIVE) {
                 Pair<PsiElement, String> section = extractSectionParameter(psiElement);
                 if(section != null) {
+                    if(resolver == null) {
+                        resolver = new LazyVirtualFileTemplateResolver();
+                    }
+
                     collectPushOverwrites(section.getFirst(), collection, section.getSecond());
                 }
             } else if(psiElement.getNode().getElementType() == BladeTokenTypes.SLOT_DIRECTIVE) {
                 // @slot('foobar')
                 Pair<PsiElement, String> section = extractSectionParameter(psiElement);
                 if(section != null) {
-                    collectSlotOverwrites(section.getFirst(), collection, section.getSecond());
+                    if(resolver == null) {
+                        resolver = new LazyVirtualFileTemplateResolver();
+                    }
+
+                    collectSlotOverwrites(section.getFirst(), collection, section.getSecond(), resolver);
                 }
             }
         }
@@ -116,7 +137,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
     /**
      * like this @section('sidebar')
      */
-    private void collectOverwrittenSection(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
+    private void collectOverwrittenSection(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
 
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
@@ -127,13 +148,11 @@ public class TemplateLineMarker implements LineMarkerProvider {
                 if(bladeParameter instanceof BladePsiDirectiveParameter) {
                     String extendTemplate = BladePsiUtil.getSection(bladeParameter);
                     if(extendTemplate != null) {
-                        Set<VirtualFile> virtualFiles = BladeTemplateUtil.resolveTemplateName(psiElement.getProject(), extendTemplate);
-                        for(VirtualFile virtualFile: virtualFiles) {
+                        for(VirtualFile virtualFile: resolver.resolveTemplateName(psiElement.getProject(), extendTemplate)) {
                             PsiFile psiFile = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
                             if(psiFile != null) {
-                                visitOverwrittenTemplateFile(psiFile, gotoRelatedItems, sectionName);
+                                visitOverwrittenTemplateFile(psiFile, gotoRelatedItems, sectionName, resolver);
                             }
-
                         }
                     }
                 }
@@ -147,8 +166,8 @@ public class TemplateLineMarker implements LineMarkerProvider {
         collection.add(getRelatedPopover("Parent Section", "Blade Section", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES));
     }
 
-    private void collectTemplateFileRelatedFiles(@NotNull PsiFile psiFile, @NotNull Collection<LineMarkerInfo> collection) {
-        Collection<String> collectedTemplates = BladeTemplateUtil.resolveTemplateName(psiFile);
+    private void collectTemplateFileRelatedFiles(@NotNull PsiFile psiFile, @NotNull Collection<LineMarkerInfo> collection, @NotNull LazyVirtualFileTemplateResolver resolver) {
+        Collection<String> collectedTemplates = resolver.resolveTemplateName(psiFile);
         if(collectedTemplates.size() == 0) {
             return;
         }
@@ -234,11 +253,11 @@ public class TemplateLineMarker implements LineMarkerProvider {
         );
     }
 
-    private void visitOverwrittenTemplateFile(final PsiFile psiFile, final List<GotoRelatedItem> gotoRelatedItems, final String sectionName) {
-        visitOverwrittenTemplateFile(psiFile, gotoRelatedItems, sectionName, 10);
+    private void visitOverwrittenTemplateFile(final PsiFile psiFile, final List<GotoRelatedItem> gotoRelatedItems, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
+        visitOverwrittenTemplateFile(psiFile, gotoRelatedItems, sectionName, 10, resolver);
     }
 
-    private void visitOverwrittenTemplateFile(final PsiFile psiFile, final List<GotoRelatedItem> gotoRelatedItems, final String sectionName, int depth) {
+    private void visitOverwrittenTemplateFile(final PsiFile psiFile, final List<GotoRelatedItem> gotoRelatedItems, @NotNull String sectionName, int depth, @NotNull LazyVirtualFileTemplateResolver resolver) {
         // simple secure recursive calls
         if(depth-- <= 0) {
             return;
@@ -255,11 +274,10 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
         final int finalDepth = depth;
         BladeTemplateUtil.visitExtends(psiFile, parameter -> {
-            Set<VirtualFile> virtualFiles = BladeTemplateUtil.resolveTemplateName(psiFile.getProject(), parameter.getContent());
-            for (VirtualFile virtualFile : virtualFiles) {
+            for (VirtualFile virtualFile : resolver.resolveTemplateName(psiFile.getProject(), parameter.getContent())) {
                 PsiFile templatePsiFile = PsiManager.getInstance(psiFile.getProject()).findFile(virtualFile);
                 if (templatePsiFile != null) {
-                    visitOverwrittenTemplateFile(templatePsiFile, gotoRelatedItems, sectionName, finalDepth);
+                    visitOverwrittenTemplateFile(templatePsiFile, gotoRelatedItems, sectionName, finalDepth, resolver);
                 }
             }
         });
@@ -270,8 +288,8 @@ public class TemplateLineMarker implements LineMarkerProvider {
      * Find all sub implementations of a section that are overwritten by an extends tag
      * Possible targets are: @section('sidebar')
      */
-    private void collectImplementsSection(PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, @NotNull String sectionName) {
-        Collection<String> templateNames = BladeTemplateUtil.resolveTemplateName(psiElement.getContainingFile());
+    private void collectImplementsSection(@NotNull PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
+        Collection<String> templateNames = resolver.resolveTemplateName(psiElement.getContainingFile());
         if(templateNames.size() == 0) {
             return;
         }
@@ -304,8 +322,8 @@ public class TemplateLineMarker implements LineMarkerProvider {
     /**
      * Support: @stack('foobar')
      */
-    private void collectStackImplements(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
-        Collection<String> templateNames = BladeTemplateUtil.resolveTemplateName(psiElement.getContainingFile());
+    private void collectStackImplements(@NotNull PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
+        Collection<String> templateNames = resolver.resolveTemplateName(psiElement.getContainingFile());
         if(templateNames.size() == 0) {
             return;
         }
@@ -338,7 +356,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
     /**
      * Support: @push('foobar')
      */
-    private void collectPushOverwrites(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
+    private void collectPushOverwrites(@NotNull PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, @NotNull String sectionName) {
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
         BladeTemplateUtil.visitUpPath(psiElement.getContainingFile(), 10, parameter -> {
@@ -357,7 +375,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
     /**
      * Support: @slot('foobar')
      */
-    private void collectSlotOverwrites(final PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, final String sectionName) {
+    private void collectSlotOverwrites(@NotNull PsiElement psiElement, @NotNull Collection<LineMarkerInfo> collection, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
         if(!(psiElement instanceof BladePsiDirectiveParameter)) {
             return;
         }
@@ -369,7 +387,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
         List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
-        for (VirtualFile virtualFile : BladeTemplateUtil.resolveTemplateName(psiElement.getProject(), component)) {
+        for (VirtualFile virtualFile : resolver.resolveTemplateName(psiElement.getProject(), component)) {
             PsiFile file = PsiManager.getInstance(psiElement.getProject()).findFile(virtualFile);
             if(file == null) {
                 continue;
