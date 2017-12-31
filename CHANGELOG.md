@@ -1,3 +1,23 @@
+# Changelog
+
+## Versions
+* 0.15.x: PhpStorm 2017.3.2+
+
+## 0.15
+* Fix typo in settings form @Luiz* [#160](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/160</)
+* Replace deprecated ScalarIndexExtension usages in indexing process
+* Support Blade includeWhen, includeFirst for template references [#164](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/164) [#152](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/152) [#158](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/158) [#142](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/142)
+* Use new directory SLOT\_DIRECTIVE and COMPONENT\_DIRECTIVE for completion parameter pattern [#167](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/167)
+* Provide indexer for all Blade include directives and use some new Blade apis [#165](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/165)
+* Replace cost intensive template resolving on path visiting
+* Convert Blade template file navigation to lazy target implementation
+* Convert Blade template include navigation to lazy target implementation
+* Config files matching refactored + tests added @Adel [#169](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/169) [#166](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/166)
+* Fix "component" and "slot" navigation
+* Provide directory navigation for Blade template strings
+* Fix performance issue for Blade linemarkers: targets must be attached to leaf elements [#161](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/161)
+* Provide references for assets [#170](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/170)
+
 ## 0.14.2
 * Additional check for Route::resource analyzer [#130](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/130) [#131](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/131) @adelf
 * Fixed duplicates in @lang blade directive [#133](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/133) @adelf

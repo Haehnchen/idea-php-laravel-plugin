@@ -1,7 +1,7 @@
 <idea-plugin url="https://github.com/Haehnchen/idea-php-laravel-plugin">
   <id>de.espend.idea.laravel</id>
   <name>Laravel Plugin</name>
-  <version>0.14.2</version>
+  <version>0.15</version>
   <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
 
     <description><![CDATA[
@@ -46,6 +46,22 @@
     ]]></description>
 
   <change-notes><![CDATA[
+
+    <ul>
+        <li>Fix typo in settings form @Luiz* <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/160</">#160</a></li>
+        <li>Replace deprecated ScalarIndexExtension usages in indexing process</li>
+        <li>Support Blade includeWhen, includeFirst for template references <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/164">#164</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/152">#152</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/158">#158</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/142">#142</a></li>
+        <li>Use new directory SLOT_DIRECTIVE and COMPONENT_DIRECTIVE for completion parameter pattern <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/167">#167</a></li>
+        <li>Provide indexer for all Blade include directives and use some new Blade apis <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/165">#165</a></li>
+        <li>Replace cost intensive template resolving on path visiting</li>
+        <li>Convert Blade template file navigation to lazy target implementation</li>
+        <li>Convert Blade template include navigation to lazy target implementation</li>
+        <li>Config files matching refactored + tests added @Adel <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/169">#169</a> <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/166">#166</a></li>
+        <li>Fix "component" and "slot" navigation</li>
+        <li>Provide directory navigation for Blade template strings</li>
+        <li>Fix performance issue for Blade linemarkers: targets must be attached to leaf elements <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/161">#161</a></li>
+        <li>Provide references for assets <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/pull/170">#170</a></li>
+    </ul>
 
     <br/>
     <a href="https://github.com/Haehnchen/idea-php-laravel-plugin/blob/master/CHANGELOG.md">see full changelog</a> | <a href="https://www.paypal.me/DanielEspendiller">Donate</a>
