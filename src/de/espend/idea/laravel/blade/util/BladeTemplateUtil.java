@@ -219,6 +219,44 @@ public class BladeTemplateUtil {
         });
     }
 
+    /**
+     * Try to find directory or file navigation for template name
+     *
+     * "foo.bar" => "foo", "bar"
+     */
+    @NotNull
+    public static Collection<VirtualFile> resolveTemplate(@NotNull Project project, @NotNull String templateName, int offset) {
+        Set<VirtualFile> files = new HashSet<>();
+
+        // try to find a path pattern on current offset after path normalization
+        if(offset > 0 && offset < templateName.length()) {
+            String templateNameWithCaret = normalizeTemplate(new StringBuilder(templateName).insert(offset, '\u0182').toString()).replace("/", ".");
+            offset = templateNameWithCaret.indexOf('\u0182');
+
+            int i = StringUtils.strip(templateNameWithCaret.replace(String.valueOf('\u0182'), ""), "/").indexOf(".", offset);
+            if(i > 0) {
+                files.addAll(resolveTemplateDirectory(project, templateName.substring(0, i)));
+            }
+        }
+
+        // full filepath fallback: "foo/foo<caret>.blade.php"
+        if(files.size() == 0) {
+            files.addAll(resolveTemplateName(project, templateName));
+        }
+
+        return files;
+    }
+
+    /**
+     * Normalize template path
+     */
+    @NotNull
+    public static String normalizeTemplate(@NotNull String templateName) {
+        return templateName
+            .replace("\\", "/")
+            .replaceAll("/+", "/");
+    }
+
     private static class DirectivePsiRecursiveElementWalkingVisitor extends PsiRecursiveElementWalkingVisitor {
 
         @NotNull

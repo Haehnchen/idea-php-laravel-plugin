@@ -1,5 +1,6 @@
 package fr.adrienbrault.idea.symfony2plugin.codeInsight;
 
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import fr.adrienbrault.idea.symfony2plugin.codeInsight.completion.CompletionContributorParameter;
@@ -30,4 +31,9 @@ public abstract class GotoCompletionProvider implements GotoCompletionProviderIn
     }
 
     public void getLookupElements(CompletionContributorParameter parameter) {}
+
+    @NotNull
+    public Collection<? extends PsiElement> getPsiTargets(@NotNull PsiElement psiElement, int offset, @NotNull Editor editor) {
+        return Collections.emptyList();
+    }
 }

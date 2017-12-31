@@ -138,4 +138,47 @@ public class BladeTemplateUtilTempTest extends LaravelTempCodeInsightFixtureTest
             .orElse(null)
         );
     }
+
+    /**
+     * @see BladeTemplateUtil#resolveTemplate
+     */
+    public void testResolveTemplate() {
+        createFiles("resources/views/foobar/foo/foo_blade.blade.php");
+
+        assertNotNull(BladeTemplateUtil.resolveTemplate(getProject(), "foobar.foo.foo_blade", 3)
+            .stream()
+            .filter(virtualFile -> virtualFile.isDirectory() && "foobar".equals(virtualFile.getName()))
+            .findFirst()
+            .orElseGet(null)
+        );
+
+        assertNotNull(BladeTemplateUtil.resolveTemplate(getProject(), "foobar.foo.foo_blade", 9)
+            .stream()
+            .filter(virtualFile -> virtualFile.isDirectory() && "foo".equals(virtualFile.getName()))
+            .findFirst()
+            .orElseGet(null)
+        );
+
+        assertNotNull(BladeTemplateUtil.resolveTemplate(getProject(), "foobar/foo/foo_blade", 9)
+            .stream()
+            .filter(virtualFile -> virtualFile.isDirectory() && "foo".equals(virtualFile.getName()))
+            .findFirst()
+            .orElseGet(null)
+        );
+
+        assertNotNull(BladeTemplateUtil.resolveTemplate(getProject(), "foobar.foo.foo_blade", 14)
+            .stream()
+            .filter(virtualFile -> "foo_blade.blade.php".equals(virtualFile.getName()))
+            .findFirst()
+            .orElseGet(null)
+        );
+    }
+
+    /**
+     * @see BladeTemplateUtil#normalizeTemplate
+     */
+    public void testNormalizeTemplate() {
+        assertEquals("foo/bar", BladeTemplateUtil.normalizeTemplate("foo\\bar"));
+        assertEquals("foo/bar", BladeTemplateUtil.normalizeTemplate("foo\\\\bar"));
+    }
 }

@@ -3,6 +3,7 @@ package de.espend.idea.laravel.view;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.PsiElement;
@@ -197,18 +198,27 @@ public class ViewReferences implements GotoCompletionRegistrar {
 
         @NotNull
         @Override
-        public Collection<PsiElement> getPsiTargets(StringLiteralExpression element) {
-            String content = element.getContents();
-            if(StringUtils.isBlank(content)) {
+        public Collection<? extends PsiElement> getPsiTargets(@NotNull PsiElement psiElement, int offset, @NotNull Editor editor) {
+            PsiElement stringLiteral = psiElement.getParent();
+            if(!(stringLiteral instanceof StringLiteralExpression)) {
                 return Collections.emptyList();
             }
 
-            Collection<PsiElement> targets = new ArrayList<>(
-                PsiElementUtils.convertVirtualFilesToPsiFiles(getProject(), BladeTemplateUtil.resolveTemplateName(getProject(), content))
-            );
+            String contents = ((StringLiteralExpression) stringLiteral).getContents();
+            if(StringUtils.isBlank(contents)) {
+                return Collections.emptyList();
+            }
+
+            // select position of click event
+            int caretOffset = offset - psiElement.getTextRange().getStartOffset();
+
+            Collection<PsiElement> targets = new ArrayList<>(PsiElementUtils.convertVirtualFilesToPsiFiles(
+                getProject(),
+                BladeTemplateUtil.resolveTemplate(getProject(), contents, caretOffset)
+            ));
 
             // @TODO: no filesystem access in test; fake item
-            if("test_view".equals(content) && ApplicationManager.getApplication().isUnitTestMode()) {
+            if("test_view".equals(contents) && ApplicationManager.getApplication().isUnitTestMode()) {
                 targets.add(PsiManager.getInstance(getProject()).findDirectory(getProject().getBaseDir()));
             }
 
