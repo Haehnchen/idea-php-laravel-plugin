@@ -1,6 +1,7 @@
 package fr.adrienbrault.idea.symfony2plugin.codeInsight.utils;
 
 import com.intellij.psi.PsiElement;
+import de.espend.idea.laravel.asset.AssetGotoCompletionRegistrar;
 import de.espend.idea.laravel.blade.BladeDirectiveReferences;
 import de.espend.idea.laravel.config.AppConfigReferences;
 import de.espend.idea.laravel.config.ProviderGotoCompletion;
@@ -27,7 +28,8 @@ public class GotoCompletionUtil {
         new BladeDirectiveReferences(),
         new TranslationReferences(),
         new RoutingGotoCompletionRegistrar(),
-        new DicCompletionRegistrar()
+        new DicCompletionRegistrar(),
+        new AssetGotoCompletionRegistrar(),
     };
 
     public static Collection<GotoCompletionContributor> getContributors(final PsiElement psiElement) {
