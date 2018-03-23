@@ -16,8 +16,8 @@ import java.util.List;
 @State(
     name = "LaravelPluginSettings",
     storages = {
-        @Storage(id = "default", file = StoragePathMacros.PROJECT_FILE),
-        @Storage(id = "dir", file = StoragePathMacros.PROJECT_CONFIG_DIR + "/laravel-plugin.xml", scheme = StorageScheme.DIRECTORY_BASED)
+        @Storage(file = StoragePathMacros.PROJECT_FILE),
+        @Storage(file = StoragePathMacros.PROJECT_CONFIG_DIR + "/laravel-plugin.xml", scheme = StorageScheme.DIRECTORY_BASED)
     }
 )
 public class LaravelSettings implements PersistentStateComponent<LaravelSettings> {
