@@ -1,6 +1,9 @@
 package de.espend.idea.laravel;
 
-import com.intellij.openapi.components.*;
+import com.intellij.openapi.components.PersistentStateComponent;
+import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.components.State;
+import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import de.espend.idea.laravel.view.dict.TemplatePath;
@@ -16,8 +19,7 @@ import java.util.List;
 @State(
     name = "LaravelPluginSettings",
     storages = {
-        @Storage(file = StoragePathMacros.PROJECT_FILE),
-        @Storage(file = StoragePathMacros.PROJECT_CONFIG_DIR + "/laravel-plugin.xml", scheme = StorageScheme.DIRECTORY_BASED)
+        @Storage("laravel-plugin.xml")
     }
 )
 public class LaravelSettings implements PersistentStateComponent<LaravelSettings> {
