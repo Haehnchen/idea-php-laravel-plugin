@@ -300,7 +300,7 @@ public class ControllerReferences implements GotoCompletionLanguageRegistrar {
 
             ControllerCollector.visitControllerActions(getProject(), (phpClass, method, name) ->
                 namespaceCutter.cut(name, (processedClassName, prioritised) -> {
-                    if (content.equalsIgnoreCase(processedClassName)) {
+                    if (content.equalsIgnoreCase(processedClassName) || content.replace("\\\\", "\\").equalsIgnoreCase(processedClassName)) {
                         targets.add(method);
                     }
                 })
