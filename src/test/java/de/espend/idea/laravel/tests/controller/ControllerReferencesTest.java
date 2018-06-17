@@ -37,6 +37,11 @@ public class ControllerReferencesTest extends LaravelLightCodeInsightFixtureTest
                 "Route::get(null, 'Foo\\Controllers\\BarController@foo<caret>');\n",
             PlatformPatterns.psiElement(Method.class)
         );
+
+        assertNavigationMatch(PhpFileType.INSTANCE, "<?php\n" +
+                "Route::get(null, 'Foo\\\\Controllers\\\\BarController@foo<caret>');\n",
+            PlatformPatterns.psiElement(Method.class)
+        );
     }
 
     public void testRouteUsesInsideArray() {
