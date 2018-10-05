@@ -26,4 +26,4 @@ env:
   - IDEA_VERSION="IU-2017.3.5" PHP_PLUGIN_VERSION="173.4301.34" BLADE_PLUGIN_VERSION="173.4127.29"
 
 script:
-- "./gradlew check buildPlugin"
+- "./gradlew check verifyPlugin buildPlugin"
