@@ -20,7 +20,7 @@ public class GotoHandler implements GotoDeclarationHandler {
     public PsiElement[] getGotoDeclarationTargets(PsiElement psiElement, int i, Editor editor) {
 
         if (!LaravelProjectComponent.isEnabled(psiElement)) {
-            return new PsiElement[0];
+            return PsiElement.EMPTY_ARRAY;
         }
 
         Collection<PsiElement> psiTargets = new ArrayList<PsiElement>();

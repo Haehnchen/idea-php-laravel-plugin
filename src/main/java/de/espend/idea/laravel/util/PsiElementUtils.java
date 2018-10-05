@@ -29,7 +29,7 @@ public class PsiElementUtils {
 
         PsiElement startElement = psiElement.getFirstChild();
         if(startElement == null) {
-            return new PsiElement[0];
+            return PsiElement.EMPTY_ARRAY;
         }
 
         psiElements.add(startElement);
