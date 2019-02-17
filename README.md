@@ -44,6 +44,8 @@ To register custom Blade template paths use `ide-blade.json` files in directorie
   ]
 }
 ```
+Make sure that the namespace does not have dot `.` delimiter, because the plugin will not work in that situation.
+For example, if the above example had namespace called `foo.bar` then it will not work correctly.
 
 ## Screenshots
 
