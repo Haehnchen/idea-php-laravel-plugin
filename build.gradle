@@ -4,12 +4,17 @@ buildscript {
     repositories {
         mavenCentral()
 
-        maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+        maven {
+            url 'https://dl.bintray.com/jetbrains/intellij-plugin-service'
+        }
     }
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.3.11"
+    id "org.jetbrains.intellij" version "0.4.4"
     id 'com.palantir.git-version' version "0.11.0"
 }
 
