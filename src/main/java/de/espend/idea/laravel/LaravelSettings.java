@@ -8,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import de.espend.idea.laravel.view.dict.TemplatePath;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
 
     public boolean dismissEnableNotification = false;
 
-    public static LaravelSettings getInstance(Project project) {
+    public static LaravelSettings getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, LaravelSettings.class);
     }
 
@@ -49,7 +50,7 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
     }
 
     @Override
-    public void loadState(LaravelSettings settings) {
+    public void loadState(@NotNull LaravelSettings settings) {
         XmlSerializerUtil.copyBean(settings, this);
     }
 

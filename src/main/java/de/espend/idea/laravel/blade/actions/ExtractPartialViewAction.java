@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.refactoring.RefactoringActionHandler;
 import com.intellij.refactoring.actions.BaseRefactoringAction;
@@ -37,10 +38,15 @@ public class ExtractPartialViewAction extends BaseRefactoringAction {
     }
 
     @Override
-    public void update(AnActionEvent anActionEvent) {
+    public void update(@NotNull AnActionEvent anActionEvent) {
         super.update(anActionEvent);
 
-        if(!LaravelSettings.getInstance(anActionEvent.getProject()).pluginEnabled) {
+        final Project project = anActionEvent.getProject();
+        if (project == null) {
+            return;
+        }
+
+        if(!LaravelSettings.getInstance(project).pluginEnabled) {
             anActionEvent.getPresentation().setVisible(false);
             return;
         }

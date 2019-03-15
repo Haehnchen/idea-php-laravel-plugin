@@ -13,7 +13,7 @@ public class LaravelIcons {
     public static final Icon LARAVEL;
 
     static {
-        if(Calendar.getInstance().get(Calendar.MONTH) == 11 && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) > 7) {
+        if(Calendar.getInstance().get(Calendar.MONTH) == Calendar.DECEMBER && Calendar.getInstance().get(Calendar.DAY_OF_MONTH) > 7) {
             LARAVEL = IconLoader.getIcon("/icons/laravel_dec.png");
         } else {
             LARAVEL = IconLoader.getIcon("/icons/laravel.png");
