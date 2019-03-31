@@ -3,6 +3,10 @@
 ## Versions
 * 0.15.x: PhpStorm 2017.3.2+
 
+## 0.15.2
+* Require Project to be @NotNull on LaravelSettings#getInstance (Cedric Ziel)
+* Dont offer ExtractPartialViewAction when no project on event (Cedric Ziel)
+
 ## 0.15
 * Fix typo in settings form @Luiz* [#160](https://github.com/Haehnchen/idea-php-laravel-plugin/pull/160</)
 * Replace deprecated ScalarIndexExtension usages in indexing process
