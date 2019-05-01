@@ -309,7 +309,7 @@ public class BladeDirectiveReferences implements GotoCompletionRegistrar {
 
             FileBasedIndex.getInstance().getFilesWithKey(
                     BladeCustomDirectivesStubIndex.KEY,
-                    new HashSet<>(Collections.singletonList(directiveName)),
+                    Collections.singleton(directiveName),
                     virtualFile -> {
 
                         PsiFile psiFile = PsiManager.getInstance(getProject()).findFile(virtualFile);

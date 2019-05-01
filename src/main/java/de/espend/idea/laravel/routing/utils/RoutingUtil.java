@@ -50,7 +50,7 @@ public class RoutingUtil {
         Set<VirtualFile> virtualFiles = new HashSet<>();
 
         // find files with route name
-        FileBasedIndex.getInstance().getFilesWithKey(RouteIndexExtension.KEY, new HashSet<>(Collections.singletonList(routeName)), virtualFile -> {
+        FileBasedIndex.getInstance().getFilesWithKey(RouteIndexExtension.KEY, Collections.singleton(routeName), virtualFile -> {
             virtualFiles.add(virtualFile);
             return true;
         }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(project), PhpFileType.INSTANCE));

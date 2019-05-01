@@ -189,7 +189,7 @@ public class BladeTemplateUtil {
         }
 
         int finalDepth = depth;
-        FileBasedIndex.getInstance().getFilesWithKey(BladeExtendsStubIndex.KEY, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
+        FileBasedIndex.getInstance().getFilesWithKey(BladeExtendsStubIndex.KEY, Collections.singleton(templateName), virtualFile -> {
             if (!virtualFiles.contains(virtualFile)) {
                 virtualFiles.add(virtualFile);
                 for (String nextTpl : BladeTemplateUtil.resolveTemplateName(project, virtualFile)) {

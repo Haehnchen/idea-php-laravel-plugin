@@ -92,7 +92,7 @@ public class AppConfigReferences implements GotoCompletionLanguageRegistrar {
                 return targets;
             }
 
-            FileBasedIndex.getInstance().getFilesWithKey(ConfigKeyStubIndex.KEY, new HashSet<>(Collections.singletonList(contents)), virtualFile -> {
+            FileBasedIndex.getInstance().getFilesWithKey(ConfigKeyStubIndex.KEY, Collections.singletonList(contents), virtualFile -> {
                 PsiFile psiFileTarget = PsiManager.getInstance(getProject()).findFile(virtualFile);
                 if(psiFileTarget == null) {
                     return true;
