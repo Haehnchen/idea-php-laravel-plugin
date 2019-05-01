@@ -23,7 +23,6 @@ import java.util.Map;
 public class BladeEachStubIndex extends FileBasedIndexExtension<String, Void> {
 
     public static final ID<String, Void> KEY = ID.create("de.espend.idea.laravel.blade.each");
-    private final KeyDescriptor<String> myKeyDescriptor = new EnumeratorStringDescriptor();
 
     @NotNull
     @Override
@@ -63,7 +62,7 @@ public class BladeEachStubIndex extends FileBasedIndexExtension<String, Void> {
     @NotNull
     @Override
     public KeyDescriptor<String> getKeyDescriptor() {
-        return this.myKeyDescriptor;
+        return EnumeratorStringDescriptor.INSTANCE;
     }
 
     @NotNull

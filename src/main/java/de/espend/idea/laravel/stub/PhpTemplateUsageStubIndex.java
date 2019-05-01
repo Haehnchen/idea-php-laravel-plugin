@@ -29,7 +29,6 @@ import java.util.Set;
 public class PhpTemplateUsageStubIndex extends FileBasedIndexExtension<String, Void> {
 
     public static final ID<String, Void> KEY = ID.create("de.espend.idea.laravel.template");
-    private final KeyDescriptor<String> myKeyDescriptor = new EnumeratorStringDescriptor();
     private static int MAX_FILE_BYTE_SIZE = 2097152;
 
 
@@ -138,7 +137,7 @@ public class PhpTemplateUsageStubIndex extends FileBasedIndexExtension<String, V
     @NotNull
     @Override
     public KeyDescriptor<String> getKeyDescriptor() {
-        return this.myKeyDescriptor;
+        return EnumeratorStringDescriptor.INSTANCE;
     }
 
     @NotNull
