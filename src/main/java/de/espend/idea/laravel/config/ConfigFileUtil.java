@@ -26,12 +26,14 @@ public class ConfigFileUtil
         if(m.matches()) {
             return new ConfigFileMatchResult(true, m.group(1).replace('/', '.'));
         } else {
-            return new ConfigFileMatchResult(false, "");
+            return ConfigFileMatchResult.NO_MATCH;
         }
     }
 
     public static class ConfigFileMatchResult
     {
+        static final ConfigFileMatchResult NO_MATCH = new ConfigFileMatchResult(false, "");
+
         private boolean matches;
 
         private String keyPrefix;
