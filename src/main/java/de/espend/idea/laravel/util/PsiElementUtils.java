@@ -25,13 +25,12 @@ public class PsiElementUtils {
      * getChildren fixed helper
      */
     static public PsiElement[] getChildrenFix(PsiElement psiElement) {
-        List<PsiElement> psiElements = new ArrayList<>();
-
         PsiElement startElement = psiElement.getFirstChild();
         if(startElement == null) {
             return PsiElement.EMPTY_ARRAY;
         }
 
+        List<PsiElement> psiElements = new ArrayList<>();
         psiElements.add(startElement);
 
         for (PsiElement child = psiElement.getFirstChild().getNextSibling(); child != null; child = child.getNextSibling()) {
