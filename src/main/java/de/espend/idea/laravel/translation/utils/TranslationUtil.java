@@ -11,9 +11,9 @@ import java.util.regex.Pattern;
  */
 public class TranslationUtil {
 
-    private static final String[] REGEX = new String[]{
-        ".*/lang/(\\w{2}|\\w{2}[_|-]\\w{2})/(.*)\\.php$",
-        ".*/lang/packages/(\\w{2}|\\w{2}[_|-]\\w{2})/\\w+/(.*)\\.php$"
+    private static final Pattern[] PATTERNS = new Pattern[] {
+        Pattern.compile(".*/lang/(\\w{2}|\\w{2}[_|-]\\w{2})/(.*)\\.php$"),
+        Pattern.compile(".*/lang/packages/(\\w{2}|\\w{2}[_|-]\\w{2})/\\w+/(.*)\\.php$")
     };
 
     /**
@@ -27,8 +27,8 @@ public class TranslationUtil {
      */
     @Nullable
     public static String getNamespaceFromFilePath(@NotNull String path) {
-        for (String s : REGEX) {
-            Matcher matcher = Pattern.compile(s).matcher(path);
+        for (Pattern pattern : PATTERNS) {
+            Matcher matcher = pattern.matcher(path);
             if (!matcher.find()) {
                 continue;
             }
