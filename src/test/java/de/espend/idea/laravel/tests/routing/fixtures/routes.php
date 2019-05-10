@@ -22,3 +22,21 @@ namespace Collective\Html {
         public function linkRoute();
     }
 }
+
+
+namespace Laravel\BrowserKitTesting\Concerns {
+    trait InteractsWithPages {
+        /**
+         * @param  string  $route
+         */
+        public function visitRoute($route){
+            return '';
+        }
+    }
+
+}
+namespace Tests\Feature {
+  class ExampleTest {
+      use \Laravel\BrowserKitTesting\Concerns\InteractsWithPages;
+  }
+}

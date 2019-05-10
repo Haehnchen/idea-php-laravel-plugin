@@ -30,6 +30,8 @@ public class RoutingGotoCompletionRegistrar implements GotoCompletionRegistrar {
         new MethodMatcher.CallToSignature("\\Illuminate\\Contracts\\Routing\\UrlGenerator", "route"),
         new MethodMatcher.CallToSignature("\\Collective\\Html\\HtmlBuilder", "linkRoute"),
         new MethodMatcher.CallToSignature("\\Illuminate\\Routing\\Redirector", "route"),
+        new MethodMatcher.CallToSignature("\\Laravel\\Dusk\\Browser", "visitRoute"),
+        new MethodMatcher.CallToSignature("\\Laravel\\BrowserKitTesting\\Concerns\\InteractsWithPages", "visitRoute"),
     };
 
     @Override
