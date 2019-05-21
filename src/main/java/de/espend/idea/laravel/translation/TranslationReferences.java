@@ -105,7 +105,7 @@ public class TranslationReferences implements GotoCompletionLanguageRegistrar {
             final Set<PsiElement> priorityTargets = new LinkedHashSet<>();
             final Set<PsiElement> targets = new LinkedHashSet<>();
 
-            FileBasedIndex.getInstance().getFilesWithKey(TranslationKeyStubIndex.KEY, new HashSet<>(Collections.singletonList(contents)), virtualFile -> {
+            FileBasedIndex.getInstance().getFilesWithKey(TranslationKeyStubIndex.KEY, Collections.singleton(contents), virtualFile -> {
                 PsiFile psiFileTarget = PsiManager.getInstance(getProject()).findFile(virtualFile);
                 if(psiFileTarget == null) {
                     return true;

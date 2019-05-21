@@ -207,7 +207,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
         AtomicBoolean includeLineMarker = new AtomicBoolean(false);
         for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY, BladeEachStubIndex.KEY)) {
             for(String templateName: templateNames) {
-                FileBasedIndex.getInstance().getFilesWithKey(key, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
+                FileBasedIndex.getInstance().getFilesWithKey(key, Collections.singleton(templateName), virtualFile -> {
                     includeLineMarker.set(true);
 
                     // stop on first file match
@@ -507,7 +507,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
 
             for(ID<String, Void> key : Arrays.asList(BladeExtendsStubIndex.KEY, BladeSectionStubIndex.KEY, BladeIncludeStubIndex.KEY, BladeEachStubIndex.KEY)) {
                 for(String templateName: templateNames) {
-                    FileBasedIndex.getInstance().getFilesWithKey(key, new HashSet<>(Collections.singletonList(templateName)), virtualFile -> {
+                    FileBasedIndex.getInstance().getFilesWithKey(key, Collections.singleton(templateName), virtualFile -> {
                         virtualFiles.add(virtualFile);
                         return true;
                     }, GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(project), BladeFileType.INSTANCE));
