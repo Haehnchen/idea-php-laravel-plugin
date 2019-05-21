@@ -20,7 +20,6 @@ import java.util.Map;
 public class RouteIndexExtension extends FileBasedIndexExtension<String, Void> {
 
     public static final ID<String, Void> KEY = ID.create("de.espend.idea.laravel.routes");
-    private final KeyDescriptor<String> myKeyDescriptor = new EnumeratorStringDescriptor();
 
     @NotNull
     @Override
@@ -60,7 +59,7 @@ public class RouteIndexExtension extends FileBasedIndexExtension<String, Void> {
     @NotNull
     @Override
     public KeyDescriptor<String> getKeyDescriptor() {
-        return this.myKeyDescriptor;
+        return EnumeratorStringDescriptor.INSTANCE;
     }
 
     @NotNull

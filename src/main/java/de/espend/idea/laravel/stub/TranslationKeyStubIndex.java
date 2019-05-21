@@ -21,7 +21,6 @@ import java.util.Map;
 public class TranslationKeyStubIndex extends FileBasedIndexExtension<String, Void> {
 
     public static final ID<String, Void> KEY = ID.create("de.espend.idea.laravel.translation_keys");
-    private final KeyDescriptor<String> myKeyDescriptor = new EnumeratorStringDescriptor();
 
     @NotNull
     @Override
@@ -57,7 +56,7 @@ public class TranslationKeyStubIndex extends FileBasedIndexExtension<String, Voi
     @NotNull
     @Override
     public KeyDescriptor<String> getKeyDescriptor() {
-        return this.myKeyDescriptor;
+        return EnumeratorStringDescriptor.INSTANCE;
     }
 
     @NotNull
