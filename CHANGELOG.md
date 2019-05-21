@@ -3,6 +3,17 @@
 ## Versions
 * 0.15.x: PhpStorm 2017.3.2+
 
+## 0.15.3
+* Add IntelliJ plugin icon (Daniel Espendiller) [#228](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/228)
+* feat: added completion for laravel dusk (Viktor Vassilyev) [#226](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/226)
+* feat: added completion if Route::match (Viktor Vassilyev) [#225](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/225)
+* Compile Patterns before repeated use (Martynas Sateika) [#223](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/223)
+* Remove unnecessary KeyDescriptor instances from index files (Martynas Sateika) [#224](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/224)
+* Use Collections.singleton to avoid new HashSet creation (Martynas Sateika) [#222](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/222)
+* Replace 'substring' with 'trimStart' from the OpenAPI utils (Martynas Sateika) [#221](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/221)
+* Re-use ConfigFileMatchResult instance when no match is found (Martynas Sateika) [#220](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/220)
+* Move new ArrayList creation until after null check in 'getChildrenFix' (Martynas Sateika) [#219](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/219)
+
 ## 0.15.2
 * Require Project to be @NotNull on LaravelSettings#getInstance (Cedric Ziel)
 * Dont offer ExtractPartialViewAction when no project on event (Cedric Ziel)
