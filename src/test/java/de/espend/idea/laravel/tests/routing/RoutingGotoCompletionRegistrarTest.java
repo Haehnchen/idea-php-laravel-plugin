@@ -43,6 +43,7 @@ public class RoutingGotoCompletionRegistrarTest extends LaravelLightCodeInsightF
             add(new String[] {"Illuminate\\Routing\\UrlGenerator", "route"});
             add(new String[] {"Illuminate\\Contracts\\Routing\\UrlGenerator", "route"});
             add(new String[] {"Collective\\Html\\HtmlBuilder", "linkRoute"});
+            add(new String[] {"Tests\\Feature\\ExampleTest", "visitRoute"});
         }};
 
         for (String[] provider : providers) {

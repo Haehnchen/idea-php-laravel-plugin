@@ -217,6 +217,18 @@ public class Symfony2InterfacesUtil {
     }
 
     @Nullable
+    protected Method getTraitMethod(Project project, String traitFQN, String methodName) {
+
+        Collection<PhpClass> traits = PhpIndex.getInstance(project).getTraitsByFQN(traitFQN);
+
+        if (traits.size() < 1) {
+                return null;
+        }
+
+        return findClassMethodByName(traits.iterator().next(), methodName);
+    }
+
+    @Nullable
     protected Method getClassMethod(Project project, String classFQN, String methodName) {
         return PhpElementsUtil.getClassMethod(project, classFQN, methodName);
     }
@@ -300,6 +312,7 @@ public class Symfony2InterfacesUtil {
         return isCallTo(e, new Method[] {
             getInterfaceMethod(e.getProject(), ClassInterfaceName, methodName),
             getClassMethod(e.getProject(), ClassInterfaceName, methodName),
+            getTraitMethod(e.getProject(), ClassInterfaceName, methodName),
         });
     }
 
