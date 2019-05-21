@@ -1,6 +1,7 @@
 package de.espend.idea.laravel.config;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,12 +13,8 @@ public class ConfigFileUtil
     private static final Pattern configFilePattern = Pattern.compile(".*/config/([\\w-/]+).php$");
 
     public static ConfigFileMatchResult matchConfigFile(Project project, VirtualFile virtualFile) {
-        String path = virtualFile.getPath();
         String projectPath = project.getBaseDir().getPath();
-
-        if(path.startsWith(projectPath)) {
-            path = path.substring(projectPath.length());
-        }
+        String path = StringUtil.trimStart(virtualFile.getPath(), projectPath);
 
         Matcher m = configFilePattern.matcher(path);
 
