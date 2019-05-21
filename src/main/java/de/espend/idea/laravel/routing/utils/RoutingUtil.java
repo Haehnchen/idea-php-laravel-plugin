@@ -26,7 +26,7 @@ import java.util.*;
  */
 public class RoutingUtil {
 
-    static final String[] HTTP_METHODS = new String[]{"get", "post", "put", "delete", "patch", "delete", "options", "any"};
+    static final String[] HTTP_METHODS = new String[]{"get", "post", "put", "delete", "patch", "delete", "options", "any", "match"};
 
     private static final Key<CachedValue<Collection<String>>> ROUTE_NAMES = new Key<>("LaravelRoutingUtilNames");
 
@@ -162,11 +162,17 @@ public class RoutingUtil {
         private void visitAs(@NotNull MethodReference methodReference, @NotNull String prefix) {
 
             PsiElement[] parameters = methodReference.getParameters();
-            if(parameters.length < 2 || !(parameters[1] instanceof ArrayCreationExpression)) {
+            int indexParameter = 1;
+
+            if("match".equals(methodReference.getName())){
+                indexParameter = 2;
+            }
+
+            if(parameters.length < (1+indexParameter) || !(parameters[indexParameter] instanceof ArrayCreationExpression)) {
                 return;
             }
 
-            PhpPsiElement arrayValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[1], "as");
+            PhpPsiElement arrayValue = PhpElementsUtil.getArrayValue((ArrayCreationExpression) parameters[indexParameter], "as");
             if(!(arrayValue instanceof StringLiteralExpression)) {
                 return;
             }
