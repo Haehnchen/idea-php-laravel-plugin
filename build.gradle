@@ -24,6 +24,9 @@ apply plugin: 'idea'
 apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'java'
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 intellij {
     version ideaVersion
     updateSinceUntilBuild false
