@@ -40,7 +40,7 @@ public class LaravelSettings implements PersistentStateComponent<LaravelSettings
     }
 
     public String getMainLanguage() {
-        return !StringUtils.isBlank(mainLanguage) ? mainLanguage : "en";
+        return StringUtils.isNotBlank(mainLanguage) ? mainLanguage : "en";
     }
 
     @Nullable
