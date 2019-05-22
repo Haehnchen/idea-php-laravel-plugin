@@ -3,6 +3,9 @@
 ## Versions
 * 0.15.x: PhpStorm 2017.3.2+
 
+## 0.15.4
+* Java 8 build
+
 ## 0.15.3
 * Add IntelliJ plugin icon (Daniel Espendiller) [#228](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/228)
 * feat: added completion for laravel dusk (Viktor Vassilyev) [#226](https://github.com/Haehnchen/idea-php-laravel-plugin/issues/226)
