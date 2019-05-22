@@ -19,6 +19,9 @@ before_install:
 - "export ORG_GRADLE_PROJECT_phpPluginVersion=${PHP_PLUGIN_VERSION}"
 - "export ORG_GRADLE_PROJECT_bladePluginVersion=${BLADE_PLUGIN_VERSION}"
 
+after_failure:
+  - cat build/idea-sandbox/system/log/idea.log
+
 env:
   # - IDEA_VERSION="IU-2019.1" PHP_PLUGIN_VERSION="191.6183.95" BLADE_PLUGIN_VERSION="191.6183.95" not working 'No such property: artifactName for class: org.jetbrains.intellij.jbre.JbreResolver'
   - IDEA_VERSION="IU-2018.3.5" PHP_PLUGIN_VERSION="183.4886.46" BLADE_PLUGIN_VERSION="183.3795.24"
