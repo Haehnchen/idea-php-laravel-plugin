@@ -3,18 +3,21 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 buildscript {
     repositories {
         mavenCentral()
-
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots/"
         }
         maven {
             url 'https://dl.bintray.com/jetbrains/intellij-plugin-service'
         }
+
+    }
+    dependencies {
+        classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.5.0-SNAPSHOT"
     }
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.4.4"
+    id "org.jetbrains.intellij" version "0.4.9"
     id 'com.palantir.git-version' version "0.11.0"
 }
 
@@ -60,7 +63,7 @@ if (details.isCleanTag) {
 }
 
 wrapper {
-    gradleVersion '5.4.1'
+    gradleVersion '5.5.1'
 }
 
 test.testLogging.exceptionFormat = TestExceptionFormat.FULL
