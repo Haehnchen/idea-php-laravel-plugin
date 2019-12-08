@@ -80,6 +80,7 @@
     <extensions defaultExtensionNs="com.jetbrains.php">
         <typeProvider3 implementation="de.espend.idea.laravel.blade.BladeInjectTypeProvider"/>
         <typeProvider3 implementation="de.espend.idea.laravel.dic.DicTypeProvider"/>
+        <typeProvider4 implementation="de.espend.idea.laravel.factory.ModelFactoryTypeProvider"/>
     </extensions>
 
   <extensions defaultExtensionNs="com.intellij">
