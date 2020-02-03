@@ -2,7 +2,7 @@
   <id>de.espend.idea.laravel</id>
   <name>Laravel</name>
   <version>0.15.4</version>
-  <vendor email="daniel@espendiller.net" url="http://espend.de">Daniel Espendiller</vendor>
+  <vendor email="daniel@espendiller.net" url="http://espend.de">espend_de</vendor>
 
     <description><![CDATA[
       <h1>Laravel Plugin</h1><br>
