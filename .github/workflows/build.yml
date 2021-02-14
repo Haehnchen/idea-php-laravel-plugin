@@ -39,7 +39,6 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        experimental: [false]
         include:
           - platform: '2019.1.3'
             phpPlugin: '191.7141.52'
@@ -48,6 +47,7 @@ jobs:
           - platform: '2018.3.5'
             phpPlugin: '183.4886.46'
             bladePlugin: '183.3795.24'
+            experimental: false
     env:
       ORG_GRADLE_PROJECT_platformVersion: ${{ matrix.platform }}
       ORG_GRADLE_PROJECT_phpPluginVersion: ${{ matrix.phpPlugin }}
@@ -92,15 +92,18 @@ jobs:
     name: Build
     needs: test
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
         include:
           - platform: '2019.1.3'
             phpPlugin: '191.7141.52'
             bladePlugin: '191.7141.5'
+            experimental: true
           - platform: '2018.3.5'
             phpPlugin: '183.4886.46'
             bladePlugin: '183.3795.24'
+            experimental: false
     env:
       ORG_GRADLE_PROJECT_platformVersion: ${{ matrix.platform }}
       ORG_GRADLE_PROJECT_phpPluginVersion: ${{ matrix.phpPlugin }}
