@@ -1,7 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
-    id 'com.palantir.git-version' version "0.11.0"
     id "org.jetbrains.intellij" version "0.6.5"
 }
 
@@ -19,7 +18,8 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 intellij {
-    version ideaVersion
+    version platformVersion
+    type platformType
     updateSinceUntilBuild false
     plugins = [
             "com.jetbrains.php:${phpPluginVersion}",
@@ -28,11 +28,11 @@ intellij {
             'java-i18n',
             'properties'
     ]
-    pluginName 'Laravel Plugin'
+    pluginName pluginName_
 }
 
 patchPluginXml {
-    sinceBuild '173'
+    sinceBuild '191'
     changeNotes = htmlFixer('src/main/resources/META-INF/change-notes.html')
 }
 
@@ -42,13 +42,7 @@ publishPlugin {
 }
 
 group 'de.espend.idea.laravel'
-
-def details = versionDetails()
-if (details.isCleanTag) {
-    version = "${details.lastTag}"
-} else {
-    version = "${details.lastTag}.${details.gitHash}-SNAPSHOT"
-}
+version pluginVersion
 
 wrapper {
     gradleVersion '6.8.2'
