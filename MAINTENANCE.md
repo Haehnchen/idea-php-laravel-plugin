@@ -24,6 +24,7 @@ The checklist for a new release should be the following:
 * prepare the changelog:
   * execute `./prepare-release.sh` to write the changelog to disk
   * manually copy the relevant parts to `CHANGELOG.md`
+* change the `pluginVersion` property to the new version
 * commit the changed files (preferrable with a meaningful commit message 
   `Prepare release 0.16.xxx`)
 * tag a release (`git tag 0.x.xxx`)
