@@ -20,7 +20,7 @@ targetCompatibility = 1.8
 intellij {
     version platformVersion
     type platformType
-    updateSinceUntilBuild false
+    updateSinceUntilBuild true
     plugins = [
             "com.jetbrains.php:${phpPluginVersion}",
             "com.jetbrains.php.blade:${bladePluginVersion}",
@@ -32,7 +32,9 @@ intellij {
 }
 
 patchPluginXml {
-    sinceBuild '191'
+    version pluginVersion
+    sinceBuild sinceBuild
+    untilBuild untilBuild
     changeNotes = htmlFixer('src/main/resources/META-INF/change-notes.html')
 }
 
