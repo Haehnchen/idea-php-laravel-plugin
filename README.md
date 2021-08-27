@@ -18,7 +18,7 @@ Changelog   | [CHANGELOG](CHANGELOG.md)
 
 To install,  go to `Settings > Plugins` and search for "Laravel Plugin".
 
-Once installed, you must activate per-project by going to `Settings > Languages & Frameworks > PHP > Laravel` and clicking "Enable for this project".
+Once installed, you must activate per-project by going to `Settings > PHP > Laravel` and clicking "Enable for this project".
 
 *Note* You must install and use the [Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) in order for PhpStorm to know how to find the Laravel classes.
 
