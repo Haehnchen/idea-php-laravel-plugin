@@ -48,7 +48,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
     }
 
     @Override
-    public void collectSlowLineMarkers(@NotNull List<PsiElement> psiElements, @NotNull Collection<LineMarkerInfo> lineMarkers) {
+    public void collectSlowLineMarkers(@NotNull List<? extends PsiElement> psiElements, @NotNull Collection<? super LineMarkerInfo<?>> lineMarkers) {
         // we need project element; so get it from first item
         if(psiElements.size() == 0) {
             return;
@@ -154,7 +154,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
      * Like this @section('sidebar')
      */
     @NotNull
-    private Collection<LineMarkerInfo> collectOverwrittenSection(@NotNull LeafPsiElement psiElement, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
+    private Collection<LineMarkerInfo<?>> collectOverwrittenSection(@NotNull LeafPsiElement psiElement, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
         List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
         for(PsiElement psiElement1 : psiElement.getContainingFile().getChildren()) {
@@ -180,12 +180,12 @@ public class TemplateLineMarker implements LineMarkerProvider {
         }
 
         return Collections.singletonList(
-            getRelatedPopover("Parent Section", "Blade Section", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES)
+            getRelatedPopover("Parent Section", "Blade Section", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES, "Show parent section")
         );
     }
 
     @NotNull
-    private Collection<LineMarkerInfo> collectTemplateFileRelatedFiles(@NotNull PsiFile psiFile, @NotNull LazyVirtualFileTemplateResolver resolver) {
+    private Collection<LineMarkerInfo<?>> collectTemplateFileRelatedFiles(@NotNull PsiFile psiFile, @NotNull LazyVirtualFileTemplateResolver resolver) {
         Collection<String> collectedTemplates = resolver.resolveTemplateName(psiFile);
         if(collectedTemplates.size() == 0) {
             return Collections.emptyList();
@@ -221,7 +221,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
             }
         }
 
-        Collection<LineMarkerInfo> lineMarkers = new ArrayList<>();
+        Collection<LineMarkerInfo<?>> lineMarkers = new ArrayList<>();
 
         if(includeLineMarker.get()) {
             NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder
@@ -255,7 +255,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
     }
 
     @NotNull
-    private LineMarkerInfo getRelatedPopover(@NotNull String singleItemTitle, @NotNull String singleItemTooltipPrefix, @NotNull PsiElement lineMarkerTarget, @NotNull Collection<GotoRelatedItem> gotoRelatedItems, @NotNull Icon icon) {
+    private LineMarkerInfo getRelatedPopover(@NotNull String singleItemTitle, @NotNull String singleItemTooltipPrefix, @NotNull PsiElement lineMarkerTarget, @NotNull Collection<GotoRelatedItem> gotoRelatedItems, @NotNull Icon icon, String accessibleName) {
         // single item has no popup
         String title = singleItemTitle;
         if(gotoRelatedItems.size() == 1) {
@@ -269,10 +269,10 @@ public class TemplateLineMarker implements LineMarkerProvider {
             lineMarkerTarget,
             lineMarkerTarget.getTextRange(),
             icon,
-            6,
             new ConstantFunction<>(title),
             new RelatedPopupGotoLineMarker.NavigationHandler(gotoRelatedItems),
-            GutterIconRenderer.Alignment.RIGHT
+            GutterIconRenderer.Alignment.RIGHT,
+            () -> accessibleName
         );
     }
 
@@ -312,7 +312,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
      * Possible targets are: @section('sidebar')
      */
     @NotNull
-    private Collection<LineMarkerInfo> collectImplementsSection(@NotNull LeafPsiElement psiElement, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
+    private Collection<LineMarkerInfo<?>> collectImplementsSection(@NotNull LeafPsiElement psiElement, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
         Collection<String> templateNames = resolver.resolveTemplateName(psiElement.getContainingFile());
         if(templateNames.size() == 0) {
             return Collections.emptyList();
@@ -341,7 +341,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
         }
 
         return Collections.singletonList(
-            getRelatedPopover("Template", "Blade File", psiElement, gotoRelatedItems, PhpIcons.IMPLEMENTED)
+            getRelatedPopover("Template", "Blade File", psiElement, gotoRelatedItems, PhpIcons.IMPLEMENTED, "Show template")
         );
     }
 
@@ -349,7 +349,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
      * Support: @stack('foobar')
      */
     @NotNull
-    private Collection<LineMarkerInfo> collectStackImplements(@NotNull LeafPsiElement psiElement, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
+    private Collection<LineMarkerInfo<?>> collectStackImplements(@NotNull LeafPsiElement psiElement, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
         Collection<String> templateNames = resolver.resolveTemplateName(psiElement.getContainingFile());
         if(templateNames.size() == 0) {
             return Collections.emptyList();
@@ -378,7 +378,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
         }
 
         return Collections.singletonList(
-            getRelatedPopover("Push Implementation", "Push Implementation", psiElement, gotoRelatedItems, PhpIcons.IMPLEMENTED)
+            getRelatedPopover("Push Implementation", "Push Implementation", psiElement, gotoRelatedItems, PhpIcons.IMPLEMENTED, "Go to push Implementation")
         );
     }
 
@@ -386,7 +386,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
      * Support: @push('foobar')
      */
     @NotNull
-    private Collection<LineMarkerInfo> collectPushOverwrites(@NotNull LeafPsiElement psiElement, @NotNull String sectionName) {
+    private Collection<LineMarkerInfo<?>> collectPushOverwrites(@NotNull LeafPsiElement psiElement, @NotNull String sectionName) {
         final List<GotoRelatedItem> gotoRelatedItems = new ArrayList<>();
 
         BladeTemplateUtil.visitUpPath(psiElement.getContainingFile(), 10, parameter -> {
@@ -400,7 +400,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
         }
 
         return Collections.singletonList(
-            getRelatedPopover("Stack Section", "Stack Overwrites", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES)
+            getRelatedPopover("Stack Section", "Stack Overwrites", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES, "Go to stack section")
         );
     }
 
@@ -408,7 +408,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
      * Support: @slot('foobar')
      */
     @NotNull
-    private Collection<LineMarkerInfo> collectSlotOverwrites(@NotNull LeafPsiElement psiElement, @NotNull BladePsiDirectiveParameter parameter, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
+    private Collection<LineMarkerInfo<?>> collectSlotOverwrites(@NotNull LeafPsiElement psiElement, @NotNull BladePsiDirectiveParameter parameter, @NotNull String sectionName, @NotNull LazyVirtualFileTemplateResolver resolver) {
         String component = BladePsiUtil.findComponentForSlotScope(parameter);
         if(component == null) {
             return Collections.emptyList();
@@ -434,7 +434,7 @@ public class TemplateLineMarker implements LineMarkerProvider {
         }
 
         return Collections.singletonList(
-            getRelatedPopover("Slot Overwrites", "Slot Overwrites", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES)
+            getRelatedPopover("Slot Overwrites", "Slot Overwrites", psiElement, gotoRelatedItems, PhpIcons.OVERRIDES, "Go to slot")
         );
     }
 
